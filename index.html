@@ -73,7 +73,7 @@
     <div class="turn-badge"><div class="turn-dot red" id="p1-dot"></div><div class="turn-label red" id="p1-label">RED వంతు</div><div class="turn-sub">ROLL</div></div>
     <div class="timer-track"><div class="timer-fill red-fill" id="p1-timer-fill"></div></div>
     <div class="roll-row">
-      <button class="roll-btn" id="p1-roll-btn" onclick="rollGavvalu(1)">🎲 గవ్వలు (Space)</button>
+      <button class="roll-btn" id="p1-roll-btn" onclick="rollGavvalu(1)">🎲 గవ్వలు (5)</button>
       <div class="shells-row"><div class="shell-el" id="p1-s0">🐚</div><div class="shell-el" id="p1-s1">🐚</div><div class="shell-el" id="p1-s2">🐚</div><div class="shell-el" id="p1-s3">🐚</div></div>
     </div>
     <div class="result-row"><div class="result-number" id="p1-result-num">—</div><div class="tip-text" id="p1-tip">ఆట ప్రారంభించండి...</div></div>
@@ -102,7 +102,7 @@
     <div class="turn-badge"><div class="turn-dot dim" id="p2-dot"></div><div class="turn-label dim" id="p2-label">BLUE వంతు</div><div class="turn-sub">ROLL</div></div>
     <div class="timer-track"><div class="timer-fill blue-fill" id="p2-timer-fill"></div></div>
     <div class="roll-row">
-      <button class="roll-btn" id="p2-roll-btn" onclick="rollGavvalu(2)" disabled>🎲 గవ్వలు (Space)</button>
+      <button class="roll-btn" id="p2-roll-btn" onclick="rollGavvalu(2)" disabled>🎲 గవ్వలు (5)</button>
       <div class="shells-row"><div class="shell-el" id="p2-s0">🐚</div><div class="shell-el" id="p2-s1">🐚</div><div class="shell-el" id="p2-s2">🐚</div><div class="shell-el" id="p2-s3">🐚</div></div>
     </div>
     <div class="result-row"><div class="result-number" id="p2-result-num">—</div><div class="tip-text" id="p2-tip">ఆట ప్రారంభించండి...</div></div>
@@ -132,7 +132,7 @@ const SFX = {
       else if (type === 'redhole' || type === 'timeout') { osc.type = 'square'; osc.frequency.setValueAtTime(150, t); osc.frequency.linearRampToValueAtTime(100, t + 0.4); gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0, t + 0.4); osc.start(t); osc.stop(t + 0.4); }
       else if (type === 'shield') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); osc.frequency.linearRampToValueAtTime(1200, t + 0.2); gain.gain.setValueAtTime(0.15, t); gain.gain.linearRampToValueAtTime(0, t + 0.2); osc.start(t); osc.stop(t + 0.2); }
       else if (type === 'win') { [300, 400, 500, 600, 800, 1200].forEach((f, i) => { const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = 'triangle'; o.connect(g); g.connect(this.ctx.destination); o.frequency.setValueAtTime(f, t + i*0.1); g.gain.setValueAtTime(0.2, t + i*0.1); g.gain.linearRampToValueAtTime(0, t + i*0.1 + 0.2); o.start(t + i*0.1); o.stop(t + i*0.1 + 0.2); }); }
-    } catch(e) { }
+    } catch(e) { console.log("Audio not ready yet"); }
   }
 };
 
@@ -291,6 +291,7 @@ function updateBoard() {
   if (!G.isGameOver) { 
     document.querySelectorAll('.board .token').forEach(tok=>{ 
       tok.addEventListener('click', e => moveToken(parseInt(tok.dataset.player), parseInt(tok.dataset.idx), e)); 
+      tok.addEventListener('keydown', e => { if(e.code==='Numpad0'||e.code==='Digit0') moveToken(parseInt(tok.dataset.player), parseInt(tok.dataset.idx), e); });
     }); 
   }
  
@@ -298,13 +299,13 @@ function updateBoard() {
   G.p1Tokens.forEach((v,i)=>{ if(v!==-1)return;
     const m=(p===1&&G.hasRolled&&(r===6||r===12) && !G.isGameOver), t=document.createElement('div'); t.className='token p1-token'+(m?' movable-vault-token':'');
     if (m) { t.style.boxShadow='0 0 10px #4ade80, 0 2px 6px rgba(185,28,28,0.6)'; } 
-    if (!G.isGameOver) { t.onclick=(e)=>releaseFromVault(1,i,e); } 
+    if (!G.isGameOver) { t.onclick=(e)=>releaseFromVault(1,i,e); t.onkeydown=(e)=>{ if(e.code==='Numpad0'||e.code==='Digit0') releaseFromVault(1,i,e); }; } 
     rV.appendChild(t);
   });
   G.p2Tokens.forEach((v,i)=>{ if(v!==-1)return;
     const m=(p===2&&G.hasRolled&&(r===6||r===12) && !G.isGameOver), t=document.createElement('div'); t.className='token p2-token'+(m?' movable-vault-token':'');
     if (m) { t.style.boxShadow='0 0 10px #4ade80, 0 2px 6px rgba(29,78,216,0.6)'; } 
-    if (!G.isGameOver) { t.onclick=(e)=>releaseFromVault(2,i,e); } 
+    if (!G.isGameOver) { t.onclick=(e)=>releaseFromVault(2,i,e); t.onkeydown=(e)=>{ if(e.code==='Numpad0'||e.code==='Digit0') releaseFromVault(2,i,e); }; } 
     bV.appendChild(t);
   });
  
@@ -344,18 +345,18 @@ function checkWinner() {
   document.getElementById('m-blue').style.width=p2win?'100%':'0%'; document.getElementById('m-blue').textContent=p2win?'100%':'0%';
 }
  
-// ===== GLOBAL KEYBOARD CONTROLS (NEW LOGIC) =====
+// ===== GLOBAL KEYBOARD CONTROLS (NUMPAD PRO MODE) =====
 document.addEventListener('keydown', e => {
   if(G.isGameOver) return;
   
-  if(e.code === 'Space') { 
+  if(e.code === 'Numpad5' || e.code === 'Digit5') { 
     e.preventDefault(); 
     if(!G.hasRolled) { 
       if(G.currentPlayer === 1 && !document.getElementById('p1-roll-btn').disabled) rollGavvalu(1); 
       else if(G.currentPlayer === 2 && !document.getElementById('p2-roll-btn').disabled) rollGavvalu(2); 
     } 
   }
-  else if(e.code === 'Enter') { 
+  else if(e.code === 'Numpad0' || e.code === 'Digit0') { 
     e.preventDefault(); 
     if(G.hasRolled && selMovIdx > -1 && curMovEls[selMovIdx]) curMovEls[selMovIdx].click(); 
   }
