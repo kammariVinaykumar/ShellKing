@@ -635,8 +635,7 @@
         const winner = p===1 ? '🔵 BLUE' : '🔴 RED';
         D.p1Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`; D.p2Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`;
         SFX.play('win'); 
-        triggerConfetti(); 
-        try { updateBoard(); flashBoard('board-win-flash'); } catch(e) { console.error(e); } 
+        triggerConfetti(); flashBoard('board-win-flash'); updateBoard(); 
         showRestartScreen(`${winner} గెలిచారు! 👑`, `${p===1?'RED':'BLUE'} ప్లేయర్ టైమ్ ఔట్ వల్ల డిస్‌క్వాలిఫై అయ్యారు!`); return;
       }
       const tokens = p===1 ? G.p1Tokens : G.p2Tokens;
@@ -650,8 +649,7 @@
         if (!safeZones.includes(landedCoord) && oppTokens.some(pos => pos !== -1 && oppPath[pos] === landedCoord)) { tokens[targetIdx] = -1; }
       }
       
-      G.hasRolled = false; G.currentRoll = 0; 
-      try { updateBoard(); flashBoard('board-danger-flash'); } catch(e) { console.error(e); }
+      G.hasRolled = false; G.currentRoll = 0; updateBoard(); flashBoard('board-danger-flash');
       clearActionTimeouts();
       registerAction(() => switchTurn(false), 2000);
     }
@@ -753,7 +751,7 @@
       if (!movable.length && !canRelease) { registerAction(()=>afterMove(), 1100); }
       else if (movable.length===1 && !canRelease) { registerAction(()=>moveToken(p, movable[0].idx), 900); }
       else { 
-          try { updateBoard(); } catch (e) { console.error(e); }
+          updateBoard();
           startTimer(); 
           if (G.gameMode === 'AI' && p === G.aiColor) {
               registerAction(() => executeAIMove(p, final, movable, canRelease, vaultIdxs), 700);
@@ -824,7 +822,6 @@
       if (!c) return; 
       clearActionTimeouts(); stopTimer(); SFX.play('move');
       
-      let oldPos = t[tIdx];
       let nx = c.targetPos; const path = p===1?p1Path:p2Path; const lC = path[nx]; let trap = false;
       
       if (lC===activePortal) { 
@@ -832,12 +829,16 @@
           const oPath = p===1?p2Path:p1Path, oT = p===1?G.p2Tokens:G.p1Tokens, t10 = getNextPosWithPerm(nx, 10), c10 = path[t10], hasOpp = oT.some(op=>op!==-1&&oPath[op]===c10); 
           nx = hasOpp ? getNextPosWithPerm(nx,11) : t10; removePortal(); trap = true; SFX.play('portal'); 
       }
-      else if (lC===activeRedhole) { nx = 0; removeRedhole(); trap = true; shakeBoard(); SFX.play('redhole'); }
+      else if (lC===activeRedhole) { 
+          nx = 0; 
+          removeRedhole(); 
+          trap = true; 
+          shakeBoard(); 
+          SFX.play('redhole'); 
+      }
       
       t[tIdx] = nx; 
       if (path[nx]) sparkle(path[nx]);
-      
-      if (nx >= 41 && nx <= 46 && oldPos < 41 && !trap) { SFX.play('shield'); }
       
       if (!trap) checkKill(p, path[nx]); 
       afterMove();
@@ -932,8 +933,7 @@
         for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
       });
       
-      try { updateBoard(); } catch (e) { console.error("resetRoll updateBoard fallback:", e); }
-      startTimer();
+      updateBoard(); startTimer();
 
       if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) {
           registerAction(() => { rollGavvalu(p); }, 700);
@@ -942,107 +942,111 @@
 
     // ===== FULLY ALLOCATION-FREE BOARD UPDATE WITH SAFEGUARDS =====
     function updateBoard() {
-      try {
-          const p = G.currentPlayer, r = G.currentRoll, mov = G.hasRolled ? getMovable(r) : [], movI = mov.map(m=>m.idx);
-          
-          const p1C={}, p2C={}; 
-          for (let i=0; i<4; i++) {
-            if (G.p1Tokens[i] !== -1) {
-                const c = p1Path[G.p1Tokens[i]];
-                if (c) p1C[c] = (p1C[c]||0)+1;
-            }
-            if (G.p2Tokens[i] !== -1) {
-                const c = p2Path[G.p2Tokens[i]];
-                if (c) p2C[c] = (p2C[c]||0)+1;
-            }
-          }
-          
-          const dC=new Set();
-          for (let j=0; j<4; j++) {
-            const pos1 = G.p1Tokens[j];
-            if (pos1 !== -1 && !safeZones.includes(p1Path[pos1])) {
-              const c = p1Path[pos1];
-              if (c) {
-                  const i = p2Path.indexOf(c);
-                  if (i !== -1 && (p2C[c]||0) < 2) {
-                    for (let k=0; k<4; k++) { const p2 = G.p2Tokens[k]; if(p2!==-1 && p2<i && (i-p2)<=3) dC.add(c); }
-                  }
-              }
-            }
-            const pos2 = G.p2Tokens[j];
-            if (pos2 !== -1 && !safeZones.includes(p2Path[pos2])) {
-              const c = p2Path[pos2];
-              if (c) {
-                  const i = p1Path.indexOf(c);
-                  if (i !== -1 && (p1C[c]||0) < 2) {
-                    for (let k=0; k<4; k++) { const p1 = G.p1Tokens[k]; if(p1!==-1 && p1<i && (i-p1)<=3) dC.add(c); }
-                  }
-              }
-            }
-          }
-
-          for(let i=0; i<4; i++) {
-            let pos1 = G.p1Tokens[i];
-            if (pos1 === -1) {
-                if (D.p1TokensDOM[i] && D.p1TokensDOM[i].parentNode) D.p1TokensDOM[i].parentNode.removeChild(D.p1TokensDOM[i]);
-                let vTok1 = D.p1VaultDOM[i];
-                if (vTok1) {
-                    const m = (p===1&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
-                    vTok1.className = 'token p1-token' + (m ? ' movable-vault-token glow-move' : '');
-                    if (D.p1Vault) D.p1Vault.appendChild(vTok1);
-                }
-            } else {
-                if (D.p1VaultDOM[i] && D.p1VaultDOM[i].parentNode) D.p1VaultDOM[i].parentNode.removeChild(D.p1VaultDOM[i]);
-                let coord1 = p1Path[pos1];
-                let bTok1 = D.p1TokensDOM[i];
-                if (bTok1 && coord1 && D.cells[coord1]) {
-                    bTok1.className = 'token p1-token';
-                    if (p===1 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok1.classList.add('glow-move');
-                    if (pos1 >= 41 && pos1 <= 46) bTok1.classList.add('shielded');
-                    if (dC.has(coord1) && !G.isGameOver) bTok1.classList.add('danger');
-                    
-                    const isF1 = G.p1Tokens.indexOf(pos1) === i;
-                    if (isF1 && p1C[coord1] > 1) { bTok1.classList.add('stack-badge'); bTok1.dataset.count = p1C[coord1]; }
-                    if (!isF1) { bTok1.style.opacity = '0.25'; bTok1.style.position = 'absolute'; } 
-                    else { bTok1.style.opacity = '1'; bTok1.style.position = 'static'; }
-                    
-                    D.cells[coord1].appendChild(bTok1);
-                }
-            }
-
-            let pos2 = G.p2Tokens[i];
-            if (pos2 === -1) {
-                if (D.p2TokensDOM[i] && D.p2TokensDOM[i].parentNode) D.p2TokensDOM[i].parentNode.removeChild(D.p2TokensDOM[i]);
-                let vTok2 = D.p2VaultDOM[i];
-                if (vTok2) {
-                    const m = (p===2&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
-                    vTok2.className = 'token p2-token' + (m ? ' movable-vault-token glow-move' : '');
-                    if (D.p2Vault) D.p2Vault.appendChild(vTok2);
-                }
-            } else {
-                if (D.p2VaultDOM[i] && D.p2VaultDOM[i].parentNode) D.p2VaultDOM[i].parentNode.removeChild(D.p2VaultDOM[i]);
-                let coord2 = p2Path[pos2];
-                let bTok2 = D.p2TokensDOM[i];
-                if (bTok2 && coord2 && D.cells[coord2]) {
-                    bTok2.className = 'token p2-token';
-                    if (p===2 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok2.classList.add('glow-move');
-                    if (pos2 >= 41 && pos2 <= 46) bTok2.classList.add('shielded');
-                    if (dC.has(coord2) && !G.isGameOver) bTok2.classList.add('danger');
-                    
-                    const isF2 = G.p2Tokens.indexOf(pos2) === i;
-                    if (isF2 && p2C[coord2] > 1) { bTok2.classList.add('stack-badge'); bTok2.dataset.count = p2C[coord2]; }
-                    if (!isF2) { bTok2.style.opacity = '0.25'; bTok2.style.position = 'absolute'; }
-                    else { bTok2.style.opacity = '1'; bTok2.style.position = 'static'; }
-                    
-                    D.cells[coord2].appendChild(bTok2);
-                }
-            }
-          }
-
-          updateMeters(); checkWinner(); saveGameState();
-      } catch (e) {
-          console.error("updateBoard Exception Caught:", e);
+      const p = G.currentPlayer, r = G.currentRoll, mov = G.hasRolled ? getMovable(r) : [], movI = mov.map(m=>m.idx);
+      
+      const p1C={}, p2C={}; 
+      for (let i=0; i<4; i++) {
+        if (G.p1Tokens[i] !== -1) {
+            const c = p1Path[G.p1Tokens[i]];
+            if (c) p1C[c] = (p1C[c]||0)+1;
+        }
+        if (G.p2Tokens[i] !== -1) {
+            const c = p2Path[G.p2Tokens[i]];
+            if (c) p2C[c] = (p2C[c]||0)+1;
+        }
       }
+      
+      const dC=new Set();
+      for (let j=0; j<4; j++) {
+        const pos1 = G.p1Tokens[j];
+        if (pos1 !== -1 && !safeZones.includes(p1Path[pos1])) {
+          const c = p1Path[pos1];
+          if (c) {
+              const i = p2Path.indexOf(c);
+              if (i !== -1 && (p2C[c]||0) < 2) {
+                for (let k=0; k<4; k++) { const p2 = G.p2Tokens[k]; if(p2!==-1 && p2<i && (i-p2)<=3) dC.add(c); }
+              }
+          }
+        }
+        const pos2 = G.p2Tokens[j];
+        if (pos2 !== -1 && !safeZones.includes(p2Path[pos2])) {
+          const c = p2Path[pos2];
+          if (c) {
+              const i = p1Path.indexOf(c);
+              if (i !== -1 && (p1C[c]||0) < 2) {
+                for (let k=0; k<4; k++) { const p1 = G.p1Tokens[k]; if(p1!==-1 && p1<i && (i-p1)<=3) dC.add(c); }
+              }
+          }
+        }
+      }
+
+      for(let i=0; i<4; i++) {
+        let pos1 = G.p1Tokens[i];
+        if (pos1 === -1) {
+            let vTok1 = D.p1VaultDOM[i];
+            if (D.p1TokensDOM[i] && D.p1TokensDOM[i].parentNode) D.p1TokensDOM[i].parentNode.removeChild(D.p1TokensDOM[i]);
+            if (vTok1 && D.p1Vault) {
+                const m = (p===1&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
+                vTok1.className = 'token p1-token' + (m ? ' movable-vault-token glow-move' : '');
+                D.p1Vault.appendChild(vTok1);
+            }
+        } else {
+            if (D.p1VaultDOM[i] && D.p1VaultDOM[i].parentNode) D.p1VaultDOM[i].parentNode.removeChild(D.p1VaultDOM[i]);
+            let coord1 = p1Path[pos1];
+            let bTok1 = D.p1TokensDOM[i];
+            
+            // STRICT DOM DECOUPLING FIX
+            if (bTok1 && coord1 && D.cells[coord1]) {
+                if (bTok1.parentNode) bTok1.parentNode.removeChild(bTok1);
+
+                bTok1.className = 'token p1-token';
+                if (p===1 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok1.classList.add('glow-move');
+                if (pos1 >= 41 && pos1 <= 46) bTok1.classList.add('shielded');
+                if (dC.has(coord1) && !G.isGameOver) bTok1.classList.add('danger');
+                
+                const isF1 = G.p1Tokens.indexOf(pos1) === i;
+                if (isF1 && p1C[coord1] > 1) { bTok1.classList.add('stack-badge'); bTok1.dataset.count = p1C[coord1]; }
+                if (!isF1) { bTok1.style.opacity = '0.25'; bTok1.style.position = 'absolute'; } 
+                else { bTok1.style.opacity = '1'; bTok1.style.position = 'static'; }
+                
+                D.cells[coord1].appendChild(bTok1);
+            }
+        }
+
+        let pos2 = G.p2Tokens[i];
+        if (pos2 === -1) {
+            let vTok2 = D.p2VaultDOM[i];
+            if (D.p2TokensDOM[i] && D.p2TokensDOM[i].parentNode) D.p2TokensDOM[i].parentNode.removeChild(D.p2TokensDOM[i]);
+            if (vTok2 && D.p2Vault) {
+                const m = (p===2&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
+                vTok2.className = 'token p2-token' + (m ? ' movable-vault-token glow-move' : '');
+                D.p2Vault.appendChild(vTok2);
+            }
+        } else {
+            if (D.p2VaultDOM[i] && D.p2VaultDOM[i].parentNode) D.p2VaultDOM[i].parentNode.removeChild(D.p2VaultDOM[i]);
+            let coord2 = p2Path[pos2];
+            let bTok2 = D.p2TokensDOM[i];
+            
+            // STRICT DOM DECOUPLING FIX
+            if (bTok2 && coord2 && D.cells[coord2]) {
+                if (bTok2.parentNode) bTok2.parentNode.removeChild(bTok2);
+
+                bTok2.className = 'token p2-token';
+                if (p===2 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok2.classList.add('glow-move');
+                if (pos2 >= 41 && pos2 <= 46) bTok2.classList.add('shielded');
+                if (dC.has(coord2) && !G.isGameOver) bTok2.classList.add('danger');
+                
+                const isF2 = G.p2Tokens.indexOf(pos2) === i;
+                if (isF2 && p2C[coord2] > 1) { bTok2.classList.add('stack-badge'); bTok2.dataset.count = p2C[coord2]; }
+                if (!isF2) { bTok2.style.opacity = '0.25'; bTok2.style.position = 'absolute'; }
+                else { bTok2.style.opacity = '1'; bTok2.style.position = 'static'; }
+                
+                D.cells[coord2].appendChild(bTok2);
+            }
+        }
+      }
+
+      updateMeters(); checkWinner(); saveGameState();
     }
 
     function updateMeters() {
@@ -1076,8 +1080,8 @@
       if (p1win && !p2Perm) winR = "BLUE కి లోపలికి వెళ్లే పర్మిషన్ లేదు కాబట్టి ఓటమి!"; 
       if (p2win && !p1Perm) winR = "RED కి లోపలికి వెళ్లే పర్మిషన్ లేదు కాబట్టి ఓటమి!";
       
-      try { updateBoard(); flashBoard('board-win-flash'); } catch(e) { console.error(e); } 
       triggerConfetti();
+      try { updateBoard(); flashBoard('board-win-flash'); } catch(e) { console.error(e); } 
       
       D.mRed.style.width=p1win?'100%':'0%'; D.mRed.textContent=p1win?'100%':'0%';
       D.mBlue.style.width=p2win?'100%':'0%'; D.mBlue.textContent=p2win?'100%':'0%';
@@ -1132,7 +1136,7 @@
         
         document.getElementById('main-game').style.display = 'flex';
         updateStrikeDisplay(); 
-        try { updateBoard(); } catch(e) { console.error(e); } 
+        updateBoard();
         startTimer(); startGameLoops();
         
         if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) {
