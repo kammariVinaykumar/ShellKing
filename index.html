@@ -44,11 +44,32 @@
       text-transform: uppercase; letter-spacing: 2px; transition: transform 0.1s;
     }
     .start-btn:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(245,158,11,0.4); }
+    .secondary-btn { background: linear-gradient(135deg, #4b5563 0%, #374151 50%, #1f2937 100%); border-color: #6b7280; box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 4px 0 rgba(255,255,255,0.2); color: #f3f4f6; }
     
     .modal-box { background: var(--panel-card); border: 2px solid var(--gold); border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
     .modal-btns { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
     .btn-sm { padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
     .btn-yes { background: #ef4444; color: white; } .btn-no { background: #4b5563; color: white; }
+
+    /* ===== GAME RULES SCREEN ===== */
+    #rules-screen {
+      position: fixed; inset: 0; background: radial-gradient(ellipse at top, #2d1a08 0%, #0a0502 100%);
+      z-index: 2500; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.3s ease;
+    }
+    .rules-header {
+      position: sticky; top: 0; background: rgba(10,5,2,0.85); backdrop-filter: blur(10px);
+      padding: 16px; display: flex; align-items: center; border-bottom: 2px solid var(--panel-border);
+      z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+    .rules-header h2 { margin: 0 0 0 16px; color: var(--gold); font-size: 20px; letter-spacing: 1px; }
+    .btn-back { background: #4b5563; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.4); }
+    .rules-content { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; padding-bottom: 60px; }
+    .rule-card { background: var(--panel-card); border: 1px solid var(--gold); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+    .rule-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--gold); }
+    .rule-card h3 { margin: 0 0 10px 0; color: #fbbf24; font-size: 16px; border-bottom: 1px dashed rgba(251,191,36,0.3); padding-bottom: 8px; }
+    .rule-card p, .rule-card li { font-size: 14px; line-height: 1.6; color: var(--text-light); margin: 6px 0; }
+    .rule-card ul { margin: 0; padding-left: 24px; }
+    .rule-card strong { color: #fef3c7; }
 
     /* ===== MAIN LAYOUT (MOBILE ONLY - FACE TO FACE) ===== */
     .game-wrap { display: flex; flex-direction: column; justify-content: space-between; width: 100%; max-width: 500px; height: 100%; gap: 4px; }
@@ -164,7 +185,118 @@
   <div id="start-screen">
     <h1 class="game-title">ShellKoin 7x7</h1>
     <p class="game-subtitle">Mobile Edition</p>
-    <button class="start-btn" id="start-btn-action">Start Game</button>
+    <div style="display:flex; flex-direction: column; gap: 16px; align-items: center;">
+      <button class="start-btn" id="start-btn-action">Start Game</button>
+      <button class="start-btn secondary-btn" id="rules-btn-action" style="font-size: 16px; padding: 12px 30px;">📜 GAME RULES</button>
+    </div>
+  </div>
+
+  <!-- GAME RULES SCREEN -->
+  <div id="rules-screen" style="display:none;">
+    <div class="rules-header">
+      <button class="btn-back" id="rules-back-btn">⬅ బ్యాక్</button>
+      <h2>📜 గేమ్ రూల్స్</h2>
+    </div>
+    <div class="rules-content">
+      <div class="rule-card">
+        <h3>🎯 లక్ష్యం</h3>
+        <p>మీ 4 కాయిన్స్‌ను 👑 Crown Cell కి ముందుగా చేర్చిన ప్లేయర్ గెలుస్తాడు.</p>
+      </div>
+
+      <div class="rule-card">
+        <h3>🎲 గవ్వల విలువలు</h3>
+        <ul>
+          <li><strong>1 బొర్లా</strong> = 1 అడుగు</li>
+          <li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li>
+          <li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li>
+          <li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li>
+          <li><strong>0 బొర్లాలు</strong> = 12 అడుగులు</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🚪 కాయిన్ రిలీజ్</h3>
+        <p><strong>6</strong> లేదా <strong>12</strong> వచ్చినప్పుడు Vault లో ఉన్న కాయిన్‌ను Board మీదికి తీసుకురావచ్చు.</p>
+        <p><strong>12 వచ్చినప్పుడు:</strong></p>
+        <ul>
+          <li>Board లో ఒక్క కాయిన్ కూడా లేకపోతే <strong>2 కాయిన్స్</strong> రిలీజ్ అవుతాయి.</li>
+          <li>ఒక్క కాయిన్ మాత్రమే Vault లో ఉంటే అది రిలీజ్ అయ్యి <strong>6 అడుగులు</strong> ముందుకు వెళుతుంది.</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🔥 కిల్ రూల్</h3>
+        <p>మీ కాయిన్ ప్రత్యర్థి కాయిన్ ఉన్న బ్లాక్ మీద ఆగితే:</p>
+        <ul>
+          <li>ప్రత్యర్థి కాయిన్ Vault కి వెళుతుంది.</li>
+          <li>మీకు <strong>Kill Point</strong> వస్తుంది.</li>
+          <li><strong>Bonus Chance</strong> వస్తుంది.</li>
+          <li><strong>Extra Turn</strong> వస్తుంది.</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🟢 Safe Zones</h3>
+        <p>Safe Zone లో ఉన్న కాయిన్‌ను Kill చేయలేరు.</p>
+      </div>
+
+      <div class="rule-card">
+        <h3>👥 Double Coin Protection</h3>
+        <p>ఒకే బ్లాక్‌లో 2 ఒకే రంగు కాయిన్స్ ఉంటే:</p>
+        <ul>
+          <li>వాటిని Single Coin Kill చేయలేడు.</li>
+          <li>Attack చేసిన కాయిన్ Start కి వెళుతుంది.</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🛡️ Shield Zone</h3>
+        <p>Orange Path లోకి వచ్చిన కాయిన్‌కు Shield వస్తుంది.</p>
+        <p>Shield ఉన్న కాయిన్‌ను నేరుగా Kill చేయలేరు.</p>
+      </div>
+
+      <div class="rule-card">
+        <h3>🌀 Portal</h3>
+        <p>Portal మీద Land అయితే:</p>
+        <ul>
+          <li>10 లేదా 11 అడుగులు Jump అవుతుంది.</li>
+          <li>Center Permission వస్తుంది.</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🔥 Red Hole</h3>
+        <p>Red Hole మీద Land అయితే:</p>
+        <p>కాయిన్ Start Position కి వెళుతుంది.</p>
+      </div>
+
+      <div class="rule-card">
+        <h3>🔑 Center Permission</h3>
+        <p>Center Area లోకి వెళ్లడానికి:</p>
+        <ul>
+          <li>కనీసం <strong>1 Kill</strong> చేయాలి</li>
+          <li>OR <strong>Portal</strong> ఉపయోగించాలి</li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>⏳ Time Out Rules</h3>
+        <p>ప్రతి Turn కి Time Limit ఉంటుంది.</p>
+        <p>Time Out అయితే:</p>
+        <ul>
+          <li>1st Strike ⚡</li>
+          <li>2nd Strike ⚡⚡</li>
+          <li>3rd Strike ⚡⚡⚡</li>
+          <li>4th Strike = <strong>Disqualified ❌</strong></li>
+        </ul>
+      </div>
+
+      <div class="rule-card">
+        <h3>🏆 విజయం</h3>
+        <p>మీ 4 కాయిన్స్ అన్నీ 👑 Crown Cell కి చేరితే మీరు గెలుస్తారు.</p>
+        <p>లేదా ప్రత్యర్థి 4 Time Outs వల్ల Disqualify అయితే మీరు గెలుస్తారు.</p>
+      </div>
+    </div>
   </div>
 
   <!-- RESTART SCREEN -->
@@ -301,7 +433,7 @@
     let activeRedhole = null, redholeTimer = null;
     let turnTimeLeft = 100;
     
-    // Unified interval & action registries (Fix for Session Bleeds & Leaks)
+    // Unified interval & action registries
     let gameLoopIntervals = []; 
     let actionTimeouts = [];
     let timerIntervalRef = null;
@@ -310,7 +442,7 @@
     function registerAction(fn, delay) { const id = setTimeout(fn, delay); actionTimeouts.push(id); return id; }
     function clearActionTimeouts() { actionTimeouts.forEach(clearTimeout); actionTimeouts = []; }
 
-    // Debounced LocalStorage logic (Fix for Sync I/O microstutters)
+    // Debounced LocalStorage logic
     function saveGameState() { 
         if (G.isGameOver) return; 
         clearTimeout(saveDebounceRef);
@@ -815,7 +947,21 @@
       const startScreen = document.getElementById('start-screen');
       const startBtn = document.getElementById('start-btn-action');
       const restartBtn = document.getElementById('restart-btn-action');
+      const rulesBtn = document.getElementById('rules-btn-action');
+      const rulesScreen = document.getElementById('rules-screen');
+      const rulesBackBtn = document.getElementById('rules-back-btn');
       
+      // Rules Page Event Listeners
+      rulesBtn.addEventListener('click', () => {
+          rulesScreen.style.display = 'flex';
+          requestAnimationFrame(() => rulesScreen.style.opacity = '1');
+      });
+
+      rulesBackBtn.addEventListener('click', () => {
+          rulesScreen.style.opacity = '0';
+          setTimeout(() => rulesScreen.style.display = 'none', 300);
+      });
+
       if (loadGameState()) {
           startScreen.style.display = 'none'; syncUIWithState();
       } else {
