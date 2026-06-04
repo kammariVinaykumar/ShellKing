@@ -58,7 +58,6 @@
     .setup-btn { background: var(--panel-card); border: 2px solid var(--gold); border-radius: 12px; padding: 18px; font-size: 18px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: transform 0.1s, box-shadow 0.1s; }
     .setup-btn:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
     .setup-btn-red { border-color: #ef4444; } .setup-btn-blue { border-color: #3b82f6; }
-    .setup-btn-green { border-color: #22c55e; } .setup-btn-yellow { border-color: #eab308; }
 
     /* ===== GAME RULES SCREEN ===== */
     #rules-screen { position: fixed; inset: 0; background: radial-gradient(ellipse at top, #2d1a08 0%, #0a0502 100%); z-index: 2600; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; }
@@ -205,7 +204,7 @@
       <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;">మోడ్ ఎంచుకోండి</h3>
       <div class="setup-options">
          <button class="setup-btn" id="btn-mode-2p">👥 Two Players</button>
-         <button class="setup-btn" id="btn-mode-ai">🤖 Play vs Computer</button>
+         <button class="setup-btn" id="btn-mode-ai">🤖 Human vs AI</button>
       </div>
     </div>
 
@@ -218,17 +217,7 @@
       </div>
     </div>
 
-    <!-- STEP 2: DIFFICULTY SELECTION -->
-    <div class="setup-content" id="step-diff" style="display:none;">
-      <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;">కఠినత స్థాయి (Difficulty)</h3>
-      <div class="setup-options">
-         <button class="setup-btn setup-btn-green" id="btn-diff-easy">🟢 Easy</button>
-         <button class="setup-btn setup-btn-yellow" id="btn-diff-med">🟡 Medium</button>
-         <button class="setup-btn setup-btn-red" id="btn-diff-hard">🔴 Hard</button>
-      </div>
-    </div>
-
-    <!-- STEP 3: READY / START -->
+    <!-- STEP 2: READY / START -->
     <div class="setup-content" id="step-ready" style="display:none;">
       <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;" id="ready-summary"></h3>
       <button class="start-btn" id="final-start-btn">Start Game</button>
@@ -250,7 +239,7 @@
       <div class="rule-card">
         <h3>🎲 గవ్వల విలువలు</h3>
         <ul>
-          <li><strong>1 బొర్లా</strong> = 1 අడుగు</li>
+          <li><strong>1 బొర్లా</strong> = 1 అడుగు</li>
           <li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li>
           <li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li>
           <li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li>
@@ -471,10 +460,10 @@
     function getInitialState() {
       return { 
           currentPlayer: 1, currentRoll: 0, hasRolled: false, p1Tokens: [-1,-1,-1,-1], p2Tokens: [-1,-1,-1,-1], 
-          isGameOver: false, extraTurn: false, p1Kills: 0, p2Kills: 0, p1PortalUsed: false, p2PortalUsed: false, 
+          isGameOver: false, extraTurns: 0, p1Kills: 0, p2Kills: 0, p1PortalUsed: false, p2PortalUsed: false, 
           p1BonusPending: false, p2BonusPending: false, p1Revenge: false, p2Revenge: false, p1MissCount: 0, 
-          p2MissCount: 0, p1Timeouts: 0, p2Timeouts: 0, shielded: { player: null, idx: null }, maxP1: 0, maxP2: 0,
-          gameMode: '2P', humanColor: 1, aiColor: 2, aiDifficulty: 'MEDIUM' 
+          p2MissCount: 0, p1Timeouts: 0, p2Timeouts: 0, maxP1: 0, maxP2: 0,
+          gameMode: '2P', humanColor: 1, aiColor: 2, aiDifficulty: 'EASY' 
       };
     }
     
@@ -490,7 +479,7 @@
     let saveDebounceRef = null;
 
     // Wizard Variables
-    let tempSetup = { mode: '2P', hColor: 1, aColor: 2, diff: 'MEDIUM' };
+    let tempSetup = { mode: '2P', hColor: 1, aColor: 2 };
     let currentSetupStep = 0;
 
     function registerAction(fn, delay) { const id = setTimeout(fn, delay); actionTimeouts.push(id); return id; }
@@ -514,11 +503,12 @@
     function clearGameLoops() {
         gameLoopIntervals.forEach(clearInterval);
         gameLoopIntervals = [];
+        clearTimeout(portalTimer);
+        clearTimeout(redholeTimer);
         removePortal(); removeRedhole();
     }
 
     function restartGame() {
-        // Keep the same mode on restart
         const currentMode = G.gameMode, currentHColor = G.humanColor, currentAColor = G.aiColor, currentDiff = G.aiDifficulty;
         G = getInitialState(); 
         G.gameMode = currentMode; G.humanColor = currentHColor; G.aiColor = currentAColor; G.aiDifficulty = currentDiff;
@@ -726,7 +716,8 @@
       else if (p===1&&G.p1BonusPending) { if (p1sum<p2sum) final=boostedRoll(base); G.p1BonusPending=false; }
       else if (p===2&&G.p2BonusPending) { if (p2sum<p1sum) final=boostedRoll(base); G.p2BonusPending=false; }
       
-      G.extraTurn = (final===12); G.currentRoll = final; G.hasRolled = true; 
+      if (final === 12) G.extraTurns++; 
+      G.currentRoll = final; G.hasRolled = true; 
       
       const activeBtn = p === 1 ? D.p1RollBtn : D.p2RollBtn;
       activeBtn.textContent = `🎲 ${final}`;
@@ -740,7 +731,7 @@
       
       const movable = getMovable(final); const canRelease = (final===6||final===12) && vaultIdxs.length>0;
       
-      if (!movable.length && !canRelease) { registerAction(()=>switchTurn(true), 1100); }
+      if (!movable.length && !canRelease) { registerAction(()=>afterMove(), 1100); }
       else if (movable.length===1 && !canRelease) { registerAction(()=>moveToken(p, movable[0].idx), 900); }
       else { 
           updateBoard(); startTimer(); 
@@ -750,7 +741,7 @@
       }
     }
 
-    // ===== AI LOGIC (EASY MODE: RANDOM SELECTION) =====
+    // ===== AI LOGIC (RANDOM SELECTION ONLY) =====
     function executeAIMove(p, finalRoll, movable, canRelease, vaultIdxs) {
         if (G.isGameOver || G.currentPlayer !== p || !G.hasRolled) return;
         
@@ -758,7 +749,7 @@
         if (canRelease && vaultIdxs.length > 0) { vaultIdxs.forEach(idx => options.push({ type: 'vault', idx: idx })); }
         movable.forEach(m => options.push({ type: 'board', idx: m.idx }));
 
-        if (options.length === 0) { switchTurn(true); return; }
+        if (options.length === 0) { afterMove(); return; }
         
         const choice = options[Math.floor(Math.random() * options.length)];
         if (choice.type === 'vault') { releaseFromVault(p, choice.idx, null); } 
@@ -770,7 +761,7 @@
         clearActionTimeouts(); stopTimer(); 
         const t = p===1?G.p1Tokens:G.p2Tokens; 
         t[i1]=0; t[i2]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[0]); validateShield(); afterMove(); 
+        checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
     }
     
     function doReleaseOne(p, idx) { 
@@ -778,7 +769,7 @@
         clearActionTimeouts(); stopTimer(); 
         const t = p===1?G.p1Tokens:G.p2Tokens; 
         t[idx]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[0]); validateShield(); afterMove(); 
+        checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
     }
     
     function doReleaseAndSix(p, idx) { 
@@ -786,7 +777,7 @@
         clearActionTimeouts(); stopTimer(); 
         const t = p===1?G.p1Tokens:G.p2Tokens; 
         t[idx]=6; sparkle((p===1?p1Path:p2Path)[6]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[6]); validateShield(); afterMove(); 
+        checkKill(p, (p===1?p1Path:p2Path)[6]); afterMove(); 
     }
     
     function releaseFromVault(p, idx, e) { 
@@ -806,6 +797,7 @@
       if (!c) return; 
       clearActionTimeouts(); stopTimer(); SFX.play('move');
       
+      let oldPos = t[tIdx];
       let nx = c.targetPos; const path = p===1?p1Path:p2Path; const lC = path[nx]; let trap = false;
       
       if (lC===activePortal) { 
@@ -816,43 +808,62 @@
       else if (lC===activeRedhole) { nx = 0; removeRedhole(); trap = true; shakeBoard(); SFX.play('redhole'); }
       
       t[tIdx] = nx; sparkle(path[nx]);
-      if (nx>=41&&nx<=46&&!trap&&G.shielded.player===null) { G.shielded = {player:p, idx:tIdx}; SFX.play('shield'); }
       
-      if (!trap) checkKill(p, path[nx]); validateShield(); afterMove();
+      // Dynamic Shield sound check based on new position
+      if (nx >= 41 && nx <= 46 && oldPos < 41 && !trap) { SFX.play('shield'); }
+      
+      if (!trap) checkKill(p, path[nx]); afterMove();
     }
     
     function checkKill(movingP, coord) {
       if (safeZones.includes(coord)) return;
-      const p1at = G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length, p2at = G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
+      const p1at = G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length;
+      const p2at = G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
       if (!p1at||!p2at) return;
       
-      const shP=G.shielded.player, shI=G.shielded.idx; let shC=null;
-      if (shP===1&&G.p1Tokens[shI]!==-1) shC=p1Path[G.p1Tokens[shI]]; if (shP===2&&G.p2Tokens[shI]!==-1) shC=p2Path[G.p2Tokens[shI]];
+      const p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p1Kills*10);
+      const p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p2Kills*10);
       
-      const p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p1Kills*10), p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p2Kills*10);
+      // Multi-Shield Dynamic Checks
+      const isP1VictimShielded = G.p1Tokens.some(p => p !== -1 && p1Path[p] === coord && p >= 41 && p <= 46);
+      const isP2VictimShielded = G.p2Tokens.some(p => p !== -1 && p2Path[p] === coord && p >= 41 && p <= 46);
       
       if (movingP===1) {
-        if (shP===2&&shC===coord) { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); SFX.play('kill'); shakeBoard(); }
-        else if (p2at>=2) { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); G.p2Kills++; if (p1pts<p2pts) G.p1Revenge=true; SFX.play('kill'); shakeBoard(); }
+        if (isP2VictimShielded) { 
+            G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); 
+            SFX.play('shield'); shakeBoard(); 
+        }
+        else if (p2at>=2) { 
+            G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); 
+            G.p2Kills++; if (p1pts<p2pts) G.p1Revenge=true; 
+            SFX.play('kill'); shakeBoard(); 
+        }
         else { 
             let killed=false; 
             G.p2Tokens.forEach((p,i)=>{ 
                 if(p!==-1&&p2Path[p]===coord) { 
                     if (p>=41&&p<=46) { G.p2Tokens[i]=0; } else { G.p2Tokens[i]=-1; } 
-                    G.p1Kills++; G.p1BonusPending=true; G.extraTurn=true; killed=true; if (p2pts<p1pts) G.p2Revenge=true; 
+                    G.p1Kills++; G.p1BonusPending=true; G.extraTurns++; killed=true; if (p2pts<p1pts) G.p2Revenge=true; 
                 }
             }); 
             if (killed) { SFX.play('kill'); shakeBoard(); } 
         }
       } else {
-        if (shP===1&&shC===coord) { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); SFX.play('kill'); shakeBoard(); }
-        else if (p1at>=2) { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); G.p1Kills++; if (p2pts<p1pts) G.p2Revenge=true; SFX.play('kill'); shakeBoard(); }
+        if (isP1VictimShielded) { 
+            G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); 
+            SFX.play('shield'); shakeBoard(); 
+        }
+        else if (p1at>=2) { 
+            G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); 
+            G.p1Kills++; if (p2pts<p1pts) G.p2Revenge=true; 
+            SFX.play('kill'); shakeBoard(); 
+        }
         else { 
             let killed=false; 
             G.p1Tokens.forEach((p,i)=>{ 
                 if(p!==-1&&p1Path[p]===coord) { 
                     if (p>=41&&p<=46) { G.p1Tokens[i]=0; } else { G.p1Tokens[i]=-1; } 
-                    G.p2Kills++; G.p2BonusPending=true; G.extraTurn=true; killed=true; if (p1pts<p2pts) G.p1Revenge=true; 
+                    G.p2Kills++; G.p2BonusPending=true; G.extraTurns++; killed=true; if (p1pts<p2pts) G.p1Revenge=true; 
                 }
             }); 
             if (killed) { SFX.play('kill'); shakeBoard(); } 
@@ -860,13 +871,16 @@
       }
     }
     
-    function validateShield() { const {player:p, idx:i} = G.shielded; if (p===null) return; const pos = p===1?G.p1Tokens[i]:G.p2Tokens[i]; if (pos<41||pos>46) G.shielded={player:null,idx:null}; }
-
     function switchTurn(noMove) { if (G.isGameOver) return; G.currentPlayer = G.currentPlayer===1?2:1; G.hasRolled = false; G.currentRoll = 0; resetRoll(); }
     
     function afterMove() { 
         G.hasRolled = false; 
-        if (G.extraTurn) { G.extraTurn=false; resetRoll(); } else switchTurn(false); 
+        if (G.extraTurns > 0) { 
+            G.extraTurns--; 
+            resetRoll(); 
+        } else { 
+            switchTurn(false); 
+        } 
     }
 
     function resetRoll() {
@@ -940,7 +954,7 @@
             let bTok1 = D.p1TokensDOM[i];
             bTok1.className = 'token p1-token';
             if (p===1 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok1.classList.add('glow-move');
-            if (G.shielded.player===1 && G.shielded.idx===i) bTok1.classList.add('shielded');
+            if (pos1 >= 41 && pos1 <= 46) bTok1.classList.add('shielded'); // Dynamic Multi-Shield rendering
             if (dC.has(coord1) && !G.isGameOver) bTok1.classList.add('danger');
             
             const isF1 = G.p1Tokens.indexOf(pos1) === i;
@@ -964,7 +978,7 @@
             let bTok2 = D.p2TokensDOM[i];
             bTok2.className = 'token p2-token';
             if (p===2 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok2.classList.add('glow-move');
-            if (G.shielded.player===2 && G.shielded.idx===i) bTok2.classList.add('shielded');
+            if (pos2 >= 41 && pos2 <= 46) bTok2.classList.add('shielded'); // Dynamic Multi-Shield rendering
             if (dC.has(coord2) && !G.isGameOver) bTok2.classList.add('danger');
             
             const isF2 = G.p2Tokens.indexOf(pos2) === i;
@@ -984,6 +998,7 @@
       G.p1Tokens.forEach(pos=>{ if(pos>=41&&pos<p1Path.length-1) p1pts+=pos*2; else if(pos>-1) p1pts+=pos; }); 
       G.p2Tokens.forEach(pos=>{ if(pos>=41&&pos<p2Path.length-1) p2pts+=pos*2; else if(pos>-1) p2pts+=pos; });
       
+      // Preserved maxP1/maxP2 to maintain valid Prediction meter calculations
       if(p1pts>G.maxP1) G.maxP1=p1pts; if(p2pts>G.maxP2) G.maxP2=p2pts;
       
       D.p1Kills.textContent=G.p1Kills; D.p2Kills.textContent=G.p2Kills;
@@ -1035,20 +1050,48 @@
         if(G.hasRolled) {
             const activeBtn = p === 1 ? D.p1RollBtn : D.p2RollBtn;
             activeBtn.textContent = `🎲 ${G.currentRoll}`;
+            
+            // Mathematically reconstruct shells visually after reload
+            let downCount = 0;
+            if (G.currentRoll === 12) downCount = 0;
+            else if (G.currentRoll === 6) downCount = 4;
+            else downCount = G.currentRoll;
+            
+            ['p1','p2'].forEach(player => {
+                const arr = player==='p1'?D.shells.p1:D.shells.p2;
+                const isPlaying = (player === (p===1?'p1':'p2'));
+                if (isPlaying) {
+                    for (let i=0;i<4;i++) { 
+                        if (i < downCount) { arr[i].className='shell-el down'; arr[i].textContent='บ'; }
+                        else { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
+                    }
+                } else {
+                    for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
+                }
+            });
         } else {
             D.p1RollBtn.textContent = p === 1 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
             D.p2RollBtn.textContent = p === 2 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
+            ['p1','p2'].forEach(player => {
+                const arr = player==='p1'?D.shells.p1:D.shells.p2;
+                for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
+            });
         }
-
-        ['p1','p2'].forEach(player => {
-            const arr = player==='p1'?D.shells.p1:D.shells.p2;
-            const isPlaying = (player === (p===1?'p1':'p2'));
-            if(isPlaying && G.hasRolled) { for (let i=0;i<4;i++) { arr[i].className='shell-el down'; arr[i].textContent='บ'; } } 
-            else { for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; } }
-        });
         
         document.getElementById('main-game').style.display = 'flex';
         updateStrikeDisplay(); updateBoard(); startTimer(); startGameLoops();
+        
+        // Safely resume AI turn logic after page reload
+        if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) {
+            if (!G.hasRolled) {
+                registerAction(() => { rollGavvalu(p); }, 700);
+            } else {
+                const vaultIdxs = (p===1?G.p1Tokens:G.p2Tokens).reduce((a,v,i)=>v===-1?[...a,i]:a,[]);
+                const movable = getMovable(G.currentRoll);
+                const canRelease = (G.currentRoll===6||G.currentRoll===12) && vaultIdxs.length>0;
+                registerAction(() => executeAIMove(p, G.currentRoll, movable, canRelease, vaultIdxs), 700);
+            }
+        }
     }
 
     // ===== UI EVENT LISTENERS (Modals & Setup Wizard) =====
@@ -1073,14 +1116,13 @@
     function showSetupStep(step) {
       document.getElementById('step-mode').style.display = (step === 0) ? 'flex' : 'none';
       document.getElementById('step-color').style.display = (step === 1) ? 'flex' : 'none';
-      document.getElementById('step-diff').style.display = (step === 2) ? 'flex' : 'none';
-      document.getElementById('step-ready').style.display = (step === 3) ? 'flex' : 'none';
+      document.getElementById('step-ready').style.display = (step === 2) ? 'flex' : 'none';
       currentSetupStep = step;
       
-      if (step === 3) {
+      if (step === 2) {
           const sumText = tempSetup.mode === '2P' 
               ? "👥 Two Players Mode" 
-              : `🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor === 1 ? '🔴 RED' : '🔵 BLUE'} | Bot: ${tempSetup.aColor === 1 ? '🔴 RED' : '🔵 BLUE'}<br>స్థాయి: ${tempSetup.diff}</span>`;
+              : `🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor === 1 ? '🔴 RED' : '🔵 BLUE'} | Bot: ${tempSetup.aColor === 1 ? '🔴 RED' : '🔵 BLUE'}</span>`;
           document.getElementById('ready-summary').innerHTML = sumText;
       }
     }
@@ -1096,28 +1138,22 @@
           document.getElementById('setup-screen').style.opacity = '0';
           setTimeout(() => document.getElementById('setup-screen').style.display = 'none', 300);
       } else if (currentSetupStep === 1) { showSetupStep(0);
-      } else if (currentSetupStep === 2) { showSetupStep(1);
-      } else if (currentSetupStep === 3) {
-          if (tempSetup.mode === '2P') showSetupStep(0); else showSetupStep(2);
+      } else if (currentSetupStep === 2) {
+          if (tempSetup.mode === '2P') showSetupStep(0); else showSetupStep(1);
       }
     });
 
-    document.getElementById('btn-mode-2p').addEventListener('click', () => { tempSetup.mode = '2P'; showSetupStep(3); });
+    document.getElementById('btn-mode-2p').addEventListener('click', () => { tempSetup.mode = '2P'; showSetupStep(2); });
     document.getElementById('btn-mode-ai').addEventListener('click', () => { tempSetup.mode = 'AI'; showSetupStep(1); });
     
     document.getElementById('btn-color-red').addEventListener('click', () => { tempSetup.hColor = 1; tempSetup.aColor = 2; showSetupStep(2); });
     document.getElementById('btn-color-blue').addEventListener('click', () => { tempSetup.hColor = 2; tempSetup.aColor = 1; showSetupStep(2); });
-    
-    document.getElementById('btn-diff-easy').addEventListener('click', () => { tempSetup.diff = 'EASY'; showSetupStep(3); });
-    document.getElementById('btn-diff-med').addEventListener('click', () => { tempSetup.diff = 'MEDIUM'; showSetupStep(3); });
-    document.getElementById('btn-diff-hard').addEventListener('click', () => { tempSetup.diff = 'HARD'; showSetupStep(3); });
 
     document.getElementById('final-start-btn').addEventListener('click', () => {
       SFX.init();
       G.gameMode = tempSetup.mode;
       G.humanColor = tempSetup.hColor;
       G.aiColor = tempSetup.aColor;
-      G.aiDifficulty = tempSetup.diff;
       
       document.getElementById('setup-screen').style.opacity = '0';
       document.getElementById('start-screen').style.opacity = '0';
