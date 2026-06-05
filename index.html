@@ -729,44 +729,46 @@
     function getMovable(roll){const p=G.currentPlayer,t=p===1?G.p1Tokens:G.p2Tokens,perm=hasPerm(p),res=[];for(let i=0;i<4;i++){if(t[i]===-1)continue;const nx=getNextPos(t[i],roll,perm);if(nx<p1Path.length)res.push({idx:i,targetPos:nx});}return res;}
     function boostedRoll(b){return b===1?3:b===2?6:12;}
 
-    // ===== LUDO-STYLE STEP-BY-STEP PATH WALKING =====
-    // stepWalkToken: moves tokenEl one cell at a time along path indices
-    // fromPos → toPos (can go forward or backward)
-    // stepMs = delay between each step
-    // onDone = callback when walk finishes
-    function stepWalkToken(tokenEl, path, fromPos, toPos, stepMs, onDone) {
-      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move', 'victim-shudder', 'kill-flash');
+    // ===== LUDO-STYLE SMOOTH SLIDING PATH WALKING =====
+    function executeSmoothSteps(tokenEl, path, steps, stepMs, onDone) {
+      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move', 'victim-shudder', 'kill-flash', 'step-hop');
       tokenEl.style.zIndex = '80';
       tokenEl.style.pointerEvents = 'none';
-
-      const steps = [];
-      if (toPos >= fromPos) {
-        for (let i = fromPos; i <= toPos; i++) steps.push(i);
-      } else {
-        for (let i = fromPos; i >= toPos; i--) steps.push(i);
-      }
 
       let stepIdx = 0;
 
       function doStep() {
         if (stepIdx >= steps.length) {
-          // walk done
           tokenEl.style.zIndex = '';
           tokenEl.style.pointerEvents = '';
+          tokenEl.style.transition = '';
+          tokenEl.style.transform = '';
           if (onDone) onDone();
           return;
         }
         const pos = steps[stepIdx];
         const coord = path[pos];
         const cell = D.cells[coord];
-        if (cell) {
-          // physically move token DOM into this cell
-          if (tokenEl.parentNode) tokenEl.parentNode.removeChild(tokenEl);
+        
+        if (cell && tokenEl.parentNode !== cell) {
+          // FLIP Animation: First, Last, Invert, Play
+          const startRect = tokenEl.getBoundingClientRect();
           cell.appendChild(tokenEl);
-          // hop animation on each step
-          tokenEl.classList.remove('step-hop');
+          const endRect = tokenEl.getBoundingClientRect();
+          
+          const dx = startRect.left - endRect.left;
+          const dy = startRect.top - endRect.top;
+          
+          // Invert
+          tokenEl.style.transition = 'none';
+          tokenEl.style.transform = `translate(${dx}px, ${dy}px)`;
+          
+          // Force Reflow
           void tokenEl.offsetWidth;
-          tokenEl.classList.add('step-hop');
+          
+          // Play smooth slide
+          tokenEl.style.transition = `transform ${stepMs}ms linear`;
+          tokenEl.style.transform = 'translate(0px, 0px)';
         }
         stepIdx++;
         setTimeout(doStep, stepMs);
@@ -774,24 +776,40 @@
       doStep();
     }
 
-    // Walk token forward along path (normal move / portal jump / vault release)
-    // fromPos = current path index, toPos = destination path index
+    // Walk token forward along path smoothly
     function walkForward(player, tIdx, fromPos, toPos, onDone) {
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
-      const steps = toPos - fromPos;
-      // faster for longer distances, min 80ms per step
-      const stepMs = steps <= 3 ? 160 : steps <= 6 ? 130 : steps <= 12 ? 100 : 80;
-      stepWalkToken(tokEl, path, fromPos, toPos, stepMs, onDone);
+      const steps = [];
+      
+      // Fix BUG: Handle wrap-around on the outer path (index 23 -> 0)
+      if (toPos < fromPos) {
+        for (let i = fromPos + 1; i <= 23; i++) steps.push(i);
+        for (let i = 0; i <= toPos; i++) steps.push(i);
+      } else {
+        for (let i = fromPos + 1; i <= toPos; i++) steps.push(i);
+      }
+      
+      const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
+      executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
 
-    // Walk token backward along path (kill victim going to vault / redhole / bounce)
+    // Walk token backward smoothly (kill victim going to vault / bounce)
     function walkBackward(player, tIdx, fromPos, toPos, onDone) {
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
-      const steps = fromPos - toPos;
-      const stepMs = steps <= 4 ? 140 : steps <= 10 ? 110 : 85;
-      stepWalkToken(tokEl, path, fromPos, toPos, stepMs, onDone);
+      const steps = [];
+      
+      // Fix BUG: Handle wrap-around backward
+      if (fromPos < toPos) {
+        for (let i = fromPos - 1; i >= 0; i--) steps.push(i);
+        for (let i = 23; i >= toPos; i--) steps.push(i);
+      } else {
+        for (let i = fromPos - 1; i >= toPos; i--) steps.push(i);
+      }
+      
+      const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
+      executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
 
     // Simple single-cell bounce effect for vault entry
@@ -861,8 +879,68 @@
       if(canRelease&&vaultIdxs.length>0){vaultIdxs.forEach(idx=>options.push({type:'vault',idx}));}
       movable.forEach(m=>options.push({type:'board',idx:m.idx}));
       if(!options.length){afterMove();return;}
-      const choice=options[Math.floor(Math.random()*options.length)];
-      if(choice.type==='vault')releaseFromVault(p,choice.idx,null);else moveToken(p,choice.idx,null);
+      
+      // AI Logic: Prioritize kills, portals, avoiding redholes, and scoring
+      function evaluate(opt) {
+        let score = 0;
+        const oppTokens = p===1 ? G.p2Tokens : G.p1Tokens;
+        const myTokens = p===1 ? G.p1Tokens : G.p2Tokens;
+        const path = p===1 ? p1Path : p2Path;
+        const oppPath = p===1 ? p2Path : p1Path;
+        let targetPos, targetCoord;
+
+        if (opt.type === 'vault') {
+            score += 60; // Releasing is good
+            if (finalRoll === 12 && vaultIdxs.length >= 2) targetPos = 0;
+            else if (finalRoll === 12 && vaultIdxs.length === 1) targetPos = 6;
+            else targetPos = 0;
+            targetCoord = path[targetPos];
+        } else {
+            targetPos = movable.find(m => m.idx === opt.idx).targetPos;
+            targetCoord = path[targetPos];
+            score += targetPos; // Progress mapping
+        }
+
+        // Rule 1: AVOID RED HOLE!
+        if (targetCoord === activeRedhole) return -1000;
+
+        // Rule 2: Move to Crown (Win condition)
+        if (targetPos === path.length - 1) score += 1000;
+
+        // Rule 3: Kill Opponent (Top Priority)
+        if (!safeZones.includes(targetCoord) && oppTokens.some(ot => ot !== -1 && oppPath[ot] === targetCoord)) {
+            let oppCount = oppTokens.filter(ot => ot !== -1 && oppPath[ot] === targetCoord).length;
+            let oppFirstOrange = p===1 ? G.orangeFirstP2Coord[targetCoord] : G.orangeFirstP1Coord[targetCoord];
+            // If enemy is protected by shield or double coin, avoid!
+            if (oppFirstOrange || oppCount >= 2) return -800; 
+            else score += 500; // Safe to kill
+        }
+
+        // Rule 4: Claim Portal
+        if (targetCoord === activePortal) score += 400;
+
+        // Rule 5: Land on Safe Zone
+        if (safeZones.includes(targetCoord)) score += 40;
+
+        // Rule 6: Enter empty Orange zone for Shield
+        if (isInOrange(targetPos, p) && !G.orangeFirstP1Coord[targetCoord] && !G.orangeFirstP2Coord[targetCoord]) score += 200;
+
+        // Add small random tie-breaker
+        return score + (Math.random() * 10);
+      }
+
+      let bestOption = options[0];
+      let bestScore = -Infinity;
+      options.forEach(opt => {
+        let s = evaluate(opt);
+        if (s > bestScore) {
+          bestScore = s;
+          bestOption = opt;
+        }
+      });
+
+      if(bestOption.type==='vault') releaseFromVault(p,bestOption.idx,null);
+      else moveToken(p,bestOption.idx,null);
     }
 
     // Release helpers — animate enter on board arrival
