@@ -735,7 +735,7 @@
     // stepMs = delay between each step
     // onDone = callback when walk finishes
     function stepWalkToken(tokenEl, path, fromPos, toPos, stepMs, onDone) {
-      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move');
+      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move', 'victim-shudder', 'kill-flash');
       tokenEl.style.zIndex = '80';
       tokenEl.style.pointerEvents = 'none';
 
@@ -800,6 +800,28 @@
       void tokenEl.offsetWidth;
       tokenEl.classList.add('anim-enter');
       setTimeout(() => { tokenEl.classList.remove('anim-enter'); if(cb) cb(); }, 450);
+    }
+
+    // Missing function: Animation for being killed (victim shudder)
+    function animateKill(tokenEl, cb) {
+      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
+      void tokenEl.offsetWidth;
+      tokenEl.classList.add('victim-shudder');
+      setTimeout(() => { 
+        tokenEl.classList.remove('victim-shudder'); 
+        if(cb) cb(); 
+      }, 400);
+    }
+
+    // Missing function: Animation for bouncing back when shielded/double
+    function animateBounce(tokenEl, cb) {
+      tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
+      void tokenEl.offsetWidth;
+      tokenEl.classList.add('victim-shudder'); // Reusing the shuddering animation for bounce impact
+      setTimeout(() => { 
+        tokenEl.classList.remove('victim-shudder'); 
+        if(cb) cb(); 
+      }, 400);
     }
 
     function rollGavvalu(playerNum){
