@@ -24,6 +24,16 @@
       padding: 4px;
     }
 
+    /* ===== AUDIO BTN ===== */
+    #audio-btn {
+      position: fixed; top: 12px; right: 12px; z-index: 5000;
+      background: var(--panel-card); border: 2px solid var(--gold); border-radius: 50%;
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+      color: white; outline: none; transition: transform 0.1s; padding-left: 2px;
+    }
+    #audio-btn:active { transform: scale(0.9); }
+
     /* ===== SCREENS ===== */
     #start-screen, #restart-screen, #quit-modal, #setup-screen { 
       position: fixed; inset: 0; background: radial-gradient(ellipse at top, #2d1a08 0%, #0f0804 100%); 
@@ -70,12 +80,7 @@
 
     /* ===== GAME LAYOUT ===== */
     .game-wrap { display: flex; flex-direction: column; justify-content: space-between; width: 100%; max-width: 500px; height: 100%; gap: 4px; }
-    
-    /* NEW: Panel ordering classes to keep human at bottom */
-    .panel-top { order: 1; transform: rotate(180deg); }
-    .board-center { order: 2; }
-    .panel-bottom { order: 3; }
-    
+    .top-panel { transform: rotate(180deg); }
     .player-panel { display: flex; flex-direction: column; width: 100%; background: var(--panel-card); border: 1px solid var(--panel-border); border-radius: 12px; padding: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
     .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
     .roll-btn-wrap { position: relative; flex: 1; max-width: 140px; padding: 3px; background: conic-gradient(var(--timer-color, transparent) var(--timer-pct, 0%), #1a0f06 0); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 8px rgba(0,0,0,0.8); }
@@ -90,41 +95,29 @@
     .stats-bar { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 6px 8px; border-radius: 6px; }
     .turn-badge-mini { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; }
     .turn-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .turn-dot.red { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
-    .turn-dot.blue { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+    .turn-dot.c-red { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+    .turn-dot.c-blue { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
     .turn-dot.dim { background: #555; }
     .turn-label { transition: color 0.3s; }
-    .turn-label.red { color: #f87171; } .turn-label.blue { color: #60a5fa; } .turn-label.dim { color: #777; }
+    .turn-label.c-red { color: #f87171; } .turn-label.c-blue { color: #60a5fa; } .turn-label.dim { color: #777; }
     .stats-group { display: flex; align-items: center; gap: 8px; }
     .stats-group span { font-weight: 700; color: var(--text-light); }
     .strikes-row { display: flex; align-items: center; gap: 2px; }
     .strike-icon { font-size: 10px; color: #555; } .strike-icon.used { color: #ef4444; }
-    
-    /* Move extra info to bottom only */
     .bottom-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
-    /* Hide bottom-extra in top panel */
-    .panel-top .bottom-extra { display: none; }
-    
     .pred-wrap { flex: 1; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); padding: 4px; }
     .pred-header { font-size: 9px; color: var(--text-muted); text-align: center; margin-bottom: 2px; font-weight: bold; }
     .meter-track { height: 14px; background: rgba(255,255,255,0.05); border-radius: 7px; display: flex; overflow: hidden; }
-    .meter-red { background: linear-gradient(90deg, #b91c1c, #ef4444); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: white; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); will-change: width; min-width: 0; overflow: hidden; white-space: nowrap; }
-    .meter-blue { background: linear-gradient(90deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: white; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); will-change: width; min-width: 0; overflow: hidden; white-space: nowrap; }
+    .meter-p1 { display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: white; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); will-change: width; min-width: 0; overflow: hidden; white-space: nowrap; }
+    .meter-p2 { display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: white; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); will-change: width; min-width: 0; overflow: hidden; white-space: nowrap; }
+    body[data-theme="red-blue"] .meter-p1, body[data-theme="blue-red"] .meter-p2 { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+    body[data-theme="red-blue"] .meter-p2, body[data-theme="blue-red"] .meter-p1 { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
     .quit-btn { background: #7f1d1d; color: white; font-size: 12px; font-weight: bold; border: 1px solid #ef4444; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
     /* ===== BOARD ===== */
     .center-col { display: flex; flex: 1; align-items: center; justify-content: center; width: 100%; min-height: 0; padding: 2px 0; }
     .board-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; max-height: 52vh; }
-    
-    /* NEW: Class to rotate board if human is playing Blue */
-    .board-rotated { transform: rotate(180deg) translateZ(0) !important; }
-    /* Counter-rotate tokens so they stay upright when board is rotated */
-    .board-rotated .token { transform: rotate(-180deg); }
-    .board-rotated .crown-emoji { transform: rotate(-180deg); }
-    .board-rotated .portal-layer { transform: rotate(-180deg); }
-    .board-rotated .redhole-layer { transform: rotate(-180deg); }
-
-    .board { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); height: 100%; max-height: 100vw; aspect-ratio: 1; gap: 2px; padding: 6px; background: var(--board-bg); border-radius: 14px; border: 3px solid var(--board-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateZ(0); transition: transform 0.5s ease; }
+    .board { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); height: 100%; max-height: 100vw; aspect-ratio: 1; gap: 2px; padding: 6px; background: var(--board-bg); border-radius: 14px; border: 3px solid var(--board-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateZ(0); }
     .cell { background: var(--cell-white); border-radius: 12%; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid rgba(139,90,43,0.3); }
     .cell-yellow { background: var(--cell-yellow) !important; border-color: rgba(234,179,8,0.4) !important; }
     .cell-orange { background: var(--cell-orange) !important; border-color: rgba(234,88,12,0.4) !important; }
@@ -135,11 +128,11 @@
     .arrow-down::after { content:'↓'; position:absolute; bottom:-8px; font-size:10px; color:#b91c1c; font-weight:700; z-index:40; }
 
     /* ===== TOKENS ===== */
-    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; outline: none; position: relative; transition: box-shadow 0.15s; }
-    .p1-token { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); box-shadow: 0 2px 6px rgba(185,28,28,0.6); }
-    .p2-token { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); box-shadow: 0 2px 6px rgba(29,78,216,0.6); }
+    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, box-shadow 0.15s; outline: none; position: relative; }
+    body[data-theme="red-blue"] .p1-token, body[data-theme="blue-red"] .p2-token { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); box-shadow: 0 2px 6px rgba(185,28,28,0.6); }
+    body[data-theme="red-blue"] .p2-token, body[data-theme="blue-red"] .p1-token { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); box-shadow: 0 2px 6px rgba(29,78,216,0.6); }
     .token.glow-move { animation: token-pulse 0.7s infinite alternate; border-color: #fbbf24; }
-    @keyframes token-pulse { 0% { box-shadow:0 0 4px #fbbf24; } 100% { box-shadow:0 0 16px #fbbf24; } }
+    @keyframes token-pulse { 0% { box-shadow:0 0 4px #fbbf24; transform:scale(1); } 100% { box-shadow:0 0 16px #fbbf24; transform:scale(1.12); } }
 
     /* ===== ORANGE ZONE SHIELD ===== */
     .token.shielded {
@@ -157,78 +150,19 @@
     @keyframes badge-pop { 0%{transform:scale(0);} 60%{transform:scale(1.3);} 100%{transform:scale(1);} }
 
     /* ===== LUDO STEP-BY-STEP ANIMATIONS ===== */
-
-    /* Per-cell hop: played on each step of path walking */
-    @keyframes step-hop {
-      0%   { margin-top: 0; }
-      35%  { margin-top: -10px; }
-      65%  { margin-top: -5px; }
-      100% { margin-top: 0; }
-    }
-    .token.step-hop {
-      animation: step-hop 0.18s ease-out forwards !important;
-    }
-
-    /* Kill flash: red pulse on attacker when kill happens */
-    @keyframes kill-flash {
-      0%   { box-shadow: 0 0 0px #ef4444; }
-      50%  { box-shadow: 0 0 22px 6px #ef4444; margin-top:-5px; }
-      100% { box-shadow: 0 0 6px #ef4444; margin-top:0; }
-    }
-    .token.kill-flash {
-      animation: kill-flash 0.35s ease-out forwards !important;
-      z-index: 90;
-    }
-
-    /* Victim shudder before walking back */
-    @keyframes victim-shudder {
-      0%   { margin-left:0; margin-top:0; }
-      20%  { margin-left:-3px; margin-top:-2px; }
-      40%  { margin-left:3px; margin-top:2px; }
-      60%  { margin-left:-2px; margin-top:-1px; }
-      80%  { margin-left:2px; margin-top:1px; }
-      100% { margin-left:0; margin-top:0; }
-    }
-    .token.victim-shudder {
-      animation: victim-shudder 0.38s ease-out forwards !important;
-      z-index: 90;
-    }
-
-    /* Coin entering board from vault → bounce drop */
-    @keyframes coin-enter {
-      0%   { margin-top:-40px; opacity: 0; }
-      60%  { margin-top:4px; opacity: 1; }
-      80%  { margin-top:-2px; }
-      100% { margin-top:0; opacity: 1; }
-    }
-    .token.anim-enter {
-      animation: coin-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-    }
-
-    /* Red hole spiral-shrink */
-    @keyframes redhole-sink {
-      0%   { opacity: 1; }
-      60%  { opacity: 0.7; }
-      100% { opacity: 0; }
-    }
-    .token.anim-redhole-sink {
-      animation: redhole-sink 0.5s ease-in forwards !important;
-      z-index: 90; pointer-events: none;
-    }
-
-    /* Portal spin-zoom */
-    @keyframes portal-launch {
-      0%   { opacity: 1; }
-      50%  { opacity: 0.8; }
-      100% { opacity: 0; }
-    }
-    .token.anim-portal-launch {
-      animation: portal-launch 0.4s ease-in forwards !important;
-      z-index: 90; pointer-events: none;
-    }
-    .token.anim-portal-land {
-      animation: coin-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-    }
+    @keyframes step-hop { 0% { transform: scale(1) translateY(0); } 35% { transform: scale(1.25) translateY(-7px); } 65% { transform: scale(1.1) translateY(-3px); } 100% { transform: scale(1) translateY(0); } }
+    .token.step-hop { animation: step-hop 0.18s ease-out forwards !important; }
+    @keyframes kill-flash { 0% { box-shadow: 0 0 0px #ef4444; } 50% { box-shadow: 0 0 22px 6px #ef4444; transform: scale(1.25); } 100% { box-shadow: 0 0 6px #ef4444; transform: scale(1); } }
+    .token.kill-flash { animation: kill-flash 0.35s ease-out forwards !important; z-index: 90; }
+    @keyframes victim-shudder { 0% { transform: rotate(0deg) scale(1.1); } 20% { transform: rotate(-12deg) scale(1.2); } 40% { transform: rotate(12deg) scale(1.2); } 60% { transform: rotate(-8deg) scale(1.1); } 80% { transform: rotate(6deg) scale(1.05); } 100% { transform: rotate(0deg) scale(1); } }
+    .token.victim-shudder { animation: victim-shudder 0.38s ease-out forwards !important; z-index: 90; }
+    @keyframes coin-enter { 0% { transform: scale(0.2) translateY(-40px); opacity: 0; } 60% { transform: scale(1.2) translateY(4px); opacity: 1; } 80% { transform: scale(0.92) translateY(-2px); } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+    .token.anim-enter { animation: coin-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important; }
+    @keyframes redhole-sink { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 60% { transform: scale(0.6) rotate(200deg); opacity: 0.7; } 100% { transform: scale(0.1) rotate(420deg); opacity: 0; } }
+    .token.anim-redhole-sink { animation: redhole-sink 0.5s ease-in forwards !important; z-index: 90; pointer-events: none; }
+    @keyframes portal-launch { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 50% { transform: scale(1.4) rotate(180deg); opacity: 0.8; } 100% { transform: scale(0.3) rotate(360deg); opacity: 0; } }
+    .token.anim-portal-launch { animation: portal-launch 0.4s ease-in forwards !important; z-index: 90; pointer-events: none; }
+    .token.anim-portal-land { animation: coin-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important; }
 
     /* Traps & Effects */
     .portal-layer, .redhole-layer { position:absolute; inset:0; border-radius:12%; z-index:15; pointer-events:none; display:flex; align-items:center; justify-content:center; font-size:18px; }
@@ -237,9 +171,9 @@
     .redhole-layer { background:#7f1d1d; animation:redhole-blink 0.6s infinite alternate; }
     @keyframes redhole-blink { 0%{box-shadow:inset 0 0 10px #7f1d1d;} 100%{box-shadow:inset 0 0 25px #dc2626;} }
     .crown-emoji { font-size:22px; animation:crown-float 2s infinite alternate; position:absolute; z-index:2; }
-    @keyframes crown-float { 0%{margin-top:0; filter:drop-shadow(0 0 4px rgba(251,191,36,0.5));} 100%{margin-top:-3px; filter:drop-shadow(0 0 12px rgba(251,191,36,0.9));} }
+    @keyframes crown-float { 0%{transform:translateY(0) scale(1); filter:drop-shadow(0 0 4px rgba(251,191,36,0.5));} 100%{transform:translateY(-3px) scale(1.07); filter:drop-shadow(0 0 12px rgba(251,191,36,0.9));} }
     .sparkle { position:absolute; width:100%; height:100%; border-radius:50%; background:radial-gradient(circle, #fff 5%, #fbbf24 40%, transparent 70%); pointer-events:none; z-index:100; animation:spark 0.5s ease-out forwards; }
-    @keyframes spark { 0%{margin-top:0; opacity:1;} 100%{margin-top:0; opacity:0;} }
+    @keyframes spark { 0%{transform:scale(0.4); opacity:1;} 100%{transform:scale(2.5); opacity:0;} }
     .shake { animation:shake 0.3s ease; }
     @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
     .board.board-danger-flash { animation:board-flash-danger 0.5s ease-in-out 2; }
@@ -248,35 +182,12 @@
     @keyframes board-flash-win { 0%,100%{border-color:var(--board-border);} 50%{border-color:#fbbf24; box-shadow:0 0 60px rgba(251,191,36,0.6);} }
     .confetti-piece { position:fixed; top:-12px; width:8px; height:10px; z-index:999; animation:fall linear forwards; border-radius:2px; }
     @keyframes fall { to{transform:translateY(110vh) rotate(720deg);} }
-
-    /* ===== SOUND TOGGLE BTN ===== */
-    .sound-toggle-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(45, 26, 8, 0.8);
-      border: 2px solid var(--gold);
-      color: var(--text-light);
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      cursor: pointer;
-      z-index: 5000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      transition: transform 0.1s;
-    }
-    .sound-toggle-btn:active { transform: scale(0.9); }
-
   </style>
 </head>
 <body>
 
-  <!-- GLOBAL SOUND BTN (Shows on all screens) -->
-  <button class="sound-toggle-btn" id="global-sound-btn">🔊</button>
+  <!-- AUDIO CONTROL BUTTON -->
+  <button id="audio-btn" aria-label="Toggle Audio">🔊</button>
 
   <!-- START SCREEN -->
   <div id="start-screen">
@@ -321,118 +232,13 @@
       <h2>📜 గేమ్ రూల్స్</h2>
     </div>
     <div class="rules-content">
-
-      <div class="rule-card">
-        <h3>🎯 లక్ష్యం</h3>
-        <p>మీ 4 కాయిన్స్‌ను 👑 Crown Cell కి ముందుగా చేర్చిన ప్లేయర్ గెలుస్తాడు.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🎲 గవ్వల విలువలు</h3>
-        <ul>
-          <li><strong>1 బొర్లా</strong> = 1 అడుగు</li>
-          <li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li>
-          <li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li>
-          <li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li>
-          <li><strong>0 బొర్లాలు</strong> = 12 అడుగులు</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🚪 కాయిన్ రిలీజ్</h3>
-        <p><strong>6</strong> లేదా <strong>12</strong> వచ్చినప్పుడు Vault లో ఉన్న కాయిన్‌ను Board మీదికి తీసుకురావచ్చు.</p>
-        <p><strong>12 వచ్చినప్పుడు ప్రత్యేక నియమాలు:</strong></p>
-        <ul>
-          <li>Board లో ఒక్క కాయిన్ కూడా లేకపోతే, Vault లో <strong>2 కాయిన్స్ ఉంటే</strong> రెండూ Start కి వస్తాయి.</li>
-          <li>Vault లో <strong>1 కాయిన్ మాత్రమే</strong> ఉంటే అది రిలీజ్ అయ్యి <strong>6 అడుగులు</strong> ముందుకు వెళుతుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔥 కిల్ రూల్</h3>
-        <p>మీ కాయిన్ ప్రత్యర్థి కాయిన్ ఉన్న బ్లాక్ మీద ఆగితే:</p>
-        <ul>
-          <li>ప్రత్యర్థి కాయిన్ <strong>Vault కి</strong> వెళుతుంది.</li>
-          <li>మీకు <strong>Kill Point</strong> వస్తుంది.</li>
-          <li><strong>Bonus Chance</strong> వస్తుంది (తక్కువ స్కోర్‌లో ఉంటే boosted roll).</li>
-          <li><strong>Extra Turn</strong> వస్తుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🟢 Safe Zones</h3>
-        <p>Safe Zone లో ఉన్న కాయిన్‌ను Kill చేయలేరు.</p>
-        <p>Safe Zones: Start cells (మూలలు) మరియు Center 👑 cell.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>👥 Double Coin Protection</h3>
-        <p>ఒకే బ్లాక్‌లో <strong>2 లేదా అంతకంటే ఎక్కువ</strong> ఒకే రంగు కాయిన్స్ ఉంటే:</p>
-        <ul>
-          <li>వాటిని Single Coin Kill చేయలేడు.</li>
-          <li>Attack చేసిన కాయిన్ <strong>Start Position (pos 0)</strong> కి వెళుతుంది.</li>
-          <li>Defend చేసిన team కి <strong>Kill Point</strong> వస్తుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🛡️ Orange Zone Protection</h3>
-        <p>Board లో <strong>Orange రంగు</strong> cells ఉన్నాయి — ఇవి home stretch (చివరి దశ).</p>
-        <p><strong>ముఖ్యమైన నియమం:</strong></p>
-        <ul>
-          <li>ఏ team coin అయినా <strong>మొదటగా</strong> Orange Zone లోకి వస్తే దానికి <strong>Shield Protection</strong> లభిస్తుంది. (coin మీద orange glow కనబడుతుంది)</li>
-          <li>తర్వాత opponent team coin అదే Orange Zone లోకి వచ్చి Kill చేయాలని చూస్తే — అది <strong>నేరుగా తన home (pos 0) కి వెళ్ళిపోతుంది</strong>.</li>
-          <li>Shield ఉన్న coin మాత్రమే safe — తర్వాత వచ్చిన coin కి shield రాదు.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🌀 Portal</h3>
-        <p>Portal మీద Land అయితే:</p>
-        <ul>
-          <li><strong>10 అడుగులు</strong> Jump అవుతుంది (destination free అయితే).</li>
-          <li>Destination occupied అయితే <strong>11 అడుగులు</strong> Jump అవుతుంది.</li>
-          <li><strong>Center Permission</strong> unlock అవుతుంది.</li>
-        </ul>
-        <p>Portal కొంత సమయం తర్వాత మాయమవుతుంది — వేగంగా ఉపయోగించుకోండి!</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔥 Red Hole</h3>
-        <p>Red Hole మీద Land అయితే కాయిన్ <strong>Start Position కి</strong> వెళుతుంది.</p>
-        <p>Red Hole కూడా కొంత సమయం తర్వాత మాయమవుతుంది.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔑 Center Permission</h3>
-        <p>Center Area (👑 Crown Cell) లోకి వెళ్లడానికి:</p>
-        <ul>
-          <li>కనీసం <strong>1 Kill</strong> చేయాలి</li>
-          <li>OR <strong>Portal</strong> ఉపయోగించాలి</li>
-        </ul>
-        <p>Permission లేకుండా Center కి వెళ్ళే roll వచ్చినా కాయిన్ Outer Loop లోనే ఉంటుంది.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>⏳ Time Out Rules</h3>
-        <p>ప్రతి Turn కి Time Limit ఉంటుంది. Time Out అయితే:</p>
-        <ul>
-          <li>1st Strike ⚡ — మీ ముందున్న కాయిన్ <strong>6 అడుగులు వెనక్కి</strong> వెళుతుంది.</li>
-          <li>2nd Strike ⚡⚡ — మళ్ళీ 6 అడుగులు వెనక్కి.</li>
-          <li>3rd Strike ⚡⚡⚡ — మళ్ళీ 6 అడుగులు వెనక్కి.</li>
-          <li>4th Strike = <strong>Disqualified ❌</strong> — ప్రత్యర్థి గెలుస్తారు.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🏆 విజయం</h3>
-        <p>గెలవడానికి రెండు మార్గాలు:</p>
-        <ul>
-          <li>మీ <strong>4 కాయిన్స్ అన్నీ</strong> 👑 Crown Cell కి చేరితే గెలుస్తారు.</li>
-          <li>ప్రత్యర్థి <strong>4 Time Outs</strong> వల్ల Disqualify అయితే మీరు గెలుస్తారు.</li>
-        </ul>
-      </div>
-
+      <div class="rule-card"><h3>🎯 లక్ష్యం</h3><p>మీ 4 కాయిన్స్‌ను 👑 Crown Cell కి ముందుగా చేర్చిన ప్లేయర్ గెలుస్తాడు.</p></div>
+      <div class="rule-card"><h3>🎲 గవ్వల విలువలు</h3><ul><li><strong>1 బొర్లా</strong> = 1 అడుగు</li><li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li><li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li><li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li><li><strong>0 బొర్లాలు</strong> = 12 అడుగులు</li></ul></div>
+      <div class="rule-card"><h3>🚪 కాయిన్ రిలీజ్</h3><p><strong>6</strong> లేదా <strong>12</strong> వచ్చినప్పుడు Vault లో ఉన్న కాయిన్‌ను Board మీదికి తీసుకురావచ్చు.</p></div>
+      <div class="rule-card"><h3>🔥 కిల్ రూల్</h3><p>మీ కాయిన్ ప్రత్యర్థి కాయిన్ ఉన్న బ్లాక్ మీద ఆగితే ప్రత్యర్థి కాయిన్ <strong>Vault కి</strong> వెళుతుంది.</p></div>
+      <div class="rule-card"><h3>🟢 Safe Zones</h3><p>Safe Zone లో ఉన్న కాయిన్‌ను Kill చేయలేరు.</p></div>
+      <div class="rule-card"><h3>🛡️ Orange Zone Protection</h3><p>Board లో <strong>Orange రంగు</strong> cells లో మొదటగా వచ్చిన కాయిన్ కి <strong>Shield Protection</strong> వస్తుంది. ఇతరులు దాన్ని చంపలేరు.</p></div>
+      <div class="rule-card"><h3>🌀 Portal / 🔥 Red Hole</h3><p>Portal మీద పడితే 10 అడుగులు జంప్ అవుతుంది. Red Hole మీద పడితే కాయిన్ Start కి వెళ్తుంది.</p></div>
     </div>
   </div>
 
@@ -458,8 +264,8 @@
   <!-- MAIN GAME UI -->
   <div class="game-wrap" id="main-game" style="display:none;">
 
-    <!-- P2 (BLUE) - By default top -->
-    <div class="player-panel panel-top" id="p2-container">
+    <!-- P2 (TOP) — AI / Player 2 -->
+    <div class="player-panel top-panel">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p2-timer-wrap">
           <button class="roll-btn-mini" id="p2-roll-btn" disabled>🎲 వెయిట్ ⏳</button>
@@ -474,27 +280,17 @@
         <div class="turn-badge-mini"><div class="turn-dot dim" id="p2-dot"></div><span class="turn-label dim" id="p2-label">BLUE వంతు</span></div>
         <div class="stats-group">కిల్స్: <span id="p2-kills">0</span> | పర్మిషన్: <span id="p2-perm">❌</span> | <div class="strikes-row" id="p2-strikes"></div></div>
       </div>
-      <div class="bottom-extra">
-        <div class="pred-wrap">
-          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct-p2">50</span>% vs 🔵 <span id="pred-blue-pct-p2">50</span>%</div>
-          <div class="meter-track">
-            <div class="meter-red" id="m-red-p2" style="width:50%">50%</div>
-            <div class="meter-blue" id="m-blue-p2" style="width:50%">50%</div>
-          </div>
-        </div>
-        <button class="quit-btn btn-quit-main">✕ QUIT</button>
-      </div>
     </div>
 
     <!-- BOARD -->
-    <div class="center-col board-center">
+    <div class="center-col">
       <div class="board-wrap">
         <div class="board" id="game-board"></div>
       </div>
     </div>
 
-    <!-- P1 (RED) - By default bottom -->
-    <div class="player-panel panel-bottom" id="p1-container">
+    <!-- P1 (BOTTOM) — ALWAYS THE HUMAN PLAYER -->
+    <div class="player-panel bottom-panel">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p1-timer-wrap">
           <button class="roll-btn-mini" id="p1-roll-btn">🎲 రోల్</button>
@@ -506,18 +302,18 @@
         <div class="vault-tokens-inline" id="p1-vault-tokens"></div>
       </div>
       <div class="stats-bar">
-        <div class="turn-badge-mini"><div class="turn-dot red" id="p1-dot"></div><span class="turn-label red" id="p1-label">RED వంతు</span></div>
+        <div class="turn-badge-mini"><div class="turn-dot c-red" id="p1-dot"></div><span class="turn-label c-red" id="p1-label">RED వంతు</span></div>
         <div class="stats-group">కిల్స్: <span id="p1-kills">0</span> | పర్మిషన్: <span id="p1-perm">❌</span> | <div class="strikes-row" id="p1-strikes"></div></div>
       </div>
       <div class="bottom-extra">
         <div class="pred-wrap">
-          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct-p1">50</span>% vs 🔵 <span id="pred-blue-pct-p1">50</span>%</div>
+          <div class="pred-header" id="pred-header-text">గెలుపు అంచనా — 🔴 <span id="pred-p1-pct">50</span>% vs 🔵 <span id="pred-p2-pct">50</span>%</div>
           <div class="meter-track">
-            <div class="meter-red" id="m-red-p1" style="width:50%">50%</div>
-            <div class="meter-blue" id="m-blue-p1" style="width:50%">50%</div>
+            <div class="meter-p1" id="m-p1" style="width:50%">50%</div>
+            <div class="meter-p2" id="m-p2" style="width:50%">50%</div>
           </div>
         </div>
-        <button class="quit-btn btn-quit-main">✕ QUIT</button>
+        <button class="quit-btn" id="btn-quit-main">✕ QUIT</button>
       </div>
     </div>
   </div>
@@ -532,54 +328,28 @@
       p1TimerWrap:null, p2TimerWrap:null,
       p1Dot:null, p2Dot:null, p1Label:null, p2Label:null,
       p1Kills:null, p2Kills:null, p1Perm:null, p2Perm:null,
+      mRed:null, mBlue:null, predRedPct:null, predBluePct:null,
       p1Strikes:null, p2Strikes:null,
       shells:{p1:[],p2:[]},
-      portalEl:null, redholeEl:null,
-      soundBtn:null,
-      p1Container:null, p2Container:null
+      portalEl:null, redholeEl:null, audioBtn:null
     };
 
     const SFX = {
       ctx:null,
-      isMuted: false, 
-      masterGain: null, 
-      
-      init(){
-        if(!this.ctx){
-          this.ctx=new(window.AudioContext||window.webkitAudioContext)();
-          this.masterGain = this.ctx.createGain();
-          this.masterGain.connect(this.ctx.destination);
-          this.updateVolume();
-        }
-        if(this.ctx.state==='suspended')this.ctx.resume();
-      },
-      
-      toggleMute() {
-        this.isMuted = !this.isMuted;
-        this.updateVolume();
-        return this.isMuted;
-      },
-      
-      updateVolume() {
-        if(this.masterGain) {
-          this.masterGain.gain.value = this.isMuted ? 0 : 1;
-        }
-      },
-
+      volMode: 2, // 2: High, 1: Low, 0: Mute
+      init(){if(!this.ctx){this.ctx=new(window.AudioContext||window.webkitAudioContext)();}if(this.ctx.state==='suspended')this.ctx.resume();},
       play(type){
-        if(this.isMuted) return;
+        if(this.volMode === 0) return;
+        const v = this.volMode === 1 ? 0.3 : 1.0;
         try{
-          this.init();const t=this.ctx.currentTime;const osc=this.ctx.createOscillator();const gain=this.ctx.createGain();
-          osc.connect(gain);
-          gain.connect(this.masterGain);
-          
-          if(type==='roll'){[0,0.05,0.1,0.15].forEach(d=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='square';o.connect(g);g.connect(this.masterGain);o.frequency.setValueAtTime(800,t+d);o.frequency.exponentialRampToValueAtTime(200,t+d+0.05);g.gain.setValueAtTime(0.1,t+d);g.gain.linearRampToValueAtTime(0,t+d+0.05);o.start(t+d);o.stop(t+d+0.05);});}
-          else if(type==='move'){osc.type='sine';osc.frequency.setValueAtTime(600,t);osc.frequency.exponentialRampToValueAtTime(300,t+0.1);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.1);osc.start(t);osc.stop(t+0.1);}
-          else if(type==='kill'){osc.type='sawtooth';osc.frequency.setValueAtTime(200,t);osc.frequency.exponentialRampToValueAtTime(20,t+0.3);gain.gain.setValueAtTime(0.3,t);gain.gain.linearRampToValueAtTime(0,t+0.3);osc.start(t);osc.stop(t+0.3);}
-          else if(type==='shield'){osc.type='sine';osc.frequency.setValueAtTime(400,t);osc.frequency.linearRampToValueAtTime(800,t+0.2);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.2);osc.start(t);osc.stop(t+0.2);}
-          else if(type==='portal'){osc.type='sine';osc.frequency.setValueAtTime(300,t);osc.frequency.linearRampToValueAtTime(1200,t+0.4);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
-          else if(type==='redhole'||type==='timeout'){osc.type='square';osc.frequency.setValueAtTime(150,t);osc.frequency.linearRampToValueAtTime(100,t+0.4);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
-          else if(type==='win'){[300,400,500,600,800,1200].forEach((f,i)=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='triangle';o.connect(g);g.connect(this.masterGain);o.frequency.setValueAtTime(f,t+i*0.1);g.gain.setValueAtTime(0.2,t+i*0.1);g.gain.linearRampToValueAtTime(0,t+i*0.1+0.2);o.start(t+i*0.1);o.stop(t+i*0.1+0.2);});}
+          this.init();const t=this.ctx.currentTime;const osc=this.ctx.createOscillator();const gain=this.ctx.createGain();osc.connect(gain);gain.connect(this.ctx.destination);
+          if(type==='roll'){[0,0.05,0.1,0.15].forEach(d=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='square';o.connect(g);g.connect(this.ctx.destination);o.frequency.setValueAtTime(800,t+d);o.frequency.exponentialRampToValueAtTime(200,t+d+0.05);g.gain.setValueAtTime(0.1*v,t+d);g.gain.linearRampToValueAtTime(0,t+d+0.05);o.start(t+d);o.stop(t+d+0.05);});}
+          else if(type==='move'){osc.type='sine';osc.frequency.setValueAtTime(600,t);osc.frequency.exponentialRampToValueAtTime(300,t+0.1);gain.gain.setValueAtTime(0.2*v,t);gain.gain.linearRampToValueAtTime(0,t+0.1);osc.start(t);osc.stop(t+0.1);}
+          else if(type==='kill'){osc.type='sawtooth';osc.frequency.setValueAtTime(200,t);osc.frequency.exponentialRampToValueAtTime(20,t+0.3);gain.gain.setValueAtTime(0.3*v,t);gain.gain.linearRampToValueAtTime(0,t+0.3);osc.start(t);osc.stop(t+0.3);}
+          else if(type==='shield'){osc.type='sine';osc.frequency.setValueAtTime(400,t);osc.frequency.linearRampToValueAtTime(800,t+0.2);gain.gain.setValueAtTime(0.2*v,t);gain.gain.linearRampToValueAtTime(0,t+0.2);osc.start(t);osc.stop(t+0.2);}
+          else if(type==='portal'){osc.type='sine';osc.frequency.setValueAtTime(300,t);osc.frequency.linearRampToValueAtTime(1200,t+0.4);gain.gain.setValueAtTime(0.2*v,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
+          else if(type==='redhole'||type==='timeout'){osc.type='square';osc.frequency.setValueAtTime(150,t);osc.frequency.linearRampToValueAtTime(100,t+0.4);gain.gain.setValueAtTime(0.2*v,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
+          else if(type==='win'){[300,400,500,600,800,1200].forEach((f,i)=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='triangle';o.connect(g);g.connect(this.ctx.destination);o.frequency.setValueAtTime(f,t+i*0.1);g.gain.setValueAtTime(0.2*v,t+i*0.1);g.gain.linearRampToValueAtTime(0,t+i*0.1+0.2);o.start(t+i*0.1);o.stop(t+i*0.1+0.2);});}
         }catch(e){}
       }
     };
@@ -607,11 +377,11 @@
         p1Revenge:false,p2Revenge:false,
         p1MissCount:0,p2MissCount:0,
         p1Timeouts:0,p2Timeouts:0,
-        p1OrangeFirst:[-1,-1,-1,-1], 
+        p1OrangeFirst:[-1,-1,-1,-1],
         p2OrangeFirst:[-1,-1,-1,-1],
-        orangeFirstP1Coord:{}, 
-        orangeFirstP2Coord:{}, 
-        gameMode:'2P',humanColor:1,aiColor:2,aiDifficulty:'EASY'
+        orangeFirstP1Coord:{},
+        orangeFirstP2Coord:{},
+        gameMode:'2P', theme:'red-blue'
       };
     }
 
@@ -671,25 +441,6 @@
       },3000);
     }
 
-    // UPDATED: Adjust board and panels based on human player's color
-    function updateBoardOrientation() {
-      // If Human is Blue (2), Blue panel should be bottom, Red top, and board rotated
-      if (G.humanColor === 2) {
-        D.p2Container.classList.remove('panel-top');
-        D.p2Container.classList.add('panel-bottom');
-        D.p1Container.classList.remove('panel-bottom');
-        D.p1Container.classList.add('panel-top');
-        D.board.classList.add('board-rotated');
-      } else {
-        // Default: Red is bottom, Blue is top
-        D.p1Container.classList.remove('panel-top');
-        D.p1Container.classList.add('panel-bottom');
-        D.p2Container.classList.remove('panel-bottom');
-        D.p2Container.classList.add('panel-top');
-        D.board.classList.remove('board-rotated');
-      }
-    }
-
     function initDOM(){
       D.board=document.getElementById('game-board');
       D.p1Vault=document.getElementById('p1-vault-tokens');
@@ -702,12 +453,10 @@
       D.p1Label=document.getElementById('p1-label');D.p2Label=document.getElementById('p2-label');
       D.p1Kills=document.getElementById('p1-kills');D.p2Kills=document.getElementById('p2-kills');
       D.p1Perm=document.getElementById('p1-perm');D.p2Perm=document.getElementById('p2-perm');
+      D.mP1=document.getElementById('m-p1');D.mP2=document.getElementById('m-p2');
+      D.predP1Pct=document.getElementById('pred-p1-pct');
+      D.predP2Pct=document.getElementById('pred-p2-pct');
       D.p1Strikes=document.getElementById('p1-strikes');D.p2Strikes=document.getElementById('p2-strikes');
-      D.soundBtn=document.getElementById('global-sound-btn');
-      
-      D.p1Container = document.getElementById('p1-container');
-      D.p2Container = document.getElementById('p2-container');
-      
       for(let i=0;i<4;i++){D.shells.p1.push(document.getElementById(`p1-s${i}`));D.shells.p2.push(document.getElementById(`p2-s${i}`));}
 
       for(let r=1;r<=7;r++){
@@ -737,27 +486,24 @@
       }
       D.portalEl=document.createElement('div');D.portalEl.className='portal-layer';D.portalEl.textContent='🌀';
       D.redholeEl=document.createElement('div');D.redholeEl.className='redhole-layer';D.redholeEl.textContent='🔥';
+      
+      D.audioBtn = document.getElementById('audio-btn');
+      D.audioBtn.addEventListener('click', () => {
+        SFX.volMode = (SFX.volMode - 1 + 3) % 3; // Cycles 2 -> 1 -> 0 -> 2
+        if(SFX.volMode === 2) D.audioBtn.textContent = '🔊';
+        else if(SFX.volMode === 1) D.audioBtn.textContent = '🔉';
+        else D.audioBtn.textContent = '🔇';
+      });
+
       D.board.addEventListener('click',handleTokenClick);
       D.p1Vault.addEventListener('click',handleVaultClick);
       D.p2Vault.addEventListener('click',handleVaultClick);
       D.p1RollBtn.addEventListener('click',()=>rollGavvalu(1));
       D.p2RollBtn.addEventListener('click',()=>rollGavvalu(2));
-      
-      D.soundBtn.addEventListener('click', () => {
-        const isMuted = SFX.toggleMute();
-        D.soundBtn.textContent = isMuted ? '🔇' : '🔊';
-        localStorage.setItem('shellkoin_mute', isMuted);
-      });
-      
-      const savedMute = localStorage.getItem('shellkoin_mute');
-      if(savedMute === 'true') {
-        SFX.isMuted = true;
-        D.soundBtn.textContent = '🔇';
-      }
     }
 
-    function handleTokenClick(e){const tok=e.target.closest('.token');if(!tok||G.isGameOver)return;const p=parseInt(tok.dataset.player,10);if(G.gameMode==='AI'&&p===G.aiColor)return;moveToken(p,parseInt(tok.dataset.idx,10),e);}
-    function handleVaultClick(e){const tok=e.target.closest('.token');if(!tok||G.isGameOver)return;const p=parseInt(tok.dataset.player,10);if(G.gameMode==='AI'&&p===G.aiColor)return;releaseFromVault(p,parseInt(tok.dataset.idx,10),e);}
+    function handleTokenClick(e){const tok=e.target.closest('.token');if(!tok||G.isGameOver)return;const p=parseInt(tok.dataset.player,10);if(G.gameMode==='AI'&&p===2)return;moveToken(p,parseInt(tok.dataset.idx,10),e);}
+    function handleVaultClick(e){const tok=e.target.closest('.token');if(!tok||G.isGameOver)return;const p=parseInt(tok.dataset.player,10);if(G.gameMode==='AI'&&p===2)return;releaseFromVault(p,parseInt(tok.dataset.idx,10),e);}
 
     function startTimer(){
       if(G.isGameOver)return;
@@ -765,7 +511,9 @@
       D.p1TimerWrap.style.setProperty('--timer-pct','0%');
       D.p2TimerWrap.style.setProperty('--timer-pct','0%');
       const activeWrap=G.currentPlayer===1?D.p1TimerWrap:D.p2TimerWrap;
-      const color=G.currentPlayer===1?'#ef4444':'#3b82f6';
+      const c1 = G.theme==='blue-red'?'#3b82f6':'#ef4444';
+      const c2 = G.theme==='blue-red'?'#ef4444':'#3b82f6';
+      const color=G.currentPlayer===1?c1:c2;
       activeWrap.style.setProperty('--timer-color',color);
       activeWrap.style.setProperty('--timer-pct','100%');
       timerIntervalRef=setInterval(()=>{
@@ -785,10 +533,13 @@
       if(strikes>=4){
         G.isGameOver=true;stopTimer();clearGameLoops();clearActionTimeouts();
         D.p1RollBtn.disabled=true;D.p2RollBtn.disabled=true;
-        const winner=p===1?'🔵 BLUE':'🔴 RED';
-        D.p1Label.textContent=`${p===1?'BLUE':'RED'} విజేత! 👑`;D.p2Label.textContent=`${p===1?'BLUE':'RED'} విజేత! 👑`;
+        const p1Name = G.theme==='blue-red'?'BLUE':'RED';
+        const p2Name = G.theme==='blue-red'?'RED':'BLUE';
+        const winner=p===1?p2Name:p1Name;
+        const loser=p===1?p1Name:p2Name;
+        D.p1Label.textContent=`${winner} విజేత! 👑`;D.p2Label.textContent=`${winner} విజేత! 👑`;
         SFX.play('win');triggerConfetti();updateBoard();flashBoard('board-win-flash');
-        showRestartScreen(`${winner} గెలిచారు! 👑`,`${p===1?'RED':'BLUE'} ప్లేయర్ టైమ్ ఔట్ వల్ల డిస్‌క్వాలిఫై అయ్యారు!`);return;
+        showRestartScreen(`${winner} గెలిచారు! 👑`,`${loser} ప్లేయర్ టైమ్ ఔట్ వల్ల డిస్‌క్వాలిఫై అయ్యారు!`);return;
       }
       const tokens=p===1?G.p1Tokens:G.p2Tokens;
       let maxPos=-1,targetIdx=-1;
@@ -846,9 +597,7 @@
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move', 'victim-shudder', 'kill-flash', 'step-hop');
       tokenEl.style.zIndex = '80';
       tokenEl.style.pointerEvents = 'none';
-
       let stepIdx = 0;
-
       function doStep() {
         if (stepIdx >= steps.length) {
           tokenEl.style.zIndex = '';
@@ -861,27 +610,17 @@
         const pos = steps[stepIdx];
         const coord = path[pos];
         const cell = D.cells[coord];
-        
         if (cell && tokenEl.parentNode !== cell) {
           const startRect = tokenEl.getBoundingClientRect();
           cell.appendChild(tokenEl);
           const endRect = tokenEl.getBoundingClientRect();
-          
-          let dx = startRect.left - endRect.left;
-          let dy = startRect.top - endRect.top;
-          
-          // FIX for flipped board token animations
-          if(G.humanColor === 2) {
-             dx = -dx; dy = -dy;
-          }
-          
+          const dx = startRect.left - endRect.left;
+          const dy = startRect.top - endRect.top;
           tokenEl.style.transition = 'none';
-          tokenEl.style.transform = `translate(${dx}px, ${dy}px) ${G.humanColor === 2 ? 'rotate(-180deg)' : ''}`;
-          
+          tokenEl.style.transform = `translate(${dx}px, ${dy}px)`;
           void tokenEl.offsetWidth;
-          
           tokenEl.style.transition = `transform ${stepMs}ms linear`;
-          tokenEl.style.transform = `translate(0px, 0px) ${G.humanColor === 2 ? 'rotate(-180deg)' : ''}`;
+          tokenEl.style.transform = 'translate(0px, 0px)';
         }
         stepIdx++;
         setTimeout(doStep, stepMs);
@@ -893,21 +632,13 @@
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
       const steps = [];
-      
       let curr = fromPos;
       while (curr !== toPos) {
-        if (toPos >= 24 && curr === 22) {
-          curr = 24; 
-        } 
-        else if (curr === 23 && toPos < 24) {
-          curr = 0; 
-        } 
-        else {
-          curr++;
-        }
+        if (toPos >= 24 && curr === 22) { curr = 24; } 
+        else if (curr === 23 && toPos < 24) { curr = 0; } 
+        else { curr++; }
         steps.push(curr);
       }
-      
       const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
       executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
@@ -916,21 +647,13 @@
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
       const steps = [];
-      
       let curr = fromPos;
       while (curr !== toPos) {
-        if (curr === 24 && toPos < 24) {
-          curr = 22; 
-        } 
-        else if (curr === 0 && toPos > 0 && fromPos < 24) {
-          curr = 23; 
-        } 
-        else {
-          curr--;
-        }
+        if (curr === 24 && toPos < 24) { curr = 22; } 
+        else if (curr === 0 && toPos > 0 && fromPos < 24) { curr = 23; } 
+        else { curr--; }
         steps.push(curr);
       }
-      
       const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
       executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
@@ -946,20 +669,14 @@
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
       void tokenEl.offsetWidth;
       tokenEl.classList.add('victim-shudder');
-      setTimeout(() => { 
-        tokenEl.classList.remove('victim-shudder'); 
-        if(cb) cb(); 
-      }, 400);
+      setTimeout(() => { tokenEl.classList.remove('victim-shudder'); if(cb) cb(); }, 400);
     }
 
     function animateBounce(tokenEl, cb) {
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
       void tokenEl.offsetWidth;
-      tokenEl.classList.add('victim-shudder'); 
-      setTimeout(() => { 
-        tokenEl.classList.remove('victim-shudder'); 
-        if(cb) cb(); 
-      }, 400);
+      tokenEl.classList.add('victim-shudder');
+      setTimeout(() => { tokenEl.classList.remove('victim-shudder'); if(cb) cb(); }, 400);
     }
 
     function rollGavvalu(playerNum){
@@ -989,49 +706,33 @@
       else if(movable.length===1&&!canRelease){registerAction(()=>moveToken(p,movable[0].idx),900);}
       else{
         updateBoard();startTimer();
-        if(G.gameMode==='AI'&&p===G.aiColor){registerAction(()=>executeAIMove(p,final,movable,canRelease,vaultIdxs),700);}
+        if(G.gameMode==='AI'&&p===2){registerAction(()=>executeAIMove(p,final,movable,canRelease,vaultIdxs),700);}
       }
     }
 
     function executeAIMove(p,finalRoll,movable,canRelease,vaultIdxs){
       if(G.isGameOver||G.currentPlayer!==p||!G.hasRolled)return;
       let options=[];
-      
       if(canRelease&&vaultIdxs.length>0){
         vaultIdxs.forEach(idx=>options.push({type:'vault', idx:idx, score:50}));
       }
-
       const path = p===1 ? p1Path : p2Path;
       const oppPath = p===1 ? p2Path : p1Path;
       const oppTokens = p===1 ? G.p2Tokens : G.p1Tokens;
-      
       movable.forEach(m => {
-        let score = 10; 
+        let score = 10;
         const destCoord = path[m.targetPos];
-
-        if(!safeZones.includes(destCoord) && oppTokens.some(op => op !== -1 && oppPath[op] === destCoord)){
-          score += 200; 
-        }
-        if(destCoord === activePortal){
-          score += 100;
-        }
-        if(destCoord === activeRedhole){
-          score -= 1000; 
-        }
-        if(safeZones.includes(destCoord)){
-          score += 30;
-        }
+        if(!safeZones.includes(destCoord) && oppTokens.some(op => op !== -1 && oppPath[op] === destCoord)){ score += 200; }
+        if(destCoord === activePortal){ score += 100; }
+        if(destCoord === activeRedhole){ score -= 1000; }
+        if(safeZones.includes(destCoord)){ score += 30; }
         score += (m.targetPos * 0.5);
-
         options.push({type:'board', idx:m.idx, score:score});
       });
-
       if(!options.length){afterMove();return;}
-
       options.sort((a,b) => b.score - a.score);
       const bestOptions = options.filter(o => o.score === options[0].score);
       const choice = bestOptions[Math.floor(Math.random() * bestOptions.length)];
-
       if(choice.type === 'vault') releaseFromVault(p,choice.idx,null);
       else moveToken(p,choice.idx,null);
     }
@@ -1040,7 +741,7 @@
       if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver)return;
       clearActionTimeouts();stopTimer();const t=p===1?G.p1Tokens:G.p2Tokens;
       t[i1]=0;t[i2]=0;
-      updateBoard(); 
+      updateBoard();
       [D.p1TokensDOM,D.p2TokensDOM][p-1].forEach((tok,i)=>{if(i===i1||i===i2)animateEnter(tok,null);});
       sparkle((p===1?p1Path:p2Path)[0]);SFX.play('move');
       checkKill(p,(p===1?p1Path:p2Path)[0],()=>afterMove());
@@ -1077,7 +778,6 @@
       if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver)return;
       const t=p===1?G.p1Tokens:G.p2Tokens,c=getMovable(G.currentRoll).find(m=>m.idx===tIdx);if(!c)return;
       clearActionTimeouts();stopTimer();
-
       const fromPos = t[tIdx];
       const path = p===1?p1Path:p2Path;
       let rawNx = c.targetPos;
@@ -1089,7 +789,6 @@
         const t10=getNextPosWithPerm(rawNx,10),c10=path[t10];
         const hasOpp=oT.some(op=>op!==-1&&oPath[op]===c10);
         const finalNx=hasOpp?getNextPosWithPerm(rawNx,11):t10;
-
         SFX.play('move');
         walkForward(p,tIdx,fromPos,rawNx,()=>{
           const tokEl=(p===1?D.p1TokensDOM:D.p2TokensDOM)[tIdx];
@@ -1163,7 +862,6 @@
       if(!p1at||!p2at){if(doneCb)doneCb();return;}
 
       const p1pts=computeScore(1),p2pts=computeScore(2);
-
       const defenderIsP1=(movingP===2);
       const defenderIsP2=(movingP===1);
       const coordShieldedForP1=G.orangeFirstP1Coord[coord]&&defenderIsP1&&isOrangeCoord(coord);
@@ -1251,15 +949,19 @@
 
     function resetRoll(){
       if(G.isGameOver)return;const p=G.currentPlayer;
-      D.p1RollBtn.disabled=(p!==1)||(G.gameMode==='AI'&&G.aiColor===1);
-      D.p2RollBtn.disabled=(p!==2)||(G.gameMode==='AI'&&G.aiColor===2);
+      D.p1RollBtn.disabled=(p!==1);
+      D.p2RollBtn.disabled=(p!==2)||(G.gameMode==='AI');
       D.p1RollBtn.textContent=p===1?'🎲 రోల్':'🎲 వెయిట్ ⏳';
       D.p2RollBtn.textContent=p===2?'🎲 రోల్':'🎲 వెయిట్ ⏳';
-      D.p1Dot.className=`turn-dot ${p===1?'red':'dim'}`;D.p1Label.className=`turn-label ${p===1?'red':'dim'}`;
-      D.p2Dot.className=`turn-dot ${p===2?'blue':'dim'}`;D.p2Label.className=`turn-label ${p===2?'blue':'dim'}`;
+      const p1C = G.theme==='blue-red'?'c-blue':'c-red';
+      const p2C = G.theme==='blue-red'?'c-red':'c-blue';
+      D.p1Dot.className=`turn-dot ${p===1?p1C:'dim'}`;
+      D.p1Label.className=`turn-label ${p===1?p1C:'dim'}`;
+      D.p2Dot.className=`turn-dot ${p===2?p2C:'dim'}`;
+      D.p2Label.className=`turn-label ${p===2?p2C:'dim'}`;
       ['p1','p2'].forEach(player=>{const arr=player==='p1'?D.shells.p1:D.shells.p2;for(let i=0;i<4;i++){arr[i].className='shell-el';arr[i].textContent='🐚';}});
       updateBoard();startTimer();
-      if(G.gameMode==='AI'&&p===G.aiColor&&!G.isGameOver)registerAction(()=>{rollGavvalu(p);},700);
+      if(G.gameMode==='AI'&&p===2&&!G.isGameOver)registerAction(()=>{rollGavvalu(p);},700);
     }
 
     function computeScore(player){
@@ -1286,30 +988,13 @@
       D.p1Kills.textContent=G.p1Kills;D.p2Kills.textContent=G.p2Kills;
       D.p1Perm.textContent=hasPerm(1)?'✅':'❌';D.p2Perm.textContent=hasPerm(2)?'✅':'❌';
       const s1=computeScore(1),s2=computeScore(2),total=s1+s2;
-      let redPct=total<=0?50:Math.round((s1/total)*100);
-      redPct=Math.max(5,Math.min(95,redPct));
-      const bluePct=100-redPct;
-      
-      // Update both meters since one is now hidden depending on orientation
-      const mRedTop = document.getElementById('m-red-p2');
-      const mBlueTop = document.getElementById('m-blue-p2');
-      const pRedTop = document.getElementById('pred-red-pct-p2');
-      const pBlueTop = document.getElementById('pred-blue-pct-p2');
-      
-      const mRedBot = document.getElementById('m-red-p1');
-      const mBlueBot = document.getElementById('m-blue-p1');
-      const pRedBot = document.getElementById('pred-red-pct-p1');
-      const pBlueBot = document.getElementById('pred-blue-pct-p1');
-
-      if(mRedTop) { mRedTop.style.width=redPct+'%'; mRedTop.textContent=redPct>15?redPct+'%':''; }
-      if(mBlueTop) { mBlueTop.style.width=bluePct+'%'; mBlueTop.textContent=bluePct>15?bluePct+'%':''; }
-      if(pRedTop) pRedTop.textContent=redPct;
-      if(pBlueTop) pBlueTop.textContent=bluePct;
-      
-      if(mRedBot) { mRedBot.style.width=redPct+'%'; mRedBot.textContent=redPct>15?redPct+'%':''; }
-      if(mBlueBot) { mBlueBot.style.width=bluePct+'%'; mBlueBot.textContent=bluePct>15?bluePct+'%':''; }
-      if(pRedBot) pRedBot.textContent=redPct;
-      if(pBlueBot) pBlueBot.textContent=bluePct;
+      let p1Pct=total<=0?50:Math.round((s1/total)*100);
+      p1Pct=Math.max(5,Math.min(95,p1Pct));
+      const p2Pct=100-p1Pct;
+      D.mP1.style.width=p1Pct+'%';D.mP2.style.width=p2Pct+'%';
+      D.mP1.textContent=p1Pct>15?p1Pct+'%':'';D.mP2.textContent=p2Pct>15?p2Pct+'%':'';
+      if(D.predP1Pct)D.predP1Pct.textContent=p1Pct;
+      if(D.predP2Pct)D.predP2Pct.textContent=p2Pct;
     }
 
     function updateBoard(){
@@ -1322,7 +1007,6 @@
       document.querySelectorAll('.token').forEach(t=>t.remove());
       const p1Placed={},p2Placed={};
       for(let i=0;i<4;i++){
-        // P1
         let pos1=G.p1Tokens[i];
         if(pos1===-1){
           D.p1Vault.appendChild(D.p1TokensDOM[i]);
@@ -1343,7 +1027,6 @@
             }
           }
         }
-        // P2
         let pos2=G.p2Tokens[i];
         if(pos2===-1){
           D.p2Vault.appendChild(D.p2TokensDOM[i]);
@@ -1370,22 +1053,18 @@
 
     function checkWinner(){
       if(G.p1Timeouts>=4||G.p2Timeouts>=4)return;
-      const p1win=G.p1Tokens.every(p=>p===p1Path.length-1),p2win=G.p2Tokens.every(p=>p===p1Path.length-1);
+      const p1win=G.p1Tokens.every(p=>p===p1Path.length-1),p2win=G.p2Tokens.every(p=>p===p2Path.length-1);
       if(!p1win&&!p2win)return;
       G.isGameOver=true;stopTimer();clearGameLoops();clearActionTimeouts();
       SFX.play('win');triggerConfetti();
-      showRestartScreen(`${p1win?'RED':'BLUE'} గెలిచారు! 👑`,`అభినందనలు!`);
+      const p1Name = G.theme==='blue-red'?'BLUE':'RED';
+      const p2Name = G.theme==='blue-red'?'RED':'BLUE';
+      showRestartScreen(`${p1win?p1Name:p2Name} గెలిచారు! 👑`,`అభినందనలు!`);
     }
 
-    // ===== UI EVENTS =====
     document.getElementById('rules-btn-action').addEventListener('click',()=>{document.getElementById('rules-screen').style.display='flex';requestAnimationFrame(()=>document.getElementById('rules-screen').style.opacity='1');});
     document.getElementById('rules-back-btn').addEventListener('click',()=>{document.getElementById('rules-screen').style.opacity='0';setTimeout(()=>document.getElementById('rules-screen').style.display='none',300);});
-    
-    // Bind both quit buttons (top and bottom panels)
-    document.querySelectorAll('.btn-quit-main').forEach(btn => {
-      btn.addEventListener('click',()=>{document.getElementById('quit-modal').style.display='flex';});
-    });
-    
+    document.getElementById('btn-quit-main').addEventListener('click',()=>{document.getElementById('quit-modal').style.display='flex';});
     document.getElementById('btn-quit-no').addEventListener('click',()=>{document.getElementById('quit-modal').style.display='none';});
 
     document.getElementById('btn-quit-yes').addEventListener('click',()=>{
@@ -1412,21 +1091,30 @@
       }
     }
 
+    function applyThemeUI() {
+      document.body.dataset.theme = G.theme;
+      const isBR = G.theme === 'blue-red';
+      const p1Emoji = isBR ? '🔵' : '🔴';
+      const p2Emoji = isBR ? '🔴' : '🔵';
+      D.p1Label.textContent = `${isBR ? 'BLUE' : 'RED'} వంతు`;
+      D.p2Label.textContent = `${isBR ? 'RED' : 'BLUE'} వంతు`;
+      document.getElementById('pred-header-text').innerHTML = `గెలుపు అంచనా — ${p1Emoji} <span id="pred-p1-pct">50</span>% vs ${p2Emoji} <span id="pred-p2-pct">50</span>%`;
+    }
+
     document.getElementById('start-btn-action').addEventListener('click',()=>{document.getElementById('setup-screen').style.display='flex';requestAnimationFrame(()=>document.getElementById('setup-screen').style.opacity='1');showSetupStep(0);});
     document.getElementById('setup-back-btn').addEventListener('click',()=>{if(currentSetupStep===0){document.getElementById('setup-screen').style.opacity='0';setTimeout(()=>document.getElementById('setup-screen').style.display='none',300);}else if(currentSetupStep===1){showSetupStep(0);}else if(currentSetupStep===2){if(tempSetup.mode==='2P')showSetupStep(0);else showSetupStep(1);}});
     document.getElementById('btn-mode-2p').addEventListener('click',()=>{tempSetup.mode='2P';showSetupStep(2);});
     document.getElementById('btn-mode-ai').addEventListener('click',()=>{tempSetup.mode='AI';showSetupStep(1);});
     document.getElementById('btn-color-red').addEventListener('click',()=>{tempSetup.hColor=1;tempSetup.aColor=2;showSetupStep(2);});
     document.getElementById('btn-color-blue').addEventListener('click',()=>{tempSetup.hColor=2;tempSetup.aColor=1;showSetupStep(2);});
+    
     document.getElementById('final-start-btn').addEventListener('click',()=>{
       SFX.init();
       G.gameMode=tempSetup.mode;
-      G.humanColor=tempSetup.hColor;
-      G.aiColor=tempSetup.aColor;
-      
-      // Update orientation right before game starts
-      updateBoardOrientation();
-      
+      if(tempSetup.hColor===2) G.theme = 'blue-red';
+      else G.theme = 'red-blue';
+      applyThemeUI();
+
       document.getElementById('setup-screen').style.opacity='0';document.getElementById('start-screen').style.opacity='0';
       setTimeout(()=>{
         document.getElementById('setup-screen').style.display='none';document.getElementById('start-screen').style.display='none';
@@ -1441,28 +1129,26 @@
         document.getElementById('start-screen').style.display='none';
         document.getElementById('setup-screen').style.display='none';
         document.getElementById('restart-screen').style.display='none';
-        
-        // Restore orientation
-        updateBoardOrientation();
-        
         document.getElementById('main-game').style.display='flex';
+        applyThemeUI();
         updateStrikeDisplay();
         startGameLoops();
         updateBoard();
-        
         if(!G.isGameOver){
           if(G.hasRolled){
             const p=G.currentPlayer;
             const activeBtn=p===1?D.p1RollBtn:D.p2RollBtn;
             activeBtn.textContent=`🎲 ${G.currentRoll}`;
-            D.p1RollBtn.disabled=(p!==1)||(G.gameMode==='AI'&&G.aiColor===1);
-            D.p2RollBtn.disabled=(p!==2)||(G.gameMode==='AI'&&G.aiColor===2);
-            D.p1Dot.className=`turn-dot ${p===1?'red':'dim'}`;
-            D.p1Label.className=`turn-label ${p===1?'red':'dim'}`;
-            D.p2Dot.className=`turn-dot ${p===2?'blue':'dim'}`;
-            D.p2Label.className=`turn-label ${p===2?'blue':'dim'}`;
+            D.p1RollBtn.disabled=(p!==1);
+            D.p2RollBtn.disabled=(p!==2)||(G.gameMode==='AI');
+            const p1C = G.theme==='blue-red'?'c-blue':'c-red';
+            const p2C = G.theme==='blue-red'?'c-red':'c-blue';
+            D.p1Dot.className=`turn-dot ${p===1?p1C:'dim'}`;
+            D.p1Label.className=`turn-label ${p===1?p1C:'dim'}`;
+            D.p2Dot.className=`turn-dot ${p===2?p2C:'dim'}`;
+            D.p2Label.className=`turn-label ${p===2?p2C:'dim'}`;
             startTimer();
-            if(G.gameMode==='AI'&&p===G.aiColor){
+            if(G.gameMode==='AI'&&p===2){
               const movable=getMovable(G.currentRoll);
               const vaultT=p===1?G.p1Tokens:G.p2Tokens;
               const vaultIdxs=vaultT.reduce((a,v,i)=>v===-1?[...a,i]:a,[]);
