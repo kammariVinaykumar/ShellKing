@@ -70,7 +70,12 @@
 
     /* ===== GAME LAYOUT ===== */
     .game-wrap { display: flex; flex-direction: column; justify-content: space-between; width: 100%; max-width: 500px; height: 100%; gap: 4px; }
-    .blue-panel { transform: rotate(180deg); }
+    
+    /* NEW: Panel ordering classes to keep human at bottom */
+    .panel-top { order: 1; transform: rotate(180deg); }
+    .board-center { order: 2; }
+    .panel-bottom { order: 3; }
+    
     .player-panel { display: flex; flex-direction: column; width: 100%; background: var(--panel-card); border: 1px solid var(--panel-border); border-radius: 12px; padding: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
     .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
     .roll-btn-wrap { position: relative; flex: 1; max-width: 140px; padding: 3px; background: conic-gradient(var(--timer-color, transparent) var(--timer-pct, 0%), #1a0f06 0); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 8px rgba(0,0,0,0.8); }
@@ -94,7 +99,12 @@
     .stats-group span { font-weight: 700; color: var(--text-light); }
     .strikes-row { display: flex; align-items: center; gap: 2px; }
     .strike-icon { font-size: 10px; color: #555; } .strike-icon.used { color: #ef4444; }
+    
+    /* Move extra info to bottom only */
     .bottom-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
+    /* Hide bottom-extra in top panel */
+    .panel-top .bottom-extra { display: none; }
+    
     .pred-wrap { flex: 1; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); padding: 4px; }
     .pred-header { font-size: 9px; color: var(--text-muted); text-align: center; margin-bottom: 2px; font-weight: bold; }
     .meter-track { height: 14px; background: rgba(255,255,255,0.05); border-radius: 7px; display: flex; overflow: hidden; }
@@ -105,7 +115,16 @@
     /* ===== BOARD ===== */
     .center-col { display: flex; flex: 1; align-items: center; justify-content: center; width: 100%; min-height: 0; padding: 2px 0; }
     .board-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; max-height: 52vh; }
-    .board { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); height: 100%; max-height: 100vw; aspect-ratio: 1; gap: 2px; padding: 6px; background: var(--board-bg); border-radius: 14px; border: 3px solid var(--board-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateZ(0); }
+    
+    /* NEW: Class to rotate board if human is playing Blue */
+    .board-rotated { transform: rotate(180deg) translateZ(0) !important; }
+    /* Counter-rotate tokens so they stay upright when board is rotated */
+    .board-rotated .token { transform: rotate(-180deg); }
+    .board-rotated .crown-emoji { transform: rotate(-180deg); }
+    .board-rotated .portal-layer { transform: rotate(-180deg); }
+    .board-rotated .redhole-layer { transform: rotate(-180deg); }
+
+    .board { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); height: 100%; max-height: 100vw; aspect-ratio: 1; gap: 2px; padding: 6px; background: var(--board-bg); border-radius: 14px; border: 3px solid var(--board-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; transform: translateZ(0); transition: transform 0.5s ease; }
     .cell { background: var(--cell-white); border-radius: 12%; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid rgba(139,90,43,0.3); }
     .cell-yellow { background: var(--cell-yellow) !important; border-color: rgba(234,179,8,0.4) !important; }
     .cell-orange { background: var(--cell-orange) !important; border-color: rgba(234,88,12,0.4) !important; }
@@ -116,11 +135,11 @@
     .arrow-down::after { content:'↓'; position:absolute; bottom:-8px; font-size:10px; color:#b91c1c; font-weight:700; z-index:40; }
 
     /* ===== TOKENS ===== */
-    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, box-shadow 0.15s; outline: none; position: relative; }
+    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; outline: none; position: relative; transition: box-shadow 0.15s; }
     .p1-token { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); box-shadow: 0 2px 6px rgba(185,28,28,0.6); }
     .p2-token { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); box-shadow: 0 2px 6px rgba(29,78,216,0.6); }
     .token.glow-move { animation: token-pulse 0.7s infinite alternate; border-color: #fbbf24; }
-    @keyframes token-pulse { 0% { box-shadow:0 0 4px #fbbf24; transform:scale(1); } 100% { box-shadow:0 0 16px #fbbf24; transform:scale(1.12); } }
+    @keyframes token-pulse { 0% { box-shadow:0 0 4px #fbbf24; } 100% { box-shadow:0 0 16px #fbbf24; } }
 
     /* ===== ORANGE ZONE SHIELD ===== */
     .token.shielded {
@@ -141,10 +160,10 @@
 
     /* Per-cell hop: played on each step of path walking */
     @keyframes step-hop {
-      0%   { transform: scale(1) translateY(0); }
-      35%  { transform: scale(1.25) translateY(-7px); }
-      65%  { transform: scale(1.1) translateY(-3px); }
-      100% { transform: scale(1) translateY(0); }
+      0%   { margin-top: 0; }
+      35%  { margin-top: -10px; }
+      65%  { margin-top: -5px; }
+      100% { margin-top: 0; }
     }
     .token.step-hop {
       animation: step-hop 0.18s ease-out forwards !important;
@@ -153,8 +172,8 @@
     /* Kill flash: red pulse on attacker when kill happens */
     @keyframes kill-flash {
       0%   { box-shadow: 0 0 0px #ef4444; }
-      50%  { box-shadow: 0 0 22px 6px #ef4444; transform: scale(1.25); }
-      100% { box-shadow: 0 0 6px #ef4444; transform: scale(1); }
+      50%  { box-shadow: 0 0 22px 6px #ef4444; margin-top:-5px; }
+      100% { box-shadow: 0 0 6px #ef4444; margin-top:0; }
     }
     .token.kill-flash {
       animation: kill-flash 0.35s ease-out forwards !important;
@@ -163,12 +182,12 @@
 
     /* Victim shudder before walking back */
     @keyframes victim-shudder {
-      0%   { transform: rotate(0deg) scale(1.1); }
-      20%  { transform: rotate(-12deg) scale(1.2); }
-      40%  { transform: rotate(12deg) scale(1.2); }
-      60%  { transform: rotate(-8deg) scale(1.1); }
-      80%  { transform: rotate(6deg) scale(1.05); }
-      100% { transform: rotate(0deg) scale(1); }
+      0%   { margin-left:0; margin-top:0; }
+      20%  { margin-left:-3px; margin-top:-2px; }
+      40%  { margin-left:3px; margin-top:2px; }
+      60%  { margin-left:-2px; margin-top:-1px; }
+      80%  { margin-left:2px; margin-top:1px; }
+      100% { margin-left:0; margin-top:0; }
     }
     .token.victim-shudder {
       animation: victim-shudder 0.38s ease-out forwards !important;
@@ -177,10 +196,10 @@
 
     /* Coin entering board from vault → bounce drop */
     @keyframes coin-enter {
-      0%   { transform: scale(0.2) translateY(-40px); opacity: 0; }
-      60%  { transform: scale(1.2) translateY(4px); opacity: 1; }
-      80%  { transform: scale(0.92) translateY(-2px); }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
+      0%   { margin-top:-40px; opacity: 0; }
+      60%  { margin-top:4px; opacity: 1; }
+      80%  { margin-top:-2px; }
+      100% { margin-top:0; opacity: 1; }
     }
     .token.anim-enter {
       animation: coin-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
@@ -188,9 +207,9 @@
 
     /* Red hole spiral-shrink */
     @keyframes redhole-sink {
-      0%   { transform: scale(1) rotate(0deg); opacity: 1; }
-      60%  { transform: scale(0.6) rotate(200deg); opacity: 0.7; }
-      100% { transform: scale(0.1) rotate(420deg); opacity: 0; }
+      0%   { opacity: 1; }
+      60%  { opacity: 0.7; }
+      100% { opacity: 0; }
     }
     .token.anim-redhole-sink {
       animation: redhole-sink 0.5s ease-in forwards !important;
@@ -199,9 +218,9 @@
 
     /* Portal spin-zoom */
     @keyframes portal-launch {
-      0%   { transform: scale(1) rotate(0deg); opacity: 1; }
-      50%  { transform: scale(1.4) rotate(180deg); opacity: 0.8; }
-      100% { transform: scale(0.3) rotate(360deg); opacity: 0; }
+      0%   { opacity: 1; }
+      50%  { opacity: 0.8; }
+      100% { opacity: 0; }
     }
     .token.anim-portal-launch {
       animation: portal-launch 0.4s ease-in forwards !important;
@@ -218,9 +237,9 @@
     .redhole-layer { background:#7f1d1d; animation:redhole-blink 0.6s infinite alternate; }
     @keyframes redhole-blink { 0%{box-shadow:inset 0 0 10px #7f1d1d;} 100%{box-shadow:inset 0 0 25px #dc2626;} }
     .crown-emoji { font-size:22px; animation:crown-float 2s infinite alternate; position:absolute; z-index:2; }
-    @keyframes crown-float { 0%{transform:translateY(0) scale(1); filter:drop-shadow(0 0 4px rgba(251,191,36,0.5));} 100%{transform:translateY(-3px) scale(1.07); filter:drop-shadow(0 0 12px rgba(251,191,36,0.9));} }
+    @keyframes crown-float { 0%{margin-top:0; filter:drop-shadow(0 0 4px rgba(251,191,36,0.5));} 100%{margin-top:-3px; filter:drop-shadow(0 0 12px rgba(251,191,36,0.9));} }
     .sparkle { position:absolute; width:100%; height:100%; border-radius:50%; background:radial-gradient(circle, #fff 5%, #fbbf24 40%, transparent 70%); pointer-events:none; z-index:100; animation:spark 0.5s ease-out forwards; }
-    @keyframes spark { 0%{transform:scale(0.4); opacity:1;} 100%{transform:scale(2.5); opacity:0;} }
+    @keyframes spark { 0%{margin-top:0; opacity:1;} 100%{margin-top:0; opacity:0;} }
     .shake { animation:shake 0.3s ease; }
     @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
     .board.board-danger-flash { animation:board-flash-danger 0.5s ease-in-out 2; }
@@ -229,9 +248,35 @@
     @keyframes board-flash-win { 0%,100%{border-color:var(--board-border);} 50%{border-color:#fbbf24; box-shadow:0 0 60px rgba(251,191,36,0.6);} }
     .confetti-piece { position:fixed; top:-12px; width:8px; height:10px; z-index:999; animation:fall linear forwards; border-radius:2px; }
     @keyframes fall { to{transform:translateY(110vh) rotate(720deg);} }
+
+    /* ===== SOUND TOGGLE BTN ===== */
+    .sound-toggle-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(45, 26, 8, 0.8);
+      border: 2px solid var(--gold);
+      color: var(--text-light);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 5000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: transform 0.1s;
+    }
+    .sound-toggle-btn:active { transform: scale(0.9); }
+
   </style>
 </head>
 <body>
+
+  <!-- GLOBAL SOUND BTN (Shows on all screens) -->
+  <button class="sound-toggle-btn" id="global-sound-btn">🔊</button>
 
   <!-- START SCREEN -->
   <div id="start-screen">
@@ -330,7 +375,6 @@
         </ul>
       </div>
 
-      <!-- UPDATED Orange Zone rule to match new game logic -->
       <div class="rule-card">
         <h3>🛡️ Orange Zone Protection</h3>
         <p>Board లో <strong>Orange రంగు</strong> cells ఉన్నాయి — ఇవి home stretch (చివరి దశ).</p>
@@ -414,8 +458,8 @@
   <!-- MAIN GAME UI -->
   <div class="game-wrap" id="main-game" style="display:none;">
 
-    <!-- P2 (BLUE) — top, rotated -->
-    <div class="player-panel blue-panel">
+    <!-- P2 (BLUE) - By default top -->
+    <div class="player-panel panel-top" id="p2-container">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p2-timer-wrap">
           <button class="roll-btn-mini" id="p2-roll-btn" disabled>🎲 వెయిట్ ⏳</button>
@@ -430,17 +474,27 @@
         <div class="turn-badge-mini"><div class="turn-dot dim" id="p2-dot"></div><span class="turn-label dim" id="p2-label">BLUE వంతు</span></div>
         <div class="stats-group">కిల్స్: <span id="p2-kills">0</span> | పర్మిషన్: <span id="p2-perm">❌</span> | <div class="strikes-row" id="p2-strikes"></div></div>
       </div>
+      <div class="bottom-extra">
+        <div class="pred-wrap">
+          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct-p2">50</span>% vs 🔵 <span id="pred-blue-pct-p2">50</span>%</div>
+          <div class="meter-track">
+            <div class="meter-red" id="m-red-p2" style="width:50%">50%</div>
+            <div class="meter-blue" id="m-blue-p2" style="width:50%">50%</div>
+          </div>
+        </div>
+        <button class="quit-btn btn-quit-main">✕ QUIT</button>
+      </div>
     </div>
 
     <!-- BOARD -->
-    <div class="center-col">
+    <div class="center-col board-center">
       <div class="board-wrap">
         <div class="board" id="game-board"></div>
       </div>
     </div>
 
-    <!-- P1 (RED) — bottom -->
-    <div class="player-panel red-panel">
+    <!-- P1 (RED) - By default bottom -->
+    <div class="player-panel panel-bottom" id="p1-container">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p1-timer-wrap">
           <button class="roll-btn-mini" id="p1-roll-btn">🎲 రోల్</button>
@@ -457,13 +511,13 @@
       </div>
       <div class="bottom-extra">
         <div class="pred-wrap">
-          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct">50</span>% vs 🔵 <span id="pred-blue-pct">50</span>%</div>
+          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct-p1">50</span>% vs 🔵 <span id="pred-blue-pct-p1">50</span>%</div>
           <div class="meter-track">
-            <div class="meter-red" id="m-red" style="width:50%">50%</div>
-            <div class="meter-blue" id="m-blue" style="width:50%">50%</div>
+            <div class="meter-red" id="m-red-p1" style="width:50%">50%</div>
+            <div class="meter-blue" id="m-blue-p1" style="width:50%">50%</div>
           </div>
         </div>
-        <button class="quit-btn" id="btn-quit-main">✕ QUIT</button>
+        <button class="quit-btn btn-quit-main">✕ QUIT</button>
       </div>
     </div>
   </div>
@@ -478,25 +532,54 @@
       p1TimerWrap:null, p2TimerWrap:null,
       p1Dot:null, p2Dot:null, p1Label:null, p2Label:null,
       p1Kills:null, p2Kills:null, p1Perm:null, p2Perm:null,
-      mRed:null, mBlue:null, predRedPct:null, predBluePct:null,
       p1Strikes:null, p2Strikes:null,
       shells:{p1:[],p2:[]},
-      portalEl:null, redholeEl:null
+      portalEl:null, redholeEl:null,
+      soundBtn:null,
+      p1Container:null, p2Container:null
     };
 
     const SFX = {
       ctx:null,
-      init(){if(!this.ctx){this.ctx=new(window.AudioContext||window.webkitAudioContext)();}if(this.ctx.state==='suspended')this.ctx.resume();},
+      isMuted: false, 
+      masterGain: null, 
+      
+      init(){
+        if(!this.ctx){
+          this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.connect(this.ctx.destination);
+          this.updateVolume();
+        }
+        if(this.ctx.state==='suspended')this.ctx.resume();
+      },
+      
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        this.updateVolume();
+        return this.isMuted;
+      },
+      
+      updateVolume() {
+        if(this.masterGain) {
+          this.masterGain.gain.value = this.isMuted ? 0 : 1;
+        }
+      },
+
       play(type){
+        if(this.isMuted) return;
         try{
-          this.init();const t=this.ctx.currentTime;const osc=this.ctx.createOscillator();const gain=this.ctx.createGain();osc.connect(gain);gain.connect(this.ctx.destination);
-          if(type==='roll'){[0,0.05,0.1,0.15].forEach(d=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='square';o.connect(g);g.connect(this.ctx.destination);o.frequency.setValueAtTime(800,t+d);o.frequency.exponentialRampToValueAtTime(200,t+d+0.05);g.gain.setValueAtTime(0.1,t+d);g.gain.linearRampToValueAtTime(0,t+d+0.05);o.start(t+d);o.stop(t+d+0.05);});}
+          this.init();const t=this.ctx.currentTime;const osc=this.ctx.createOscillator();const gain=this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          
+          if(type==='roll'){[0,0.05,0.1,0.15].forEach(d=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='square';o.connect(g);g.connect(this.masterGain);o.frequency.setValueAtTime(800,t+d);o.frequency.exponentialRampToValueAtTime(200,t+d+0.05);g.gain.setValueAtTime(0.1,t+d);g.gain.linearRampToValueAtTime(0,t+d+0.05);o.start(t+d);o.stop(t+d+0.05);});}
           else if(type==='move'){osc.type='sine';osc.frequency.setValueAtTime(600,t);osc.frequency.exponentialRampToValueAtTime(300,t+0.1);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.1);osc.start(t);osc.stop(t+0.1);}
           else if(type==='kill'){osc.type='sawtooth';osc.frequency.setValueAtTime(200,t);osc.frequency.exponentialRampToValueAtTime(20,t+0.3);gain.gain.setValueAtTime(0.3,t);gain.gain.linearRampToValueAtTime(0,t+0.3);osc.start(t);osc.stop(t+0.3);}
           else if(type==='shield'){osc.type='sine';osc.frequency.setValueAtTime(400,t);osc.frequency.linearRampToValueAtTime(800,t+0.2);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.2);osc.start(t);osc.stop(t+0.2);}
           else if(type==='portal'){osc.type='sine';osc.frequency.setValueAtTime(300,t);osc.frequency.linearRampToValueAtTime(1200,t+0.4);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
           else if(type==='redhole'||type==='timeout'){osc.type='square';osc.frequency.setValueAtTime(150,t);osc.frequency.linearRampToValueAtTime(100,t+0.4);gain.gain.setValueAtTime(0.2,t);gain.gain.linearRampToValueAtTime(0,t+0.4);osc.start(t);osc.stop(t+0.4);}
-          else if(type==='win'){[300,400,500,600,800,1200].forEach((f,i)=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='triangle';o.connect(g);g.connect(this.ctx.destination);o.frequency.setValueAtTime(f,t+i*0.1);g.gain.setValueAtTime(0.2,t+i*0.1);g.gain.linearRampToValueAtTime(0,t+i*0.1+0.2);o.start(t+i*0.1);o.stop(t+i*0.1+0.2);});}
+          else if(type==='win'){[300,400,500,600,800,1200].forEach((f,i)=>{const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type='triangle';o.connect(g);g.connect(this.masterGain);o.frequency.setValueAtTime(f,t+i*0.1);g.gain.setValueAtTime(0.2,t+i*0.1);g.gain.linearRampToValueAtTime(0,t+i*0.1+0.2);o.start(t+i*0.1);o.stop(t+i*0.1+0.2);});}
         }catch(e){}
       }
     };
@@ -506,7 +589,6 @@
     const safeZones=["1,4","4,7","7,4","4,1","4,4"];
     const layer2Coords=p1Path.slice(24,40);
 
-    // Orange zone = path indices 41..46 for each player (home stretch)
     const P1_ORANGE_START=41, P1_ORANGE_END=46;
     const P2_ORANGE_START=41, P2_ORANGE_END=46;
     function isInOrange(pos,player){
@@ -525,11 +607,10 @@
         p1Revenge:false,p2Revenge:false,
         p1MissCount:0,p2MissCount:0,
         p1Timeouts:0,p2Timeouts:0,
-        // Track which token first entered orange (gets shield)
-        p1OrangeFirst:[-1,-1,-1,-1], // index = token idx, value = turn they entered (or -1)
+        p1OrangeFirst:[-1,-1,-1,-1], 
         p2OrangeFirst:[-1,-1,-1,-1],
-        orangeFirstP1Coord:{}, // coord -> true if p1 coin was first
-        orangeFirstP2Coord:{}, // coord -> true if p2 coin was first
+        orangeFirstP1Coord:{}, 
+        orangeFirstP2Coord:{}, 
         gameMode:'2P',humanColor:1,aiColor:2,aiDifficulty:'EASY'
       };
     }
@@ -544,7 +625,7 @@
     let saveDebounceRef=null;
     let tempSetup={mode:'2P',hColor:1,aColor:2};
     let currentSetupStep=0;
-    let globalTurn=0; // tick every time a move is made
+    let globalTurn=0; 
 
     function registerAction(fn,delay){const id=setTimeout(fn,delay);actionTimeouts.push(id);return id;}
     function clearActionTimeouts(){actionTimeouts.forEach(clearTimeout);actionTimeouts=[];}
@@ -568,7 +649,6 @@
       removePortal();removeRedhole();
     }
 
-    // Restart after game over → go to Setup screen (mode selection)
     function restartGame(){
       stopTimer(); clearGameLoops(); clearActionTimeouts(); clearGameState();
       G = getInitialState();
@@ -591,6 +671,25 @@
       },3000);
     }
 
+    // UPDATED: Adjust board and panels based on human player's color
+    function updateBoardOrientation() {
+      // If Human is Blue (2), Blue panel should be bottom, Red top, and board rotated
+      if (G.humanColor === 2) {
+        D.p2Container.classList.remove('panel-top');
+        D.p2Container.classList.add('panel-bottom');
+        D.p1Container.classList.remove('panel-bottom');
+        D.p1Container.classList.add('panel-top');
+        D.board.classList.add('board-rotated');
+      } else {
+        // Default: Red is bottom, Blue is top
+        D.p1Container.classList.remove('panel-top');
+        D.p1Container.classList.add('panel-bottom');
+        D.p2Container.classList.remove('panel-bottom');
+        D.p2Container.classList.add('panel-top');
+        D.board.classList.remove('board-rotated');
+      }
+    }
+
     function initDOM(){
       D.board=document.getElementById('game-board');
       D.p1Vault=document.getElementById('p1-vault-tokens');
@@ -603,10 +702,12 @@
       D.p1Label=document.getElementById('p1-label');D.p2Label=document.getElementById('p2-label');
       D.p1Kills=document.getElementById('p1-kills');D.p2Kills=document.getElementById('p2-kills');
       D.p1Perm=document.getElementById('p1-perm');D.p2Perm=document.getElementById('p2-perm');
-      D.mRed=document.getElementById('m-red');D.mBlue=document.getElementById('m-blue');
-      D.predRedPct=document.getElementById('pred-red-pct');
-      D.predBluePct=document.getElementById('pred-blue-pct');
       D.p1Strikes=document.getElementById('p1-strikes');D.p2Strikes=document.getElementById('p2-strikes');
+      D.soundBtn=document.getElementById('global-sound-btn');
+      
+      D.p1Container = document.getElementById('p1-container');
+      D.p2Container = document.getElementById('p2-container');
+      
       for(let i=0;i<4;i++){D.shells.p1.push(document.getElementById(`p1-s${i}`));D.shells.p2.push(document.getElementById(`p2-s${i}`));}
 
       for(let r=1;r<=7;r++){
@@ -641,6 +742,18 @@
       D.p2Vault.addEventListener('click',handleVaultClick);
       D.p1RollBtn.addEventListener('click',()=>rollGavvalu(1));
       D.p2RollBtn.addEventListener('click',()=>rollGavvalu(2));
+      
+      D.soundBtn.addEventListener('click', () => {
+        const isMuted = SFX.toggleMute();
+        D.soundBtn.textContent = isMuted ? '🔇' : '🔊';
+        localStorage.setItem('shellkoin_mute', isMuted);
+      });
+      
+      const savedMute = localStorage.getItem('shellkoin_mute');
+      if(savedMute === 'true') {
+        SFX.isMuted = true;
+        D.soundBtn.textContent = '🔇';
+      }
     }
 
     function handleTokenClick(e){const tok=e.target.closest('.token');if(!tok||G.isGameOver)return;const p=parseInt(tok.dataset.player,10);if(G.gameMode==='AI'&&p===G.aiColor)return;moveToken(p,parseInt(tok.dataset.idx,10),e);}
@@ -729,7 +842,6 @@
     function getMovable(roll){const p=G.currentPlayer,t=p===1?G.p1Tokens:G.p2Tokens,perm=hasPerm(p),res=[];for(let i=0;i<4;i++){if(t[i]===-1)continue;const nx=getNextPos(t[i],roll,perm);if(nx<p1Path.length)res.push({idx:i,targetPos:nx});}return res;}
     function boostedRoll(b){return b===1?3:b===2?6:12;}
 
-    // ===== LUDO-STYLE SMOOTH SLIDING PATH WALKING =====
     function executeSmoothSteps(tokenEl, path, steps, stepMs, onDone) {
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move', 'victim-shudder', 'kill-flash', 'step-hop');
       tokenEl.style.zIndex = '80';
@@ -751,24 +863,25 @@
         const cell = D.cells[coord];
         
         if (cell && tokenEl.parentNode !== cell) {
-          // FLIP Animation: అద్భుతమైన స్మూత్ స్లైడింగ్ కోసం
           const startRect = tokenEl.getBoundingClientRect();
           cell.appendChild(tokenEl);
           const endRect = tokenEl.getBoundingClientRect();
           
-          const dx = startRect.left - endRect.left;
-          const dy = startRect.top - endRect.top;
+          let dx = startRect.left - endRect.left;
+          let dy = startRect.top - endRect.top;
           
-          // Invert
+          // FIX for flipped board token animations
+          if(G.humanColor === 2) {
+             dx = -dx; dy = -dy;
+          }
+          
           tokenEl.style.transition = 'none';
-          tokenEl.style.transform = `translate(${dx}px, ${dy}px)`;
+          tokenEl.style.transform = `translate(${dx}px, ${dy}px) ${G.humanColor === 2 ? 'rotate(-180deg)' : ''}`;
           
-          // Force Reflow
           void tokenEl.offsetWidth;
           
-          // Play smooth slide
           tokenEl.style.transition = `transform ${stepMs}ms linear`;
-          tokenEl.style.transform = 'translate(0px, 0px)';
+          tokenEl.style.transform = `translate(0px, 0px) ${G.humanColor === 2 ? 'rotate(-180deg)' : ''}`;
         }
         stepIdx++;
         setTimeout(doStep, stepMs);
@@ -776,7 +889,6 @@
       doStep();
     }
 
-    // Walk token forward smoothly (normal move / portal jump / vault release)
     function walkForward(player, tIdx, fromPos, toPos, onDone) {
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
@@ -784,11 +896,9 @@
       
       let curr = fromPos;
       while (curr !== toPos) {
-        // లోపలి రౌండ్ (Inner loop) కి వెళ్లేటప్పుడు ఎడమ వైపు ఉన్న బాక్స్ (index 23 అనగా 7,3 / 1,5) ని ఖచ్చితంగా స్కిప్ చేసి నేరుగా 24 కి వెళ్లాలి
         if (toPos >= 24 && curr === 22) {
           curr = 24; 
         } 
-        // ఔటర్ లూప్ చుట్టూ తిరిగేటప్పుడు 23 తర్వాత మళ్ళీ 0 కి (Wrap around) వెళ్లాలి
         else if (curr === 23 && toPos < 24) {
           curr = 0; 
         } 
@@ -802,7 +912,6 @@
       executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
 
-    // Walk token backward smoothly (kill victim going to vault / bounce)
     function walkBackward(player, tIdx, fromPos, toPos, onDone) {
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
@@ -810,11 +919,9 @@
       
       let curr = fromPos;
       while (curr !== toPos) {
-        // లోపలి రౌండ్ నుండి (TimeOut/Kill ద్వారా) బయటికి వెనక్కి వచ్చేటప్పుడు 23 ని స్కిప్ చేసి 22 కి వెళ్ళాలి
         if (curr === 24 && toPos < 24) {
           curr = 22; 
         } 
-        // ఔటర్ లూప్ లో వెనక్కి వెళ్లేటప్పుడు 0 తర్వాత వెనక్కి 23 కి వెళ్లాలి
         else if (curr === 0 && toPos > 0 && fromPos < 24) {
           curr = 23; 
         } 
@@ -828,7 +935,6 @@
       executeSmoothSteps(tokEl, path, steps, stepMs, onDone);
     }
 
-    // Simple single-cell bounce effect for vault entry
     function animateEnter(tokenEl, cb) {
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move');
       void tokenEl.offsetWidth;
@@ -836,7 +942,6 @@
       setTimeout(() => { tokenEl.classList.remove('anim-enter'); if(cb) cb(); }, 450);
     }
 
-    // Missing function: Animation for being killed (victim shudder)
     function animateKill(tokenEl, cb) {
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
       void tokenEl.offsetWidth;
@@ -847,11 +952,10 @@
       }, 400);
     }
 
-    // Missing function: Animation for bouncing back when shielded/double
     function animateBounce(tokenEl, cb) {
       tokenEl.classList.remove('anim-killed','anim-bounced','anim-enter','anim-move','glow-move','victim-shudder');
       void tokenEl.offsetWidth;
-      tokenEl.classList.add('victim-shudder'); // Reusing the shuddering animation for bounce impact
+      tokenEl.classList.add('victim-shudder'); 
       setTimeout(() => { 
         tokenEl.classList.remove('victim-shudder'); 
         if(cb) cb(); 
@@ -889,12 +993,10 @@
       }
     }
 
-    // ===== HARD AI LOGIC =====
     function executeAIMove(p,finalRoll,movable,canRelease,vaultIdxs){
       if(G.isGameOver||G.currentPlayer!==p||!G.hasRolled)return;
       let options=[];
       
-      // Vault Release కి బేసిక్ స్కోర్
       if(canRelease&&vaultIdxs.length>0){
         vaultIdxs.forEach(idx=>options.push({type:'vault', idx:idx, score:50}));
       }
@@ -904,26 +1006,21 @@
       const oppTokens = p===1 ? G.p2Tokens : G.p1Tokens;
       
       movable.forEach(m => {
-        let score = 10; // ప్రతి మూవ్‌కి బేస్ స్కోర్
+        let score = 10; 
         const destCoord = path[m.targetPos];
 
-        // 1. Kill చేయడానికి First Priority
         if(!safeZones.includes(destCoord) && oppTokens.some(op => op !== -1 && oppPath[op] === destCoord)){
-          score += 200; // అపోనెంట్ ని చంపే అవకాశం ఉంటే హైయెస్ట్ స్కోర్!
+          score += 200; 
         }
-        // 2. Portal పట్టుకోవడానికి Second Priority
         if(destCoord === activePortal){
           score += 100;
         }
-        // 3. Red hole పడకుండా ఎస్కేప్ అవ్వాలి!
         if(destCoord === activeRedhole){
-          score -= 1000; // నెగెటివ్ స్కోర్ ఇచ్చి దీన్ని కచ్చితంగా అవాయిడ్ చేస్తుంది
+          score -= 1000; 
         }
-        // 4. Safe Zones లోకి వెళ్లడం మంచిది
         if(safeZones.includes(destCoord)){
           score += 30;
         }
-        // 5. Crown కి దగ్గరవుతున్న కొద్దీ స్కోర్ పెరుగుతుంది
         score += (m.targetPos * 0.5);
 
         options.push({type:'board', idx:m.idx, score:score});
@@ -931,10 +1028,7 @@
 
       if(!options.length){afterMove();return;}
 
-      // స్కోర్ల ఆధారంగా ఆప్షన్స్ ని ఆర్డర్ చేయడం (ఎక్కువ స్కోర్ ఉన్నది ఫస్ట్ వస్తుంది)
       options.sort((a,b) => b.score - a.score);
-
-      // ఫస్ట్ ఉన్న బెస్ట్ ఆప్షన్‌ని సెలెక్ట్ చేయడం
       const bestOptions = options.filter(o => o.score === options[0].score);
       const choice = bestOptions[Math.floor(Math.random() * bestOptions.length)];
 
@@ -942,13 +1036,11 @@
       else moveToken(p,choice.idx,null);
     }
 
-    // Release helpers — animate enter on board arrival
     function doReleaseTwoVault(p,i1,i2){
       if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver)return;
       clearActionTimeouts();stopTimer();const t=p===1?G.p1Tokens:G.p2Tokens;
       t[i1]=0;t[i2]=0;
-      updateBoard(); // place tokens first so DOM elements exist
-      // animate both entering
+      updateBoard(); 
       [D.p1TokensDOM,D.p2TokensDOM][p-1].forEach((tok,i)=>{if(i===i1||i===i2)animateEnter(tok,null);});
       sparkle((p===1?p1Path:p2Path)[0]);SFX.play('move');
       checkKill(p,(p===1?p1Path:p2Path)[0],()=>afterMove());
@@ -988,12 +1080,9 @@
 
       const fromPos = t[tIdx];
       const path = p===1?p1Path:p2Path;
-
-      // Determine raw target before trap checks
       let rawNx = c.targetPos;
       const lC = path[rawNx];
 
-      // ---- PORTAL ----
       if(lC===activePortal){
         if(p===1)G.p1PortalUsed=true;else G.p2PortalUsed=true;
         const oPath=p===1?p2Path:p1Path,oT=p===1?G.p2Tokens:G.p1Tokens;
@@ -1001,17 +1090,14 @@
         const hasOpp=oT.some(op=>op!==-1&&oPath[op]===c10);
         const finalNx=hasOpp?getNextPosWithPerm(rawNx,11):t10;
 
-        // Step 1: Walk forward to portal cell
         SFX.play('move');
         walkForward(p,tIdx,fromPos,rawNx,()=>{
-          // Step 2: portal spin-out animation
           const tokEl=(p===1?D.p1TokensDOM:D.p2TokensDOM)[tIdx];
           tokEl.classList.add('anim-portal-launch');
           SFX.play('portal');
           setTimeout(()=>{
             tokEl.classList.remove('anim-portal-launch');
             removePortal();
-            // Step 3: place at destination & animate land
             t[tIdx]=finalNx;
             updateOrangeFirst(p,tIdx,finalNx);
             updateBoard();
@@ -1026,21 +1112,17 @@
         return;
       }
 
-      // ---- RED HOLE ----
       if(lC===activeRedhole){
-        // Step 1: walk forward to red hole cell
         SFX.play('move');
         walkForward(p,tIdx,fromPos,rawNx,()=>{
-          // Step 2: spiral-sink into red hole
           const tokEl=(p===1?D.p1TokensDOM:D.p2TokensDOM)[tIdx];
           tokEl.classList.add('anim-redhole-sink');
           shakeBoard(); SFX.play('redhole');
           setTimeout(()=>{
             tokEl.classList.remove('anim-redhole-sink');
             removeRedhole();
-            // Step 3: walk backward from rawNx → 0 along path
-            t[tIdx]=rawNx; // temporarily set so walkBackward knows start
-            updateBoard();   // place token at red hole cell
+            t[tIdx]=rawNx; 
+            updateBoard();   
             walkBackward(p,tIdx,rawNx,0,()=>{
               t[tIdx]=0;
               updateBoard();
@@ -1051,7 +1133,6 @@
         return;
       }
 
-      // ---- NORMAL MOVE ----
       SFX.play('move');
       walkForward(p,tIdx,fromPos,rawNx,()=>{
         t[tIdx]=rawNx;
@@ -1062,12 +1143,10 @@
       });
     }
 
-    // Track first arrival in orange zone per coordinate
     function updateOrangeFirst(player,tIdx,newPos){
       if(!isInOrange(newPos,player)) return;
       const path=player===1?p1Path:p2Path;
       const coord=path[newPos];
-      // Only mark if nobody has claimed this coord yet
       if(!G.orangeFirstP1Coord[coord]&&!G.orangeFirstP2Coord[coord]){
         if(player===1) G.orangeFirstP1Coord[coord]=true;
         else G.orangeFirstP2Coord[coord]=true;
@@ -1077,7 +1156,6 @@
     function getNextPosWithPerm(p,s){for(let i=0;i<s;i++){if(p===23)p=0;else if(p===22)p=24;else p++;if(p>=p1Path.length-1){p=p1Path.length-1;break;}}return p;}
     function afterMove(){G.hasRolled=false;if(G.extraTurns>0){G.extraTurns--;resetRoll();}else switchTurn(false);}
 
-    // ===== FIX 1: Orange Zone Shield logic in checkKill + FIX 3: kill animation =====
     function checkKill(movingP, coord, doneCb) {
       if(safeZones.includes(coord)){if(doneCb)doneCb();return;}
       const p1at=G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length;
@@ -1086,8 +1164,6 @@
 
       const p1pts=computeScore(1),p2pts=computeScore(2);
 
-      // Check orange shield: if the defending team's coin was FIRST in that orange coord,
-      // the attacker gets bounced back to pos 0 instead
       const defenderIsP1=(movingP===2);
       const defenderIsP2=(movingP===1);
       const coordShieldedForP1=G.orangeFirstP1Coord[coord]&&defenderIsP1&&isOrangeCoord(coord);
@@ -1097,13 +1173,12 @@
 
       if(movingP===1){
         if(coordShieldedForP2){
-          // P2 coin has orange shield — bounce P1 attacker back
           SFX.play('shield');
           const bounceIdx=G.p1Tokens.findIndex((pos,i)=>pos!==-1&&p1Path[pos]===coord);
           if(bounceIdx!==-1){
             const tokEl=D.p1TokensDOM[bounceIdx];
             animateBounce(tokEl,()=>{
-              G.p1Tokens[bounceIdx]=0; // send attacker to start
+              G.p1Tokens[bounceIdx]=0; 
               G.p2Kills++;
               if(p1pts<p2pts)G.p1Revenge=true;
               updateBoard();if(doneCb)doneCb();
@@ -1112,7 +1187,6 @@
           return;
         }
         if(p2at>=2){
-          // double protection — bounce attacker back
           const bounceIdx=G.p1Tokens.findIndex((pos,i)=>pos!==-1&&p1Path[pos]===coord);
           if(bounceIdx!==-1){
             const tokEl=D.p1TokensDOM[bounceIdx];
@@ -1122,7 +1196,6 @@
             });
           }else{if(doneCb)doneCb();}
         }else{
-          // normal kill — animate victim flying off
           const victimIdx=G.p2Tokens.findIndex((pos,i)=>pos!==-1&&p2Path[pos]===coord);
           if(victimIdx!==-1){
             const tokEl=D.p2TokensDOM[victimIdx];
@@ -1216,10 +1289,27 @@
       let redPct=total<=0?50:Math.round((s1/total)*100);
       redPct=Math.max(5,Math.min(95,redPct));
       const bluePct=100-redPct;
-      D.mRed.style.width=redPct+'%';D.mBlue.style.width=bluePct+'%';
-      D.mRed.textContent=redPct>15?redPct+'%':'';D.mBlue.textContent=bluePct>15?bluePct+'%':'';
-      if(D.predRedPct)D.predRedPct.textContent=redPct;
-      if(D.predBluePct)D.predBluePct.textContent=bluePct;
+      
+      // Update both meters since one is now hidden depending on orientation
+      const mRedTop = document.getElementById('m-red-p2');
+      const mBlueTop = document.getElementById('m-blue-p2');
+      const pRedTop = document.getElementById('pred-red-pct-p2');
+      const pBlueTop = document.getElementById('pred-blue-pct-p2');
+      
+      const mRedBot = document.getElementById('m-red-p1');
+      const mBlueBot = document.getElementById('m-blue-p1');
+      const pRedBot = document.getElementById('pred-red-pct-p1');
+      const pBlueBot = document.getElementById('pred-blue-pct-p1');
+
+      if(mRedTop) { mRedTop.style.width=redPct+'%'; mRedTop.textContent=redPct>15?redPct+'%':''; }
+      if(mBlueTop) { mBlueTop.style.width=bluePct+'%'; mBlueTop.textContent=bluePct>15?bluePct+'%':''; }
+      if(pRedTop) pRedTop.textContent=redPct;
+      if(pBlueTop) pBlueTop.textContent=bluePct;
+      
+      if(mRedBot) { mRedBot.style.width=redPct+'%'; mRedBot.textContent=redPct>15?redPct+'%':''; }
+      if(mBlueBot) { mBlueBot.style.width=bluePct+'%'; mBlueBot.textContent=bluePct>15?bluePct+'%':''; }
+      if(pRedBot) pRedBot.textContent=redPct;
+      if(pBlueBot) pBlueBot.textContent=bluePct;
     }
 
     function updateBoard(){
@@ -1246,7 +1336,6 @@
               p1Placed[coord]=true;
               D.cells[coord].appendChild(D.p1TokensDOM[i]);
               D.p1TokensDOM[i].className='token p1-token';
-              // Orange shield glow
               if(isInOrange(pos1,1)&&G.orangeFirstP1Coord[coord])D.p1TokensDOM[i].classList.add('shielded');
               if(p===1&&G.hasRolled&&movI.includes(i))D.p1TokensDOM[i].classList.add('glow-move');
               const ob=D.p1TokensDOM[i].querySelector('.stack-count');if(ob)ob.remove();
@@ -1268,7 +1357,6 @@
               p2Placed[coord]=true;
               D.cells[coord].appendChild(D.p2TokensDOM[i]);
               D.p2TokensDOM[i].className='token p2-token';
-              // Orange shield glow
               if(isInOrange(pos2,2)&&G.orangeFirstP2Coord[coord])D.p2TokensDOM[i].classList.add('shielded');
               if(p===2&&G.hasRolled&&movI.includes(i))D.p2TokensDOM[i].classList.add('glow-move');
               const ob=D.p2TokensDOM[i].querySelector('.stack-count');if(ob)ob.remove();
@@ -1292,18 +1380,20 @@
     // ===== UI EVENTS =====
     document.getElementById('rules-btn-action').addEventListener('click',()=>{document.getElementById('rules-screen').style.display='flex';requestAnimationFrame(()=>document.getElementById('rules-screen').style.opacity='1');});
     document.getElementById('rules-back-btn').addEventListener('click',()=>{document.getElementById('rules-screen').style.opacity='0';setTimeout(()=>document.getElementById('rules-screen').style.display='none',300);});
-    document.getElementById('btn-quit-main').addEventListener('click',()=>{document.getElementById('quit-modal').style.display='flex';});
+    
+    // Bind both quit buttons (top and bottom panels)
+    document.querySelectorAll('.btn-quit-main').forEach(btn => {
+      btn.addEventListener('click',()=>{document.getElementById('quit-modal').style.display='flex';});
+    });
+    
     document.getElementById('btn-quit-no').addEventListener('click',()=>{document.getElementById('quit-modal').style.display='none';});
 
-    // Quit → clear game, go to Setup screen (mode selection) from scratch
     document.getElementById('btn-quit-yes').addEventListener('click',()=>{
       document.getElementById('quit-modal').style.display='none';
       stopTimer(); clearGameLoops(); clearActionTimeouts(); clearGameState();
       G = getInitialState();
-      // Hide game screen
       document.getElementById('main-game').style.display='none';
       document.getElementById('restart-screen').style.display='none';
-      // Show setup screen at step 0 (mode selection)
       const setupEl = document.getElementById('setup-screen');
       setupEl.style.display = 'flex';
       setupEl.style.opacity = '0';
@@ -1329,7 +1419,14 @@
     document.getElementById('btn-color-red').addEventListener('click',()=>{tempSetup.hColor=1;tempSetup.aColor=2;showSetupStep(2);});
     document.getElementById('btn-color-blue').addEventListener('click',()=>{tempSetup.hColor=2;tempSetup.aColor=1;showSetupStep(2);});
     document.getElementById('final-start-btn').addEventListener('click',()=>{
-      SFX.init();G.gameMode=tempSetup.mode;G.humanColor=tempSetup.hColor;G.aiColor=tempSetup.aColor;
+      SFX.init();
+      G.gameMode=tempSetup.mode;
+      G.humanColor=tempSetup.hColor;
+      G.aiColor=tempSetup.aColor;
+      
+      // Update orientation right before game starts
+      updateBoardOrientation();
+      
       document.getElementById('setup-screen').style.opacity='0';document.getElementById('start-screen').style.opacity='0';
       setTimeout(()=>{
         document.getElementById('setup-screen').style.display='none';document.getElementById('start-screen').style.display='none';
@@ -1341,20 +1438,20 @@
     window.onload=function(){
       initDOM();
       if(loadGameState()){
-        // Resume saved game — hide all other screens, show game board
         document.getElementById('start-screen').style.display='none';
         document.getElementById('setup-screen').style.display='none';
         document.getElementById('restart-screen').style.display='none';
+        
+        // Restore orientation
+        updateBoardOrientation();
+        
         document.getElementById('main-game').style.display='flex';
-        // Restore full UI from saved state
         updateStrikeDisplay();
         startGameLoops();
-        // Re-render board & stats
         updateBoard();
-        // Resume timer & AI if it's AI's turn
+        
         if(!G.isGameOver){
           if(G.hasRolled){
-            // Player had already rolled — restore roll button text & let them pick
             const p=G.currentPlayer;
             const activeBtn=p===1?D.p1RollBtn:D.p2RollBtn;
             activeBtn.textContent=`🎲 ${G.currentRoll}`;
@@ -1365,7 +1462,6 @@
             D.p2Dot.className=`turn-dot ${p===2?'blue':'dim'}`;
             D.p2Label.className=`turn-label ${p===2?'blue':'dim'}`;
             startTimer();
-            // If AI had rolled and was waiting to pick — trigger AI move
             if(G.gameMode==='AI'&&p===G.aiColor){
               const movable=getMovable(G.currentRoll);
               const vaultT=p===1?G.p1Tokens:G.p2Tokens;
@@ -1374,7 +1470,6 @@
               registerAction(()=>executeAIMove(p,G.currentRoll,movable,canRelease,vaultIdxs),700);
             }
           } else {
-            // Fresh turn — normal reset
             resetRoll();
           }
         }
