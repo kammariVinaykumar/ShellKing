@@ -472,7 +472,6 @@
     let activeRedhole = null, redholeTimer = null;
     let turnTimeLeft = 100;
     
-    // Unified interval & action registries
     let gameLoopIntervals = []; 
     let actionTimeouts = [];
     let timerIntervalRef = null;
@@ -485,7 +484,6 @@
     function registerAction(fn, delay) { const id = setTimeout(fn, delay); actionTimeouts.push(id); return id; }
     function clearActionTimeouts() { actionTimeouts.forEach(clearTimeout); actionTimeouts = []; }
 
-    // Debounced LocalStorage logic
     function saveGameState() { 
         if (G.isGameOver) return; 
         clearTimeout(saveDebounceRef);
@@ -635,7 +633,7 @@
         const winner = p===1 ? '🔵 BLUE' : '🔴 RED';
         D.p1Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`; D.p2Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`;
         SFX.play('win'); 
-        triggerConfetti(); flashBoard('board-win-flash'); updateBoard(); 
+        triggerConfetti(); updateBoard(); flashBoard('board-win-flash'); 
         showRestartScreen(`${winner} గెలిచారు! 👑`, `${p===1?'RED':'BLUE'} ప్లేయర్ టైమ్ ఔట్ వల్ల డిస్‌క్వాలిఫై అయ్యారు!`); return;
       }
       const tokens = p===1 ? G.p1Tokens : G.p2Tokens;
@@ -664,51 +662,30 @@
 
     function tryPortal() {
       if (G.isGameOver || activePortal) return;
-      const onB1 = G.p1Tokens.filter(p=>p!==-1 && p<p1Path.length-1).length, onB2 = G.p2Tokens.filter(p=>p!==-1 && p<p2Path.length-1).length;
-      if (onB1<2 || onB2<2) return;
       const occ = []; G.p1Tokens.forEach(p=>{ if(p!==-1&&p<p1Path.length-1) occ.push(p1Path[p]); }); G.p2Tokens.forEach(p=>{ if(p!==-1&&p<p2Path.length-1) occ.push(p2Path[p]); });
-      const pool = p1Path.slice(0,40).filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activeRedhole);
+      const pool = [...new Set([...p1Path, ...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activeRedhole);
       if (!pool.length) return;
       activePortal = pool[Math.floor(Math.random()*pool.length)];
       const cell = D.cells[activePortal];
       if (cell) { cell.appendChild(D.portalEl); portalTimer = setTimeout(() => { removePortal(); }, 12000); }
     }
-    function removePortal() { 
-        if(D.portalEl && D.portalEl.parentNode) {
-            D.portalEl.parentNode.removeChild(D.portalEl); 
-        }
-        clearTimeout(portalTimer); activePortal=null; 
-    }
+    function removePortal() { if(D.portalEl && D.portalEl.parentNode) D.portalEl.parentNode.removeChild(D.portalEl); clearTimeout(portalTimer); activePortal=null; }
 
     function tryRedhole() {
       if (G.isGameOver || activeRedhole) return;
-      const onB1 = G.p1Tokens.filter(p=>p!==-1 && p<p1Path.length-1).length, onB2 = G.p2Tokens.filter(p=>p!==-1 && p<p2Path.length-1).length;
-      if (!onB1 || !onB2) return;
       const occ = []; G.p1Tokens.forEach(p=>{ if(p!==-1&&p<p1Path.length-1) occ.push(p1Path[p]); }); G.p2Tokens.forEach(p=>{ if(p!==-1&&p<p2Path.length-1) occ.push(p2Path[p]); });
-      const pool = [...p1Path.slice(24,40),...new Set([...p1Path.slice(41,47),...p2Path.slice(41,47)])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activePortal);
+      const pool = [...new Set([...p1Path, ...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activePortal);
       if (!pool.length) return;
       activeRedhole = pool[Math.floor(Math.random()*pool.length)];
       const cell = D.cells[activeRedhole];
       if (cell) { cell.appendChild(D.redholeEl); redholeTimer = setTimeout(() => { removeRedhole(); }, 12000); }
     }
-    function removeRedhole() { 
-        if(D.redholeEl && D.redholeEl.parentNode) {
-            D.redholeEl.parentNode.removeChild(D.redholeEl); 
-        }
-        clearTimeout(redholeTimer); activeRedhole=null; 
-    }
+    function removeRedhole() { if(D.redholeEl && D.redholeEl.parentNode) D.redholeEl.parentNode.removeChild(D.redholeEl); clearTimeout(redholeTimer); activeRedhole=null; }
 
     function hasPerm(p) { return p===1 ? (G.p1Kills>0||G.p1PortalUsed) : (G.p2Kills>0||G.p2PortalUsed); }
     
     function flashBoard(cls) { D.board.classList.add(cls); setTimeout(()=>D.board.classList.remove(cls), 1100); }
-    function sparkle(c) { 
-        const cell = D.cells[c]; 
-        if (!cell) return; 
-        const s = document.createElement('div'); 
-        s.className = 'sparkle'; 
-        cell.appendChild(s); 
-        setTimeout(()=> { if(s && s.parentNode) s.remove(); }, 500); 
-    }
+    function sparkle(c) { const cell = D.cells[c]; if (!cell) return; const s = document.createElement('div'); s.className = 'sparkle'; cell.appendChild(s); setTimeout(()=> { if(s && s.parentNode) s.remove(); }, 500); }
     function shakeBoard() { D.board.classList.add('shake'); setTimeout(()=>D.board.classList.remove('shake'), 320); }
     function triggerConfetti() { const c=['#ef4444','#3b82f6','#fbbf24','#4ade80','#a855f7','#f97316']; for (let i=0;i<80;i++) { const p=document.createElement('div'); p.className='confetti-piece'; p.style.left=Math.random()*100+'vw'; p.style.animationDelay=Math.random()*2+'s'; p.style.animationDuration=(Math.random()*3+2)+'s'; p.style.background=c[Math.floor(Math.random()*c.length)]; p.style.borderRadius=Math.random()<0.5?'50%':'2px'; document.body.appendChild(p); setTimeout(()=>p.remove(), 5500); } }
 
@@ -741,7 +718,6 @@
       
       const vaultT = p===1?G.p1Tokens:G.p2Tokens; const vaultIdxs = vaultT.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); const hasBoard = vaultT.some(pos=>pos!==-1&&pos<p1Path.length-1);
       
-      // Auto-executions
       if (final===12 && vaultIdxs.length>=2 && !hasBoard) { registerAction(()=>doReleaseTwoVault(p, vaultIdxs[0], vaultIdxs[1]), 900); return; }
       if (final===12 && vaultIdxs.length===1 && !hasBoard) { registerAction(()=>doReleaseAndSix(p, vaultIdxs[0]), 900); return; }
       if (final===6 && vaultIdxs.length>0 && !hasBoard) { registerAction(()=>doReleaseOne(p, vaultIdxs[0]), 900); return; }
@@ -751,417 +727,145 @@
       if (!movable.length && !canRelease) { registerAction(()=>afterMove(), 1100); }
       else if (movable.length===1 && !canRelease) { registerAction(()=>moveToken(p, movable[0].idx), 900); }
       else { 
-          updateBoard();
-          startTimer(); 
+          updateBoard(); startTimer(); 
           if (G.gameMode === 'AI' && p === G.aiColor) {
               registerAction(() => executeAIMove(p, final, movable, canRelease, vaultIdxs), 700);
           }
       }
     }
 
-    // ===== AI LOGIC (RANDOM SELECTION ONLY) =====
     function executeAIMove(p, finalRoll, movable, canRelease, vaultIdxs) {
         if (G.isGameOver || G.currentPlayer !== p || !G.hasRolled) return;
-        
         let options = [];
         if (canRelease && vaultIdxs.length > 0) { vaultIdxs.forEach(idx => options.push({ type: 'vault', idx: idx })); }
         movable.forEach(m => options.push({ type: 'board', idx: m.idx }));
-
         if (options.length === 0) { afterMove(); return; }
-        
         const choice = options[Math.floor(Math.random() * options.length)];
-        if (choice.type === 'vault') { releaseFromVault(p, choice.idx, null); } 
-        else { moveToken(p, choice.idx, null); }
+        if (choice.type === 'vault') releaseFromVault(p, choice.idx, null); 
+        else moveToken(p, choice.idx, null);
     }
 
     function doReleaseTwoVault(p, i1, i2) { 
         if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); 
-        const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[i1]=0; t[i2]=0; 
-        if ((p===1?p1Path:p2Path)[0]) sparkle((p===1?p1Path:p2Path)[0]); 
-        SFX.play('move'); 
+        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
+        t[i1]=0; t[i2]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
         checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
     }
-    
     function doReleaseOne(p, idx) { 
         if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); 
-        const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[idx]=0; 
-        if ((p===1?p1Path:p2Path)[0]) sparkle((p===1?p1Path:p2Path)[0]); 
-        SFX.play('move'); 
+        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
+        t[idx]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
         checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
     }
-    
     function doReleaseAndSix(p, idx) { 
         if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); 
-        const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[idx]=6; 
-        if ((p===1?p1Path:p2Path)[6]) sparkle((p===1?p1Path:p2Path)[6]); 
-        SFX.play('move'); 
+        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
+        t[idx]=6; sparkle((p===1?p1Path:p2Path)[6]); SFX.play('move'); 
         checkKill(p, (p===1?p1Path:p2Path)[6]); afterMove(); 
     }
     
     function releaseFromVault(p, idx, e) { 
         if (e) { e.stopPropagation(); e.preventDefault(); } 
         if (!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; 
-        clearActionTimeouts(); 
-        const r = G.currentRoll, t = p===1?G.p1Tokens:G.p2Tokens, vIdxs = t.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); 
+        clearActionTimeouts(); const r = G.currentRoll, t = p===1?G.p1Tokens:G.p2Tokens, vIdxs = t.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); 
         if (r===12&&vIdxs.length>=2) { doReleaseTwoVault(p,vIdxs[0],vIdxs[1]); return; } 
         if (r===12&&vIdxs.length===1) { doReleaseAndSix(p,idx); return; } 
         if ((r===6||r===12)&&t[idx]===-1) { doReleaseOne(p,idx); } 
     }
 
     function moveToken(p, tIdx, e) {
-      if(e) { e.stopPropagation(); e.preventDefault(); } 
-      if (!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; 
-      const t = p===1?G.p1Tokens:G.p2Tokens;
-      const c = getMovable(G.currentRoll).find(m=>m.idx===tIdx); 
-      if (!c) return; 
+      if(e) { e.stopPropagation(); e.preventDefault(); } if (!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; 
+      const t = p===1?G.p1Tokens:G.p2Tokens, c = getMovable(G.currentRoll).find(m=>m.idx===tIdx); if (!c) return; 
       clearActionTimeouts(); stopTimer(); SFX.play('move');
+      let nx = c.targetPos; const path = p===1?p1Path:p2Path; const lC = path[nx]; 
       
-      let nx = c.targetPos; const path = p===1?p1Path:p2Path; const lC = path[nx]; let trap = false;
+      let tempTrap = null;
+      if (lC===activePortal) { if (p===1) G.p1PortalUsed=true; else G.p2PortalUsed=true; const oPath = p===1?p2Path:p1Path, oT = p===1?G.p2Tokens:G.p1Tokens, t10 = getNextPosWithPerm(nx, 10), c10 = path[t10], hasOpp = oT.some(op=>op!==-1&&oPath[op]===c10); nx = hasOpp ? getNextPosWithPerm(nx,11) : t10; removePortal(); SFX.play('portal'); }
+      else if (lC===activeRedhole) { nx = 0; tempTrap = activeRedhole; shakeBoard(); SFX.play('redhole'); }
       
-      if (lC===activePortal) { 
-          if (p===1) G.p1PortalUsed=true; else G.p2PortalUsed=true; 
-          const oPath = p===1?p2Path:p1Path, oT = p===1?G.p2Tokens:G.p1Tokens, t10 = getNextPosWithPerm(nx, 10), c10 = path[t10], hasOpp = oT.some(op=>op!==-1&&oPath[op]===c10); 
-          nx = hasOpp ? getNextPosWithPerm(nx,11) : t10; removePortal(); trap = true; SFX.play('portal'); 
-      }
-      else if (lC===activeRedhole) { 
-          nx = 0; 
-          removeRedhole(); 
-          trap = true; 
-          shakeBoard(); 
-          SFX.play('redhole'); 
-      }
+      t[tIdx] = nx; sparkle(path[nx]);
+      if (tempTrap) { removeRedhole(); }
       
-      t[tIdx] = nx; 
-      if (path[nx]) sparkle(path[nx]);
-      
-      if (!trap) checkKill(p, path[nx]); 
-      afterMove();
+      checkKill(p, path[nx]); afterMove();
     }
+    
+    function getNextPosWithPerm(p, s) { for (let i=0; i<s; i++) { if (p===23) p=0; else if (p===22) p=24; else p++; if (p>=p1Path.length-1) { p=p1Path.length-1; break; } } return p; }
+    function afterMove() { G.hasRolled = false; if (G.extraTurns > 0) { G.extraTurns--; resetRoll(); } else switchTurn(false); }
     
     function checkKill(movingP, coord) {
       if (safeZones.includes(coord)) return;
-      const p1at = G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length;
-      const p2at = G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
+      const p1at = G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length, p2at = G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
       if (!p1at||!p2at) return;
       
-      const p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p1Kills*10);
-      const p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p2Kills*10);
-      
-      const isP1VictimShielded = G.p1Tokens.some(p => p !== -1 && p1Path[p] === coord && p >= 41 && p <= 46);
-      const isP2VictimShielded = G.p2Tokens.some(p => p !== -1 && p2Path[p] === coord && p >= 41 && p <= 46);
+      const p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p1Kills*10), p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p2Kills*10);
       
       if (movingP===1) {
-        if (isP2VictimShielded) { 
-            G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); 
-            SFX.play('shield'); shakeBoard(); 
-        }
-        else if (p2at>=2) { 
-            G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); 
-            G.p2Kills++; if (p1pts<p2pts) G.p1Revenge=true; 
-            SFX.play('kill'); shakeBoard(); 
-        }
-        else { 
-            let killed=false; 
-            G.p2Tokens.forEach((p,i)=>{ 
-                if(p!==-1&&p2Path[p]===coord) { 
-                    if (p>=41&&p<=46) { G.p2Tokens[i]=0; } else { G.p2Tokens[i]=-1; } 
-                    G.p1Kills++; G.p1BonusPending=true; G.extraTurns++; killed=true; if (p2pts<p1pts) G.p2Revenge=true; 
-                }
-            }); 
-            if (killed) { SFX.play('kill'); shakeBoard(); } 
-        }
+        if (p2at>=2) { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); G.p2Kills++; if (p1pts<p2pts) G.p1Revenge=true; SFX.play('kill'); shakeBoard(); }
+        else { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) { G.p2Tokens[i]=-1; G.p1Kills++; G.p1BonusPending=true; G.extraTurns++; if (p2pts<p1pts) G.p2Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
       } else {
-        if (isP1VictimShielded) { 
-            G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); 
-            SFX.play('shield'); shakeBoard(); 
-        }
-        else if (p1at>=2) { 
-            G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); 
-            G.p1Kills++; if (p2pts<p1pts) G.p2Revenge=true; 
-            SFX.play('kill'); shakeBoard(); 
-        }
-        else { 
-            let killed=false; 
-            G.p1Tokens.forEach((p,i)=>{ 
-                if(p!==-1&&p1Path[p]===coord) { 
-                    if (p>=41&&p<=46) { G.p1Tokens[i]=0; } else { G.p1Tokens[i]=-1; } 
-                    G.p2Kills++; G.p2BonusPending=true; G.extraTurns++; killed=true; if (p1pts<p2pts) G.p1Revenge=true; 
-                }
-            }); 
-            if (killed) { SFX.play('kill'); shakeBoard(); } 
-        }
+        if (p1at>=2) { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); G.p1Kills++; if (p2pts<p1pts) G.p2Revenge=true; SFX.play('kill'); shakeBoard(); }
+        else { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) { G.p1Tokens[i]=-1; G.p2Kills++; G.p2BonusPending=true; G.extraTurns++; if (p1pts<p2pts) G.p1Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
       }
     }
     
     function switchTurn(noMove) { if (G.isGameOver) return; G.currentPlayer = G.currentPlayer===1?2:1; G.hasRolled = false; G.currentRoll = 0; resetRoll(); }
     
-    function afterMove() { 
-        G.hasRolled = false; 
-        if (G.extraTurns > 0) { 
-            G.extraTurns--; 
-            resetRoll(); 
-        } else { 
-            switchTurn(false); 
-        } 
-    }
-
     function resetRoll() {
       if (G.isGameOver) return; const p = G.currentPlayer;
-      
       D.p1RollBtn.disabled = (p !== 1) || (G.gameMode === 'AI' && G.aiColor === 1); 
       D.p2RollBtn.disabled = (p !== 2) || (G.gameMode === 'AI' && G.aiColor === 2);
       
       D.p1RollBtn.textContent = p === 1 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
       D.p2RollBtn.textContent = p === 2 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
       
-      D.p1Dot.className = `turn-dot ${p===1?'red':'dim'}`; 
-      D.p1Label.className = `turn-label ${p===1?'red':'dim'}`;
-      D.p1Label.style.color = '';
+      D.p1Dot.className = `turn-dot ${p===1?'red':'dim'}`; D.p1Label.className = `turn-label ${p===1?'red':'dim'}`;
+      D.p2Dot.className = `turn-dot ${p===2?'blue':'dim'}`; D.p2Label.className = `turn-label ${p===2?'blue':'dim'}`;
       
-      D.p2Dot.className = `turn-dot ${p===2?'blue':'dim'}`; 
-      D.p2Label.className = `turn-label ${p===2?'blue':'dim'}`;
-      D.p2Label.style.color = '';
-      
-      ['p1','p2'].forEach(player => { 
-        const arr = player==='p1'?D.shells.p1:D.shells.p2;
-        for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
-      });
-      
+      ['p1','p2'].forEach(player => { const arr = player==='p1'?D.shells.p1:D.shells.p2; for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; } });
       updateBoard(); startTimer();
-
-      if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) {
-          registerAction(() => { rollGavvalu(p); }, 700);
-      }
+      if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) registerAction(() => { rollGavvalu(p); }, 700);
     }
 
-    // ===== FULLY ALLOCATION-FREE BOARD UPDATE WITH SAFEGUARDS =====
     function updateBoard() {
       const p = G.currentPlayer, r = G.currentRoll, mov = G.hasRolled ? getMovable(r) : [], movI = mov.map(m=>m.idx);
+      const p1C={}, p2C={}; for (let i=0; i<4; i++) { if (G.p1Tokens[i] !== -1) p1C[p1Path[G.p1Tokens[i]]] = (p1C[p1Path[G.p1Tokens[i]]]||0)+1; if (G.p2Tokens[i] !== -1) p2C[p2Path[G.p2Tokens[i]]] = (p2C[p2Path[G.p2Tokens[i]]]||0)+1; }
       
-      const p1C={}, p2C={}; 
-      for (let i=0; i<4; i++) {
-        if (G.p1Tokens[i] !== -1) {
-            const c = p1Path[G.p1Tokens[i]];
-            if (c) p1C[c] = (p1C[c]||0)+1;
-        }
-        if (G.p2Tokens[i] !== -1) {
-            const c = p2Path[G.p2Tokens[i]];
-            if (c) p2C[c] = (p2C[c]||0)+1;
-        }
-      }
+      document.querySelectorAll('.token').forEach(t=>t.remove());
       
-      const dC=new Set();
-      for (let j=0; j<4; j++) {
-        const pos1 = G.p1Tokens[j];
-        if (pos1 !== -1 && !safeZones.includes(p1Path[pos1])) {
-          const c = p1Path[pos1];
-          if (c) {
-              const i = p2Path.indexOf(c);
-              if (i !== -1 && (p2C[c]||0) < 2) {
-                for (let k=0; k<4; k++) { const p2 = G.p2Tokens[k]; if(p2!==-1 && p2<i && (i-p2)<=3) dC.add(c); }
-              }
-          }
-        }
-        const pos2 = G.p2Tokens[j];
-        if (pos2 !== -1 && !safeZones.includes(p2Path[pos2])) {
-          const c = p2Path[pos2];
-          if (c) {
-              const i = p1Path.indexOf(c);
-              if (i !== -1 && (p1C[c]||0) < 2) {
-                for (let k=0; k<4; k++) { const p1 = G.p1Tokens[k]; if(p1!==-1 && p1<i && (i-p1)<=3) dC.add(c); }
-              }
-          }
-        }
-      }
-
       for(let i=0; i<4; i++) {
         let pos1 = G.p1Tokens[i];
-        if (pos1 === -1) {
-            let vTok1 = D.p1VaultDOM[i];
-            if (D.p1TokensDOM[i] && D.p1TokensDOM[i].parentNode) D.p1TokensDOM[i].parentNode.removeChild(D.p1TokensDOM[i]);
-            if (vTok1 && D.p1Vault) {
-                const m = (p===1&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
-                vTok1.className = 'token p1-token' + (m ? ' movable-vault-token glow-move' : '');
-                D.p1Vault.appendChild(vTok1);
-            }
-        } else {
-            if (D.p1VaultDOM[i] && D.p1VaultDOM[i].parentNode) D.p1VaultDOM[i].parentNode.removeChild(D.p1VaultDOM[i]);
-            let coord1 = p1Path[pos1];
-            let bTok1 = D.p1TokensDOM[i];
-            
-            // STRICT DOM DECOUPLING FIX
-            if (bTok1 && coord1 && D.cells[coord1]) {
-                if (bTok1.parentNode) bTok1.parentNode.removeChild(bTok1);
-
-                bTok1.className = 'token p1-token';
-                if (p===1 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok1.classList.add('glow-move');
-                if (pos1 >= 41 && pos1 <= 46) bTok1.classList.add('shielded');
-                if (dC.has(coord1) && !G.isGameOver) bTok1.classList.add('danger');
-                
-                const isF1 = G.p1Tokens.indexOf(pos1) === i;
-                if (isF1 && p1C[coord1] > 1) { bTok1.classList.add('stack-badge'); bTok1.dataset.count = p1C[coord1]; }
-                if (!isF1) { bTok1.style.opacity = '0.25'; bTok1.style.position = 'absolute'; } 
-                else { bTok1.style.opacity = '1'; bTok1.style.position = 'static'; }
-                
-                D.cells[coord1].appendChild(bTok1);
-            }
-        }
+        if (pos1 === -1) { D.p1Vault.appendChild(D.p1TokensDOM[i]); D.p1TokensDOM[i].className = 'token p1-token'; } 
+        else { let c=p1Path[pos1]; if(c && D.cells[c]) { D.cells[c].appendChild(D.p1TokensDOM[i]); D.p1TokensDOM[i].className='token p1-token'; if(p===1&&G.hasRolled&&movI.includes(i)) D.p1TokensDOM[i].classList.add('glow-move'); } }
 
         let pos2 = G.p2Tokens[i];
-        if (pos2 === -1) {
-            let vTok2 = D.p2VaultDOM[i];
-            if (D.p2TokensDOM[i] && D.p2TokensDOM[i].parentNode) D.p2TokensDOM[i].parentNode.removeChild(D.p2TokensDOM[i]);
-            if (vTok2 && D.p2Vault) {
-                const m = (p===2&&G.hasRolled&&(r===6||r===12) && !G.isGameOver);
-                vTok2.className = 'token p2-token' + (m ? ' movable-vault-token glow-move' : '');
-                D.p2Vault.appendChild(vTok2);
-            }
-        } else {
-            if (D.p2VaultDOM[i] && D.p2VaultDOM[i].parentNode) D.p2VaultDOM[i].parentNode.removeChild(D.p2VaultDOM[i]);
-            let coord2 = p2Path[pos2];
-            let bTok2 = D.p2TokensDOM[i];
-            
-            // STRICT DOM DECOUPLING FIX
-            if (bTok2 && coord2 && D.cells[coord2]) {
-                if (bTok2.parentNode) bTok2.parentNode.removeChild(bTok2);
-
-                bTok2.className = 'token p2-token';
-                if (p===2 && G.hasRolled && movI.includes(i) && !G.isGameOver) bTok2.classList.add('glow-move');
-                if (pos2 >= 41 && pos2 <= 46) bTok2.classList.add('shielded');
-                if (dC.has(coord2) && !G.isGameOver) bTok2.classList.add('danger');
-                
-                const isF2 = G.p2Tokens.indexOf(pos2) === i;
-                if (isF2 && p2C[coord2] > 1) { bTok2.classList.add('stack-badge'); bTok2.dataset.count = p2C[coord2]; }
-                if (!isF2) { bTok2.style.opacity = '0.25'; bTok2.style.position = 'absolute'; }
-                else { bTok2.style.opacity = '1'; bTok2.style.position = 'static'; }
-                
-                D.cells[coord2].appendChild(bTok2);
-            }
-        }
+        if (pos2 === -1) { D.p2Vault.appendChild(D.p2TokensDOM[i]); D.p2TokensDOM[i].className = 'token p2-token'; } 
+        else { let c=p2Path[pos2]; if(c && D.cells[c]) { D.cells[c].appendChild(D.p2TokensDOM[i]); D.p2TokensDOM[i].className='token p2-token'; if(p===2&&G.hasRolled&&movI.includes(i)) D.p2TokensDOM[i].classList.add('glow-move'); } }
       }
-
       updateMeters(); checkWinner(); saveGameState();
     }
 
     function updateMeters() {
-      let p1pts=0, p2pts=0; 
-      G.p1Tokens.forEach(pos=>{ if(pos>=41&&pos<p1Path.length-1) p1pts+=pos*2; else if(pos>-1) p1pts+=pos; }); 
-      G.p2Tokens.forEach(pos=>{ if(pos>=41&&pos<p2Path.length-1) p2pts+=pos*2; else if(pos>-1) p2pts+=pos; });
-      
+      let p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0), p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0);
       if(p1pts>G.maxP1) G.maxP1=p1pts; if(p2pts>G.maxP2) G.maxP2=p2pts;
-      
       D.p1Kills.textContent=G.p1Kills; D.p2Kills.textContent=G.p2Kills;
       D.p1Perm.textContent=hasPerm(1)?'✅':'❌'; D.p2Perm.textContent=hasPerm(2)?'✅':'❌';
-      
-      const tot=G.maxP1+G.maxP2; let rp=tot>0?Math.round((G.maxP1/tot)*100):50; rp=Math.max(5,Math.min(95,rp)); const bp=100-rp;
-      D.mRed.style.width=rp+'%'; D.mRed.textContent=rp+'%';
-      D.mBlue.style.width=bp+'%'; D.mBlue.textContent=bp+'%';
+      const tot=G.maxP1+G.maxP2; let rp=tot>0?Math.round((G.maxP1/tot)*100):50; D.mRed.style.width=rp+'%'; D.mBlue.style.width=(100-rp)+'%';
     }
 
     function checkWinner() {
       if (G.p1Timeouts >= 4 || G.p2Timeouts >= 4) return;
-      const p1win=G.p1Tokens.every(p=>p===p1Path.length-1), p2win=G.p2Tokens.every(p=>p===p2Path.length-1);
+      const p1win=G.p1Tokens.every(p=>p===p1Path.length-1), p2win=G.p2Tokens.every(p=>p===p1Path.length-1);
       if (!p1win&&!p2win) return;
-      
       G.isGameOver=true; stopTimer(); clearGameLoops(); clearActionTimeouts();
-      D.p1RollBtn.disabled=true; D.p2RollBtn.disabled=true;
-      
-      D.p1Label.textContent = `${p1win?'RED':'BLUE'} విజేత! 👑`; D.p2Label.textContent = D.p1Label.textContent; 
-      D.p1Label.style.color = '#fbbf24'; D.p2Label.style.color = '#fbbf24';
-      
-      SFX.play('win'); const winner=p1win?'🔴 RED':'🔵 BLUE';
-      let p1Perm = hasPerm(1), p2Perm = hasPerm(2), winR = "అద్భుతం! అభినందనలు!";
-      if (p1win && !p2Perm) winR = "BLUE కి లోపలికి వెళ్లే పర్మిషన్ లేదు కాబట్టి ఓటమి!"; 
-      if (p2win && !p1Perm) winR = "RED కి లోపలికి వెళ్లే పర్మిషన్ లేదు కాబట్టి ఓటమి!";
-      
-      triggerConfetti();
-      try { updateBoard(); flashBoard('board-win-flash'); } catch(e) { console.error(e); } 
-      
-      D.mRed.style.width=p1win?'100%':'0%'; D.mRed.textContent=p1win?'100%':'0%';
-      D.mBlue.style.width=p2win?'100%':'0%'; D.mBlue.textContent=p2win?'100%':'0%';
-      showRestartScreen(`${winner} గెలిచారు! 👑`, winR);
+      SFX.play('win'); triggerConfetti();
+      showRestartScreen(`${p1win?'RED':'BLUE'} గెలిచారు! 👑`, `అభినందనలు!`);
     }
 
-    function syncUIWithState() {
-        const p = G.currentPlayer;
-        
-        D.p1RollBtn.disabled = (p !== 1 || G.hasRolled) || (G.gameMode === 'AI' && G.aiColor === 1); 
-        D.p2RollBtn.disabled = (p !== 2 || G.hasRolled) || (G.gameMode === 'AI' && G.aiColor === 2);
-        
-        D.p1Dot.className = `turn-dot ${p===1?'red':'dim'}`; 
-        D.p1Label.className = `turn-label ${p===1?'red':'dim'}`;
-        D.p1Label.textContent = 'RED వంతు';
-        D.p1Label.style.color = '';
-
-        D.p2Dot.className = `turn-dot ${p===2?'blue':'dim'}`; 
-        D.p2Label.className = `turn-label ${p===2?'blue':'dim'}`;
-        D.p2Label.textContent = 'BLUE వంతు';
-        D.p2Label.style.color = '';
-
-        if(G.hasRolled) {
-            const activeBtn = p === 1 ? D.p1RollBtn : D.p2RollBtn;
-            activeBtn.textContent = `🎲 ${G.currentRoll}`;
-            
-            let downCount = 0;
-            if (G.currentRoll === 12) downCount = 0;
-            else if (G.currentRoll === 6) downCount = 4;
-            else downCount = G.currentRoll;
-            
-            ['p1','p2'].forEach(player => {
-                const arr = player==='p1'?D.shells.p1:D.shells.p2;
-                const isPlaying = (player === (p===1?'p1':'p2'));
-                if (isPlaying) {
-                    for (let i=0;i<4;i++) { 
-                        if (i < downCount) { arr[i].className='shell-el down'; arr[i].textContent='บ'; }
-                        else { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
-                    }
-                } else {
-                    for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
-                }
-            });
-        } else {
-            D.p1RollBtn.textContent = p === 1 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
-            D.p2RollBtn.textContent = p === 2 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
-            ['p1','p2'].forEach(player => {
-                const arr = player==='p1'?D.shells.p1:D.shells.p2;
-                for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; }
-            });
-        }
-        
-        document.getElementById('main-game').style.display = 'flex';
-        updateStrikeDisplay(); 
-        updateBoard();
-        startTimer(); startGameLoops();
-        
-        if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) {
-            if (!G.hasRolled) {
-                registerAction(() => { rollGavvalu(p); }, 700);
-            } else {
-                const vaultIdxs = (p===1?G.p1Tokens:G.p2Tokens).reduce((a,v,i)=>v===-1?[...a,i]:a,[]);
-                const movable = getMovable(G.currentRoll);
-                const canRelease = (G.currentRoll===6||G.currentRoll===12) && vaultIdxs.length>0;
-                registerAction(() => executeAIMove(p, G.currentRoll, movable, canRelease, vaultIdxs), 700);
-            }
-        }
-    }
-
-    // ===== UI EVENT LISTENERS (Modals & Setup Wizard) =====
+    // Rules Modal
+    document.getElementById('rules-btn-action').addEventListener('click', () => { document.getElementById('rules-screen').style.display = 'flex'; requestAnimationFrame(() => document.getElementById('rules-screen').style.opacity = '1'); });
+    document.getElementById('rules-back-btn').addEventListener('click', () => { document.getElementById('rules-screen').style.opacity = '0'; setTimeout(() => document.getElementById('rules-screen').style.display = 'none', 300); });
     
-    document.getElementById('rules-btn-action').addEventListener('click', () => {
-      document.getElementById('rules-screen').style.display = 'flex';
-      requestAnimationFrame(() => document.getElementById('rules-screen').style.opacity = '1');
-    });
-    document.getElementById('rules-back-btn').addEventListener('click', () => {
-      document.getElementById('rules-screen').style.opacity = '0';
-      setTimeout(() => document.getElementById('rules-screen').style.display = 'none', 300);
-    });
-
+    // Quit Modal Logic
     document.getElementById('btn-quit-main').addEventListener('click', () => { document.getElementById('quit-modal').style.display = 'flex'; });
     document.getElementById('btn-quit-no').addEventListener('click', () => { document.getElementById('quit-modal').style.display = 'none'; });
     document.getElementById('btn-quit-yes').addEventListener('click', () => {
@@ -1170,6 +874,7 @@
         G = getInitialState(); clearGameState(); stopTimer(); clearGameLoops(); clearActionTimeouts();
     });
 
+    // Setup Wizard
     function showSetupStep(step) {
       document.getElementById('step-mode').style.display = (step === 0) ? 'flex' : 'none';
       document.getElementById('step-color').style.display = (step === 1) ? 'flex' : 'none';
@@ -1177,9 +882,7 @@
       currentSetupStep = step;
       
       if (step === 2) {
-          const sumText = tempSetup.mode === '2P' 
-              ? "👥 Two Players Mode" 
-              : `🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor === 1 ? '🔴 RED' : '🔵 BLUE'} | Bot: ${tempSetup.aColor === 1 ? '🔴 RED' : '🔵 BLUE'}</span>`;
+          const sumText = tempSetup.mode === '2P' ? "👥 Two Players Mode" : `🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor === 1 ? '🔴 RED' : '🔵 BLUE'} | Bot: ${tempSetup.aColor === 1 ? '🔴 RED' : '🔵 BLUE'}</span>`;
           document.getElementById('ready-summary').innerHTML = sumText;
       }
     }
@@ -1202,30 +905,25 @@
 
     document.getElementById('btn-mode-2p').addEventListener('click', () => { tempSetup.mode = '2P'; showSetupStep(2); });
     document.getElementById('btn-mode-ai').addEventListener('click', () => { tempSetup.mode = 'AI'; showSetupStep(1); });
-    
     document.getElementById('btn-color-red').addEventListener('click', () => { tempSetup.hColor = 1; tempSetup.aColor = 2; showSetupStep(2); });
     document.getElementById('btn-color-blue').addEventListener('click', () => { tempSetup.hColor = 2; tempSetup.aColor = 1; showSetupStep(2); });
-
     document.getElementById('final-start-btn').addEventListener('click', () => {
       SFX.init();
       G.gameMode = tempSetup.mode;
       G.humanColor = tempSetup.hColor;
       G.aiColor = tempSetup.aColor;
-      
       document.getElementById('setup-screen').style.opacity = '0';
       document.getElementById('start-screen').style.opacity = '0';
       setTimeout(() => {
           document.getElementById('setup-screen').style.display = 'none';
           document.getElementById('start-screen').style.display = 'none';
           document.getElementById('main-game').style.display = 'flex';
-          updateStrikeDisplay(); startGameLoops(); resetRoll();
-          saveGameState();
+          updateStrikeDisplay(); startGameLoops(); resetRoll(); saveGameState();
       }, 300);
     });
 
     window.onload = function() {
       initDOM();
-      
       if (loadGameState()) {
           document.getElementById('start-screen').style.display = 'none'; syncUIWithState();
       }
