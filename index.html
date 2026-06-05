@@ -751,7 +751,7 @@
         const cell = D.cells[coord];
         
         if (cell && tokenEl.parentNode !== cell) {
-          // FLIP Animation: First, Last, Invert, Play
+          // FLIP Animation: అద్భుతమైన స్మూత్ స్లైడింగ్ కోసం
           const startRect = tokenEl.getBoundingClientRect();
           cell.appendChild(tokenEl);
           const endRect = tokenEl.getBoundingClientRect();
@@ -776,18 +776,26 @@
       doStep();
     }
 
-    // Walk token forward along path smoothly
+    // Walk token forward smoothly (normal move / portal jump / vault release)
     function walkForward(player, tIdx, fromPos, toPos, onDone) {
       const path  = player === 1 ? p1Path : p2Path;
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
       const steps = [];
       
-      // Fix BUG: Handle wrap-around on the outer path (index 23 -> 0)
-      if (toPos < fromPos) {
-        for (let i = fromPos + 1; i <= 23; i++) steps.push(i);
-        for (let i = 0; i <= toPos; i++) steps.push(i);
-      } else {
-        for (let i = fromPos + 1; i <= toPos; i++) steps.push(i);
+      let curr = fromPos;
+      while (curr !== toPos) {
+        // లోపలి రౌండ్ (Inner loop) కి వెళ్లేటప్పుడు ఎడమ వైపు ఉన్న బాక్స్ (index 23 అనగా 7,3 / 1,5) ని ఖచ్చితంగా స్కిప్ చేసి నేరుగా 24 కి వెళ్లాలి
+        if (toPos >= 24 && curr === 22) {
+          curr = 24; 
+        } 
+        // ఔటర్ లూప్ చుట్టూ తిరిగేటప్పుడు 23 తర్వాత మళ్ళీ 0 కి (Wrap around) వెళ్లాలి
+        else if (curr === 23 && toPos < 24) {
+          curr = 0; 
+        } 
+        else {
+          curr++;
+        }
+        steps.push(curr);
       }
       
       const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
@@ -800,12 +808,20 @@
       const tokEl = (player === 1 ? D.p1TokensDOM : D.p2TokensDOM)[tIdx];
       const steps = [];
       
-      // Fix BUG: Handle wrap-around backward
-      if (fromPos < toPos) {
-        for (let i = fromPos - 1; i >= 0; i--) steps.push(i);
-        for (let i = 23; i >= toPos; i--) steps.push(i);
-      } else {
-        for (let i = fromPos - 1; i >= toPos; i--) steps.push(i);
+      let curr = fromPos;
+      while (curr !== toPos) {
+        // లోపలి రౌండ్ నుండి (TimeOut/Kill ద్వారా) బయటికి వెనక్కి వచ్చేటప్పుడు 23 ని స్కిప్ చేసి 22 కి వెళ్ళాలి
+        if (curr === 24 && toPos < 24) {
+          curr = 22; 
+        } 
+        // ఔటర్ లూప్ లో వెనక్కి వెళ్లేటప్పుడు 0 తర్వాత వెనక్కి 23 కి వెళ్లాలి
+        else if (curr === 0 && toPos > 0 && fromPos < 24) {
+          curr = 23; 
+        } 
+        else {
+          curr--;
+        }
+        steps.push(curr);
       }
       
       const stepMs = steps.length > 6 ? 120 : (steps.length > 3 ? 160 : 200);
@@ -873,74 +889,57 @@
       }
     }
 
+    // ===== HARD AI LOGIC =====
     function executeAIMove(p,finalRoll,movable,canRelease,vaultIdxs){
       if(G.isGameOver||G.currentPlayer!==p||!G.hasRolled)return;
       let options=[];
-      if(canRelease&&vaultIdxs.length>0){vaultIdxs.forEach(idx=>options.push({type:'vault',idx}));}
-      movable.forEach(m=>options.push({type:'board',idx:m.idx}));
-      if(!options.length){afterMove();return;}
       
-      // AI Logic: Prioritize kills, portals, avoiding redholes, and scoring
-      function evaluate(opt) {
-        let score = 0;
-        const oppTokens = p===1 ? G.p2Tokens : G.p1Tokens;
-        const myTokens = p===1 ? G.p1Tokens : G.p2Tokens;
-        const path = p===1 ? p1Path : p2Path;
-        const oppPath = p===1 ? p2Path : p1Path;
-        let targetPos, targetCoord;
-
-        if (opt.type === 'vault') {
-            score += 60; // Releasing is good
-            if (finalRoll === 12 && vaultIdxs.length >= 2) targetPos = 0;
-            else if (finalRoll === 12 && vaultIdxs.length === 1) targetPos = 6;
-            else targetPos = 0;
-            targetCoord = path[targetPos];
-        } else {
-            targetPos = movable.find(m => m.idx === opt.idx).targetPos;
-            targetCoord = path[targetPos];
-            score += targetPos; // Progress mapping
-        }
-
-        // Rule 1: AVOID RED HOLE!
-        if (targetCoord === activeRedhole) return -1000;
-
-        // Rule 2: Move to Crown (Win condition)
-        if (targetPos === path.length - 1) score += 1000;
-
-        // Rule 3: Kill Opponent (Top Priority)
-        if (!safeZones.includes(targetCoord) && oppTokens.some(ot => ot !== -1 && oppPath[ot] === targetCoord)) {
-            let oppCount = oppTokens.filter(ot => ot !== -1 && oppPath[ot] === targetCoord).length;
-            let oppFirstOrange = p===1 ? G.orangeFirstP2Coord[targetCoord] : G.orangeFirstP1Coord[targetCoord];
-            // If enemy is protected by shield or double coin, avoid!
-            if (oppFirstOrange || oppCount >= 2) return -800; 
-            else score += 500; // Safe to kill
-        }
-
-        // Rule 4: Claim Portal
-        if (targetCoord === activePortal) score += 400;
-
-        // Rule 5: Land on Safe Zone
-        if (safeZones.includes(targetCoord)) score += 40;
-
-        // Rule 6: Enter empty Orange zone for Shield
-        if (isInOrange(targetPos, p) && !G.orangeFirstP1Coord[targetCoord] && !G.orangeFirstP2Coord[targetCoord]) score += 200;
-
-        // Add small random tie-breaker
-        return score + (Math.random() * 10);
+      // Vault Release కి బేసిక్ స్కోర్
+      if(canRelease&&vaultIdxs.length>0){
+        vaultIdxs.forEach(idx=>options.push({type:'vault', idx:idx, score:50}));
       }
 
-      let bestOption = options[0];
-      let bestScore = -Infinity;
-      options.forEach(opt => {
-        let s = evaluate(opt);
-        if (s > bestScore) {
-          bestScore = s;
-          bestOption = opt;
+      const path = p===1 ? p1Path : p2Path;
+      const oppPath = p===1 ? p2Path : p1Path;
+      const oppTokens = p===1 ? G.p2Tokens : G.p1Tokens;
+      
+      movable.forEach(m => {
+        let score = 10; // ప్రతి మూవ్‌కి బేస్ స్కోర్
+        const destCoord = path[m.targetPos];
+
+        // 1. Kill చేయడానికి First Priority
+        if(!safeZones.includes(destCoord) && oppTokens.some(op => op !== -1 && oppPath[op] === destCoord)){
+          score += 200; // అపోనెంట్ ని చంపే అవకాశం ఉంటే హైయెస్ట్ స్కోర్!
         }
+        // 2. Portal పట్టుకోవడానికి Second Priority
+        if(destCoord === activePortal){
+          score += 100;
+        }
+        // 3. Red hole పడకుండా ఎస్కేప్ అవ్వాలి!
+        if(destCoord === activeRedhole){
+          score -= 1000; // నెగెటివ్ స్కోర్ ఇచ్చి దీన్ని కచ్చితంగా అవాయిడ్ చేస్తుంది
+        }
+        // 4. Safe Zones లోకి వెళ్లడం మంచిది
+        if(safeZones.includes(destCoord)){
+          score += 30;
+        }
+        // 5. Crown కి దగ్గరవుతున్న కొద్దీ స్కోర్ పెరుగుతుంది
+        score += (m.targetPos * 0.5);
+
+        options.push({type:'board', idx:m.idx, score:score});
       });
 
-      if(bestOption.type==='vault') releaseFromVault(p,bestOption.idx,null);
-      else moveToken(p,bestOption.idx,null);
+      if(!options.length){afterMove();return;}
+
+      // స్కోర్ల ఆధారంగా ఆప్షన్స్ ని ఆర్డర్ చేయడం (ఎక్కువ స్కోర్ ఉన్నది ఫస్ట్ వస్తుంది)
+      options.sort((a,b) => b.score - a.score);
+
+      // ఫస్ట్ ఉన్న బెస్ట్ ఆప్షన్‌ని సెలెక్ట్ చేయడం
+      const bestOptions = options.filter(o => o.score === options[0].score);
+      const choice = bestOptions[Math.floor(Math.random() * bestOptions.length)];
+
+      if(choice.type === 'vault') releaseFromVault(p,choice.idx,null);
+      else moveToken(p,choice.idx,null);
     }
 
     // Release helpers — animate enter on board arrival
