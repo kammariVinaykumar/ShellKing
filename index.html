@@ -74,15 +74,15 @@
 
     /* ===== MAIN LAYOUT (MOBILE ONLY - FACE TO FACE) ===== */
     .game-wrap { display: flex; flex-direction: column; justify-content: space-between; width: 100%; max-width: 500px; height: 100%; gap: 4px; }
-    .blue-panel { transform: rotate(180deg); } /* Rotated for opponent */
+    .blue-panel { transform: rotate(180deg); }
     
     .player-panel {
       display: flex; flex-direction: column; width: 100%; background: var(--panel-card);
       border: 1px solid var(--panel-border); border-radius: 12px; padding: 6px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5); flex-shrink: 0; transform: translateZ(0); /* Hardware accel wrapper */
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); flex-shrink: 0; transform: translateZ(0);
     }
 
-    /* Action Bar (Roll + Shells + Coins inline) */
+    /* Action Bar */
     .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
     
     /* Conic Gradient Animated Timer Border */
@@ -122,9 +122,21 @@
     .bottom-extra { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
     .pred-wrap { flex: 1; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); padding: 4px; }
     .pred-header { font-size: 9px; color: var(--text-muted); text-align: center; margin-bottom: 2px; font-weight: bold; }
-    .meter-track { height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; display: flex; overflow: hidden; }
-    .meter-red { background: linear-gradient(90deg, #b91c1c, #ef4444); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; transition: width 0.4s ease; will-change: width; }
-    .meter-blue { background: linear-gradient(90deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; transition: width 0.4s ease; will-change: width; }
+    .meter-track { height: 14px; background: rgba(255,255,255,0.05); border-radius: 7px; display: flex; overflow: hidden; }
+    .meter-red {
+      background: linear-gradient(90deg, #b91c1c, #ef4444);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 800; color: white;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: width; min-width: 0; overflow: hidden; white-space: nowrap;
+    }
+    .meter-blue {
+      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 800; color: white;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: width; min-width: 0; overflow: hidden; white-space: nowrap;
+    }
     .quit-btn { background: #7f1d1d; color: white; font-size: 12px; font-weight: bold; border: 1px solid #ef4444; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
     /* ===== GIANT BOARD SCALING ===== */
@@ -148,7 +160,7 @@
     .arrow-down::after { content:'↓'; position:absolute; bottom:-8px; font-size:10px; color:#b91c1c; font-weight:700; z-index:40; }
 
     /* ===== TOKENS & ANIMATIONS ===== */
-    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, box-shadow 0.15s; outline: none; will-change: transform, box-shadow; }
+    .token { width: 75%; height: 75%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, box-shadow 0.15s; outline: none; will-change: transform, box-shadow; position: relative; }
     .p1-token { background: radial-gradient(circle at 35% 35%, #f87171, #b91c1c); box-shadow: 0 2px 6px rgba(185,28,28,0.6); }
     .p2-token { background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8); box-shadow: 0 2px 6px rgba(29,78,216,0.6); }
     .token.glow-move { animation: token-pulse 0.7s infinite alternate; border-color: #fbbf24; }
@@ -157,7 +169,27 @@
     @keyframes shield-anim { 0% { box-shadow: 0 0 6px #22d3ee; } 100% { box-shadow: 0 0 15px #22d3ee; } }
     .token.danger { animation: danger-anim 0.45s infinite alternate !important; }
     @keyframes danger-anim { 0% { box-shadow: 0 0 4px #f97316; } 100% { box-shadow: 0 0 15px #ef4444; } }
-    .token.stack-badge::after { content: attr(data-count); position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; background: #fbbf24; color: #7c2d12; border-radius: 50%; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 1px solid white; z-index: 30; }
+
+    /* ===== STACK BADGE (coin count on stacked tokens) ===== */
+    .token .stack-count {
+      position: absolute;
+      top: -5px; right: -5px;
+      min-width: 15px; height: 15px;
+      background: #fbbf24;
+      color: #7c2d12;
+      border-radius: 50%;
+      font-size: 9px;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid white;
+      z-index: 35;
+      pointer-events: none;
+      line-height: 1;
+      padding: 0 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      animation: badge-pop 0.25s ease-out;
+    }
+    @keyframes badge-pop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
 
     /* Traps & Effects */
     .portal-layer, .redhole-layer { position: absolute; inset: 0; border-radius: 12%; z-index: 15; pointer-events: none; display: flex; align-items: center; justify-content: center; font-size: 18px; will-change: box-shadow; }
@@ -198,8 +230,6 @@
       <button class="btn-back" id="setup-back-btn">⬅ బ్యాక్</button>
       <h2>గేమ్ సెటప్</h2>
     </div>
-    
-    <!-- STEP 0: MODE SELECTION -->
     <div class="setup-content" id="step-mode">
       <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;">మోడ్ ఎంచుకోండి</h3>
       <div class="setup-options">
@@ -207,8 +237,6 @@
          <button class="setup-btn" id="btn-mode-ai">🤖 Human vs AI</button>
       </div>
     </div>
-
-    <!-- STEP 1: COLOR SELECTION -->
     <div class="setup-content" id="step-color" style="display:none;">
       <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;">మీ రంగు ఎంచుకోండి</h3>
       <div class="setup-options">
@@ -216,8 +244,6 @@
          <button class="setup-btn setup-btn-blue" id="btn-color-blue">🔵 BLUE</button>
       </div>
     </div>
-
-    <!-- STEP 2: READY / START -->
     <div class="setup-content" id="step-ready" style="display:none;">
       <h3 style="color:var(--gold); text-align:center; margin-bottom: 24px;" id="ready-summary"></h3>
       <button class="start-btn" id="final-start-btn">Start Game</button>
@@ -231,104 +257,18 @@
       <h2>📜 గేమ్ రూల్స్</h2>
     </div>
     <div class="rules-content">
-      <div class="rule-card">
-        <h3>🎯 లక్ష్యం</h3>
-        <p>మీ 4 కాయిన్స్‌ను 👑 Crown Cell కి ముందుగా చేర్చిన ప్లేయర్ గెలుస్తాడు.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🎲 గవ్వల విలువలు</h3>
-        <ul>
-          <li><strong>1 బొర్లా</strong> = 1 అడుగు</li>
-          <li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li>
-          <li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li>
-          <li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li>
-          <li><strong>0 బొర్లాలు</strong> = 12 అడుగులు</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🚪 కాయిన్ రిలీజ్</h3>
-        <p><strong>6</strong> లేదా <strong>12</strong> వచ్చినప్పుడు Vault లో ఉన్న కాయిన్‌ను Board మీదికి తీసుకురావచ్చు.</p>
-        <p><strong>12 వచ్చినప్పుడు:</strong></p>
-        <ul>
-          <li>Board లో ఒక్క కాయిన్ కూడా లేకపోతే <strong>2 కాయిన్స్</strong> రిలీజ్ అవుతాయి.</li>
-          <li>ఒక్క కాయిన్ మాత్రమే Vault లో ఉంటే అది రిలీజ్ అయ్యి <strong>6 అడుగులు</strong> ముందుకు వెళుతుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔥 కిల్ రూల్</h3>
-        <p>మీ కాయిన్ ప్రత్యర్థి కాయిన్ ఉన్న బ్లాక్ మీద ఆగితే:</p>
-        <ul>
-          <li>ప్రత్యర్థి కాయిన్ Vault కి వెళుతుంది.</li>
-          <li>మీకు <strong>Kill Point</strong> వస్తుంది.</li>
-          <li><strong>Bonus Chance</strong> వస్తుంది.</li>
-          <li><strong>Extra Turn</strong> వస్తుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🟢 Safe Zones</h3>
-        <p>Safe Zone లో ఉన్న కాయిన్‌ను Kill చేయలేరు.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>👥 Double Coin Protection</h3>
-        <p>ఒకే బ్లాక్‌లో 2 ఒకే రంగు కాయిన్స్ ఉంటే:</p>
-        <ul>
-          <li>వాటిని Single Coin Kill చేయలేడు.</li>
-          <li>Attack చేసిన కాయిన్ Start కి వెళుతుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🛡️ Shield Zone</h3>
-        <p>Orange Path లోకి వచ్చిన కాయిన్‌కు Shield వస్తుంది.</p>
-        <p>Shield ఉన్న కాయిన్‌ను నేరుగా Kill చేయలేరు.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🌀 Portal</h3>
-        <p>Portal మీద Land అయితే:</p>
-        <ul>
-          <li>10 లేదా 11 అడుగులు Jump అవుతుంది.</li>
-          <li>Center Permission వస్తుంది.</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔥 Red Hole</h3>
-        <p>Red Hole మీద Land అయితే:</p>
-        <p>కాయిన్ Start Position కి వెళుతుంది.</p>
-      </div>
-
-      <div class="rule-card">
-        <h3>🔑 Center Permission</h3>
-        <p>Center Area లోకి వెళ్లడానికి:</p>
-        <ul>
-          <li>కనీసం <strong>1 Kill</strong> చేయాలి</li>
-          <li>OR <strong>Portal</strong> ఉపయోగించాలి</li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>⏳ Time Out Rules</h3>
-        <p>ప్రతి Turn కి Time Limit ఉంటుంది.</p>
-        <p>Time Out అయితే:</p>
-        <ul>
-          <li>1st Strike ⚡</li>
-          <li>2nd Strike ⚡⚡</li>
-          <li>3rd Strike ⚡⚡⚡</li>
-          <li>4th Strike = <strong>Disqualified ❌</strong></li>
-        </ul>
-      </div>
-
-      <div class="rule-card">
-        <h3>🏆 విజయం</h3>
-        <p>మీ 4 కాయిన్స్ అన్నీ 👑 Crown Cell కి చేరితే మీరు గెలుస్తారు.</p>
-        <p>లేదా ప్రత్యర్థి 4 Time Outs వల్ల Disqualify అయితే మీరు గెలుస్తారు.</p>
-      </div>
+      <div class="rule-card"><h3>🎯 లక్ష్యం</h3><p>మీ 4 కాయిన్స్‌ను 👑 Crown Cell కి ముందుగా చేర్చిన ప్లేయర్ గెలుస్తాడు.</p></div>
+      <div class="rule-card"><h3>🎲 గవ్వల విలువలు</h3><ul><li><strong>1 బొర్లా</strong> = 1 అడుగు</li><li><strong>2 బొర్లాలు</strong> = 2 అడుగులు</li><li><strong>3 బొర్లాలు</strong> = 3 అడుగులు</li><li><strong>4 బొర్లాలు</strong> = 6 అడుగులు</li><li><strong>0 బొర్లాలు</strong> = 12 అడుగులు</li></ul></div>
+      <div class="rule-card"><h3>🚪 కాయిన్ రిలీజ్</h3><p><strong>6</strong> లేదా <strong>12</strong> వచ్చినప్పుడు Vault లో ఉన్న కాయిన్‌ను Board మీదికి తీసుకురావచ్చు.</p></div>
+      <div class="rule-card"><h3>🔥 కిల్ రూల్</h3><p>మీ కాయిన్ ప్రత్యర్థి కాయిన్ ఉన్న బ్లాక్ మీద ఆగితే ప్రత్యర్థి కాయిన్ Vault కి వెళుతుంది.</p></div>
+      <div class="rule-card"><h3>🟢 Safe Zones</h3><p>Safe Zone లో ఉన్న కాయిన్‌ను Kill చేయలేరు.</p></div>
+      <div class="rule-card"><h3>👥 Double Coin Protection</h3><p>ఒకే బ్లాక్‌లో 2 ఒకే రంగు కాయిన్స్ ఉంటే వాటిని Single Coin Kill చేయలేడు.</p></div>
+      <div class="rule-card"><h3>🛡️ Shield Zone</h3><p>Orange Path లోకి వచ్చిన కాయిన్‌కు Shield వస్తుంది.</p></div>
+      <div class="rule-card"><h3>🌀 Portal</h3><p>Portal మీద Land అయితే 10 లేదా 11 అడుగులు Jump అవుతుంది. Center Permission వస్తుంది.</p></div>
+      <div class="rule-card"><h3>🔥 Red Hole</h3><p>Red Hole మీద Land అయితే కాయిన్ Start Position కి వెళుతుంది.</p></div>
+      <div class="rule-card"><h3>🔑 Center Permission</h3><p>Center Area లోకి వెళ్లడానికి కనీసం <strong>1 Kill</strong> చేయాలి OR <strong>Portal</strong> ఉపయోగించాలి.</p></div>
+      <div class="rule-card"><h3>⏳ Time Out Rules</h3><p>4th Strike = <strong>Disqualified ❌</strong></p></div>
+      <div class="rule-card"><h3>🏆 విజయం</h3><p>మీ 4 కాయిన్స్ అన్నీ 👑 Crown Cell కి చేరితే మీరు గెలుస్తారు.</p></div>
     </div>
   </div>
 
@@ -351,10 +291,10 @@
     </div>
   </div>
 
-  <!-- MAIN GAME UI (MOBILE ONLY) -->
+  <!-- MAIN GAME UI -->
   <div class="game-wrap" id="main-game" style="display:none;">
 
-    <!-- P2 CONTROLS (BLUE) - TOP OF SCREEN, ROTATED 180 DEG -->
+    <!-- P2 CONTROLS (BLUE) - TOP, ROTATED 180° -->
     <div class="player-panel blue-panel">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p2-timer-wrap">
@@ -366,7 +306,6 @@
         </div>
         <div class="vault-tokens-inline" id="p2-vault-tokens"></div>
       </div>
-
       <div class="stats-bar">
         <div class="turn-badge-mini"><div class="turn-dot dim" id="p2-dot"></div><span class="turn-label dim" id="p2-label">BLUE వంతు</span></div>
         <div class="stats-group">
@@ -376,14 +315,14 @@
       </div>
     </div>
 
-    <!-- GIANT GAME BOARD -->
+    <!-- BOARD -->
     <div class="center-col">
       <div class="board-wrap">
         <div class="board" id="game-board"></div>
       </div>
     </div>
 
-    <!-- P1 CONTROLS (RED) - BOTTOM OF SCREEN -->
+    <!-- P1 CONTROLS (RED) - BOTTOM -->
     <div class="player-panel red-panel">
       <div class="action-bar">
         <div class="roll-btn-wrap" id="p1-timer-wrap">
@@ -395,7 +334,6 @@
         </div>
         <div class="vault-tokens-inline" id="p1-vault-tokens"></div>
       </div>
-
       <div class="stats-bar">
         <div class="turn-badge-mini"><div class="turn-dot red" id="p1-dot"></div><span class="turn-label red" id="p1-label">RED వంతు</span></div>
         <div class="stats-group">
@@ -403,11 +341,10 @@
           <div class="strikes-row" id="p1-strikes"></div>
         </div>
       </div>
-
-      <!-- Prediction & Quit Button Bottom Row -->
+      <!-- Prediction & Quit -->
       <div class="bottom-extra">
         <div class="pred-wrap">
-          <div class="pred-header">గెలుపు అంచనా (PREDICTION)</div>
+          <div class="pred-header">గెలుపు అంచనా — 🔴 <span id="pred-red-pct">50</span>% vs 🔵 <span id="pred-blue-pct">50</span>%</div>
           <div class="meter-track">
             <div class="meter-red" id="m-red" style="width:50%">50%</div>
             <div class="meter-blue" id="m-blue" style="width:50%">50%</div>
@@ -418,9 +355,8 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT (LOGIC) -->
   <script>
-    // ===== OPTIMIZED DOM CACHING =====
+    // ===== DOM CACHE =====
     const D = {
       board: null, cells: {},
       p1TokensDOM: [], p2TokensDOM: [], p1VaultDOM: [], p2VaultDOM: [],
@@ -429,7 +365,7 @@
       p1TimerWrap: null, p2TimerWrap: null,
       p1Dot: null, p2Dot: null, p1Label: null, p2Label: null,
       p1Kills: null, p2Kills: null, p1Perm: null, p2Perm: null,
-      mRed: null, mBlue: null,
+      mRed: null, mBlue: null, predRedPct: null, predBluePct: null,
       p1Strikes: null, p2Strikes: null,
       shells: { p1: [], p2: [] },
       portalEl: null, redholeEl: null
@@ -452,6 +388,7 @@
       }
     };
 
+    const TOTAL_STEPS = 49; // p1Path.length
     const p1Path = ["7,4","7,5","7,6","7,7","6,7","5,7","4,7","3,7","2,7","1,7","1,6","1,5","1,4","1,3","1,2","1,1","2,1","3,1","4,1","5,1","6,1","7,1","7,2","7,3","6,2","5,2","4,2","3,2","2,2","2,3","2,4","2,5","2,6","3,6","4,6","5,6","6,6","6,5","6,4","6,3","5,3","4,3","3,3","3,4","3,5","4,5","5,5","5,4","4,4"];
     const p2Path = ["1,4","1,3","1,2","1,1","2,1","3,1","4,1","5,1","6,1","7,1","7,2","7,3","7,4","7,5","7,6","7,7","6,7","5,7","4,7","3,7","2,7","1,7","1,6","1,5","2,6","3,6","4,6","5,6","6,6","6,5","6,4","6,3","6,2","5,2","4,2","3,2","2,2","2,3","2,4","2,5","3,5","4,5","5,5","5,4","5,3","4,3","3,3","3,4","4,4"];
     const safeZones = ["1,4","4,7","7,4","4,1","4,4"];
@@ -459,11 +396,16 @@
 
     function getInitialState() {
       return { 
-          currentPlayer: 1, currentRoll: 0, hasRolled: false, p1Tokens: [-1,-1,-1,-1], p2Tokens: [-1,-1,-1,-1], 
-          isGameOver: false, extraTurns: 0, p1Kills: 0, p2Kills: 0, p1PortalUsed: false, p2PortalUsed: false, 
-          p1BonusPending: false, p2BonusPending: false, p1Revenge: false, p2Revenge: false, p1MissCount: 0, 
-          p2MissCount: 0, p1Timeouts: 0, p2Timeouts: 0, maxP1: 0, maxP2: 0,
-          gameMode: '2P', humanColor: 1, aiColor: 2, aiDifficulty: 'EASY' 
+        currentPlayer: 1, currentRoll: 0, hasRolled: false,
+        p1Tokens: [-1,-1,-1,-1], p2Tokens: [-1,-1,-1,-1], 
+        isGameOver: false, extraTurns: 0,
+        p1Kills: 0, p2Kills: 0,
+        p1PortalUsed: false, p2PortalUsed: false, 
+        p1BonusPending: false, p2BonusPending: false,
+        p1Revenge: false, p2Revenge: false,
+        p1MissCount: 0, p2MissCount: 0,
+        p1Timeouts: 0, p2Timeouts: 0,
+        gameMode: '2P', humanColor: 1, aiColor: 2, aiDifficulty: 'EASY' 
       };
     }
     
@@ -471,13 +413,10 @@
     let activePortal = null, portalTimer = null;
     let activeRedhole = null, redholeTimer = null;
     let turnTimeLeft = 100;
-    
     let gameLoopIntervals = []; 
     let actionTimeouts = [];
     let timerIntervalRef = null;
     let saveDebounceRef = null;
-
-    // Wizard Variables
     let tempSetup = { mode: '2P', hColor: 1, aColor: 2 };
     let currentSetupStep = 0;
 
@@ -485,45 +424,41 @@
     function clearActionTimeouts() { actionTimeouts.forEach(clearTimeout); actionTimeouts = []; }
 
     function saveGameState() { 
-        if (G.isGameOver) return; 
-        clearTimeout(saveDebounceRef);
-        saveDebounceRef = setTimeout(() => { localStorage.setItem('shellkoin_state_mob', JSON.stringify(G)); }, 300);
+      if (G.isGameOver) return; 
+      clearTimeout(saveDebounceRef);
+      saveDebounceRef = setTimeout(() => { localStorage.setItem('shellkoin_state_mob', JSON.stringify(G)); }, 300);
     }
     function loadGameState() { const saved = localStorage.getItem('shellkoin_state_mob'); if (saved) { try { G = { ...getInitialState(), ...JSON.parse(saved) }; return true; } catch(e) { return false; } } return false; }
     function clearGameState() { clearTimeout(saveDebounceRef); localStorage.removeItem('shellkoin_state_mob'); }
 
     function startGameLoops() {
-        clearGameLoops();
-        gameLoopIntervals.push(setInterval(tryPortal, 18000));
-        gameLoopIntervals.push(setInterval(tryRedhole, 25000));
+      clearGameLoops();
+      gameLoopIntervals.push(setInterval(tryPortal, 18000));
+      gameLoopIntervals.push(setInterval(tryRedhole, 25000));
     }
-    
     function clearGameLoops() {
-        gameLoopIntervals.forEach(clearInterval);
-        gameLoopIntervals = [];
-        clearTimeout(portalTimer);
-        clearTimeout(redholeTimer);
-        removePortal(); removeRedhole();
+      gameLoopIntervals.forEach(clearInterval);
+      gameLoopIntervals = [];
+      clearTimeout(portalTimer); clearTimeout(redholeTimer);
+      removePortal(); removeRedhole();
     }
 
     function restartGame() {
-        const currentMode = G.gameMode, currentHColor = G.humanColor, currentAColor = G.aiColor, currentDiff = G.aiDifficulty;
-        G = getInitialState(); 
-        G.gameMode = currentMode; G.humanColor = currentHColor; G.aiColor = currentAColor; G.aiDifficulty = currentDiff;
-        
-        clearGameState(); clearActionTimeouts();
-        document.getElementById('restart-screen').style.display = 'none';
-        clearGameLoops(); startGameLoops();
-        updateStrikeDisplay(); resetRoll();
+      const m=G.gameMode, h=G.humanColor, a=G.aiColor, d=G.aiDifficulty;
+      G = getInitialState(); G.gameMode=m; G.humanColor=h; G.aiColor=a; G.aiDifficulty=d;
+      clearGameState(); clearActionTimeouts();
+      document.getElementById('restart-screen').style.display = 'none';
+      clearGameLoops(); startGameLoops();
+      updateStrikeDisplay(); resetRoll();
     }
     
     function showRestartScreen(title, sub) {
-        clearGameState(); clearGameLoops(); clearActionTimeouts();
-        setTimeout(() => {
-            document.getElementById('rs-title').textContent = title;
-            document.getElementById('rs-sub').textContent = sub;
-            document.getElementById('restart-screen').style.display = 'flex';
-        }, 3000);
+      clearGameState(); clearGameLoops(); clearActionTimeouts();
+      setTimeout(() => {
+        document.getElementById('rs-title').textContent = title;
+        document.getElementById('rs-sub').textContent = sub;
+        document.getElementById('restart-screen').style.display = 'flex';
+      }, 3000);
     }
 
     function initDOM() {
@@ -539,11 +474,13 @@
       D.p1Kills = document.getElementById('p1-kills'); D.p2Kills = document.getElementById('p2-kills');
       D.p1Perm = document.getElementById('p1-perm'); D.p2Perm = document.getElementById('p2-perm');
       D.mRed = document.getElementById('m-red'); D.mBlue = document.getElementById('m-blue');
+      D.predRedPct = document.getElementById('pred-red-pct');
+      D.predBluePct = document.getElementById('pred-blue-pct');
       D.p1Strikes = document.getElementById('p1-strikes'); D.p2Strikes = document.getElementById('p2-strikes');
       
       for(let i=0; i<4; i++) {
-          D.shells.p1.push(document.getElementById(`p1-s${i}`));
-          D.shells.p2.push(document.getElementById(`p2-s${i}`));
+        D.shells.p1.push(document.getElementById(`p1-s${i}`));
+        D.shells.p2.push(document.getElementById(`p2-s${i}`));
       }
 
       for (let r=1; r<=7; r++) {
@@ -551,9 +488,12 @@
           const cell = document.createElement('div');
           cell.className = 'cell'; cell.style.gridRow = r; cell.style.gridColumn = c;
           const coord = `${r},${c}`;
-          if (r===4 && c===4) { cell.classList.add('cell-center'); const crown = document.createElement('span'); crown.className = 'crown-emoji'; crown.textContent = '👑'; cell.appendChild(crown); } 
-          else if (safeZones.includes(coord)) { cell.classList.add('cell-safe'); } 
-          else {
+          if (r===4 && c===4) {
+            cell.classList.add('cell-center');
+            const crown = document.createElement('span'); crown.className = 'crown-emoji'; crown.textContent = '👑'; cell.appendChild(crown);
+          } else if (safeZones.includes(coord)) {
+            cell.classList.add('cell-safe');
+          } else {
             const p1i = p1Path.indexOf(coord), p2i = p2Path.indexOf(coord);
             if ((p1i>=41 && p1i<47)||(p2i>=41 && p2i<47)) cell.classList.add('cell-orange');
             else if (layer2Coords.includes(coord)) cell.classList.add('cell-yellow');
@@ -566,13 +506,12 @@
       }
 
       for(let i=0; i<4; i++) {
-          const t1 = document.createElement('div'); t1.dataset.player = "1"; t1.dataset.idx = i;
-          const v1 = document.createElement('div'); v1.dataset.player = "1"; v1.dataset.idx = i;
-          D.p1TokensDOM.push(t1); D.p1VaultDOM.push(v1);
-
-          const t2 = document.createElement('div'); t2.dataset.player = "2"; t2.dataset.idx = i;
-          const v2 = document.createElement('div'); v2.dataset.player = "2"; v2.dataset.idx = i;
-          D.p2TokensDOM.push(t2); D.p2VaultDOM.push(v2);
+        const t1 = document.createElement('div'); t1.dataset.player = "1"; t1.dataset.idx = i;
+        const v1 = document.createElement('div'); v1.dataset.player = "1"; v1.dataset.idx = i;
+        D.p1TokensDOM.push(t1); D.p1VaultDOM.push(v1);
+        const t2 = document.createElement('div'); t2.dataset.player = "2"; t2.dataset.idx = i;
+        const v2 = document.createElement('div'); v2.dataset.player = "2"; v2.dataset.idx = i;
+        D.p2TokensDOM.push(t2); D.p2VaultDOM.push(v2);
       }
 
       D.portalEl = document.createElement('div'); D.portalEl.className = 'portal-layer'; D.portalEl.textContent = '🌀';
@@ -586,33 +525,27 @@
     }
 
     function handleTokenClick(e) {
-        const tok = e.target.closest('.token');
-        if(!tok || G.isGameOver) return;
-        const p = parseInt(tok.dataset.player, 10);
-        if (G.gameMode === 'AI' && p === G.aiColor) return; 
-        moveToken(p, parseInt(tok.dataset.idx, 10), e);
+      const tok = e.target.closest('.token'); if(!tok || G.isGameOver) return;
+      const p = parseInt(tok.dataset.player, 10);
+      if (G.gameMode === 'AI' && p === G.aiColor) return; 
+      moveToken(p, parseInt(tok.dataset.idx, 10), e);
     }
-    
     function handleVaultClick(e) {
-        const tok = e.target.closest('.token');
-        if(!tok || G.isGameOver) return;
-        const p = parseInt(tok.dataset.player, 10);
-        if (G.gameMode === 'AI' && p === G.aiColor) return;
-        releaseFromVault(p, parseInt(tok.dataset.idx, 10), e);
+      const tok = e.target.closest('.token'); if(!tok || G.isGameOver) return;
+      const p = parseInt(tok.dataset.player, 10);
+      if (G.gameMode === 'AI' && p === G.aiColor) return;
+      releaseFromVault(p, parseInt(tok.dataset.idx, 10), e);
     }
 
     function startTimer() {
       if (G.isGameOver) return;
       clearInterval(timerIntervalRef); turnTimeLeft = 100;
-      
       D.p1TimerWrap.style.setProperty('--timer-pct', '0%');
       D.p2TimerWrap.style.setProperty('--timer-pct', '0%');
-      
       const activeWrap = G.currentPlayer === 1 ? D.p1TimerWrap : D.p2TimerWrap;
       const color = G.currentPlayer === 1 ? '#ef4444' : '#3b82f6';
       activeWrap.style.setProperty('--timer-color', color);
       activeWrap.style.setProperty('--timer-pct', '100%');
-      
       timerIntervalRef = setInterval(() => {
         if (G.isGameOver) { clearInterval(timerIntervalRef); return; }
         turnTimeLeft -= 1; 
@@ -628,25 +561,22 @@
       const strikes = p===1 ? G.p1Timeouts : G.p2Timeouts;
       updateStrikeDisplay();
       if (strikes >= 4) {
-        G.isGameOver = true; stopTimer(); clearGameLoops(); clearActionTimeouts();
+        G.isGameOver=true; stopTimer(); clearGameLoops(); clearActionTimeouts();
         D.p1RollBtn.disabled = true; D.p2RollBtn.disabled = true;
         const winner = p===1 ? '🔵 BLUE' : '🔴 RED';
         D.p1Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`; D.p2Label.textContent = `${p===1?'BLUE':'RED'} విజేత! 👑`;
-        SFX.play('win'); 
-        triggerConfetti(); updateBoard(); flashBoard('board-win-flash'); 
+        SFX.play('win'); triggerConfetti(); updateBoard(); flashBoard('board-win-flash'); 
         showRestartScreen(`${winner} గెలిచారు! 👑`, `${p===1?'RED':'BLUE'} ప్లేయర్ టైమ్ ఔట్ వల్ల డిస్‌క్వాలిఫై అయ్యారు!`); return;
       }
       const tokens = p===1 ? G.p1Tokens : G.p2Tokens;
       let maxPos=-1, targetIdx=-1;
       for (let i=0;i<4;i++) { if (tokens[i]>-1 && tokens[i]<p1Path.length-1 && tokens[i]>maxPos) { maxPos=tokens[i]; targetIdx=i; } }
-      
       if (targetIdx!==-1) {
         let newPos = Math.max(0, tokens[targetIdx]-6); tokens[targetIdx] = newPos;
-        let path = p === 1 ? p1Path : p2Path, oppPath = p === 1 ? p2Path : p1Path, oppTokens = p === 1 ? G.p2Tokens : G.p1Tokens;
+        let path = p===1?p1Path:p2Path, oppPath = p===1?p2Path:p1Path, oppTokens = p===1?G.p2Tokens:G.p1Tokens;
         let landedCoord = path[newPos];
-        if (!safeZones.includes(landedCoord) && oppTokens.some(pos => pos !== -1 && oppPath[pos] === landedCoord)) { tokens[targetIdx] = -1; }
+        if (!safeZones.includes(landedCoord) && oppTokens.some(pos=>pos!==-1&&oppPath[pos]===landedCoord)) { tokens[targetIdx] = -1; }
       }
-      
       G.hasRolled = false; G.currentRoll = 0; updateBoard(); flashBoard('board-danger-flash');
       clearActionTimeouts();
       registerAction(() => switchTurn(false), 2000);
@@ -656,277 +586,364 @@
       ['p1','p2'].forEach(p => {
         const n = p==='p1' ? G.p1Timeouts : G.p2Timeouts;
         const el = p==='p1' ? D.p1Strikes : D.p2Strikes; el.innerHTML = '';
-        for (let i=0;i<4;i++) { const sp = document.createElement('span'); sp.className = 'strike-icon' + (i<n ? ' used' : ''); sp.textContent = i<n ? '⚡' : '○'; el.appendChild(sp); }
+        for (let i=0;i<4;i++) { const sp = document.createElement('span'); sp.className = 'strike-icon' + (i<n?' used':''); sp.textContent = i<n?'⚡':'○'; el.appendChild(sp); }
       });
     }
 
     function tryPortal() {
       if (G.isGameOver || activePortal) return;
       const occ = []; G.p1Tokens.forEach(p=>{ if(p!==-1&&p<p1Path.length-1) occ.push(p1Path[p]); }); G.p2Tokens.forEach(p=>{ if(p!==-1&&p<p2Path.length-1) occ.push(p2Path[p]); });
-      const pool = [...new Set([...p1Path, ...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activeRedhole);
+      const pool = [...new Set([...p1Path,...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activeRedhole);
       if (!pool.length) return;
       activePortal = pool[Math.floor(Math.random()*pool.length)];
       const cell = D.cells[activePortal];
       if (cell) { cell.appendChild(D.portalEl); portalTimer = setTimeout(() => { removePortal(); }, 12000); }
     }
-    function removePortal() { if(D.portalEl && D.portalEl.parentNode) D.portalEl.parentNode.removeChild(D.portalEl); clearTimeout(portalTimer); activePortal=null; }
+    function removePortal() { if(D.portalEl&&D.portalEl.parentNode) D.portalEl.parentNode.removeChild(D.portalEl); clearTimeout(portalTimer); activePortal=null; }
 
     function tryRedhole() {
       if (G.isGameOver || activeRedhole) return;
       const occ = []; G.p1Tokens.forEach(p=>{ if(p!==-1&&p<p1Path.length-1) occ.push(p1Path[p]); }); G.p2Tokens.forEach(p=>{ if(p!==-1&&p<p2Path.length-1) occ.push(p2Path[p]); });
-      const pool = [...new Set([...p1Path, ...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activePortal);
+      const pool = [...new Set([...p1Path,...p2Path])].filter(c=>!safeZones.includes(c)&&c!=='4,4'&&!occ.includes(c)&&c!==activePortal);
       if (!pool.length) return;
       activeRedhole = pool[Math.floor(Math.random()*pool.length)];
       const cell = D.cells[activeRedhole];
       if (cell) { cell.appendChild(D.redholeEl); redholeTimer = setTimeout(() => { removeRedhole(); }, 12000); }
     }
-    function removeRedhole() { if(D.redholeEl && D.redholeEl.parentNode) D.redholeEl.parentNode.removeChild(D.redholeEl); clearTimeout(redholeTimer); activeRedhole=null; }
+    function removeRedhole() { if(D.redholeEl&&D.redholeEl.parentNode) D.redholeEl.parentNode.removeChild(D.redholeEl); clearTimeout(redholeTimer); activeRedhole=null; }
 
     function hasPerm(p) { return p===1 ? (G.p1Kills>0||G.p1PortalUsed) : (G.p2Kills>0||G.p2PortalUsed); }
-    
     function flashBoard(cls) { D.board.classList.add(cls); setTimeout(()=>D.board.classList.remove(cls), 1100); }
-    function sparkle(c) { const cell = D.cells[c]; if (!cell) return; const s = document.createElement('div'); s.className = 'sparkle'; cell.appendChild(s); setTimeout(()=> { if(s && s.parentNode) s.remove(); }, 500); }
+    function sparkle(c) { const cell=D.cells[c]; if(!cell) return; const s=document.createElement('div'); s.className='sparkle'; cell.appendChild(s); setTimeout(()=>{ if(s&&s.parentNode) s.remove(); }, 500); }
     function shakeBoard() { D.board.classList.add('shake'); setTimeout(()=>D.board.classList.remove('shake'), 320); }
-    function triggerConfetti() { const c=['#ef4444','#3b82f6','#fbbf24','#4ade80','#a855f7','#f97316']; for (let i=0;i<80;i++) { const p=document.createElement('div'); p.className='confetti-piece'; p.style.left=Math.random()*100+'vw'; p.style.animationDelay=Math.random()*2+'s'; p.style.animationDuration=(Math.random()*3+2)+'s'; p.style.background=c[Math.floor(Math.random()*c.length)]; p.style.borderRadius=Math.random()<0.5?'50%':'2px'; document.body.appendChild(p); setTimeout(()=>p.remove(), 5500); } }
+    function triggerConfetti() { const c=['#ef4444','#3b82f6','#fbbf24','#4ade80','#a855f7','#f97316']; for(let i=0;i<80;i++) { const p=document.createElement('div'); p.className='confetti-piece'; p.style.left=Math.random()*100+'vw'; p.style.animationDelay=Math.random()*2+'s'; p.style.animationDuration=(Math.random()*3+2)+'s'; p.style.background=c[Math.floor(Math.random()*c.length)]; p.style.borderRadius=Math.random()<0.5?'50%':'2px'; document.body.appendChild(p); setTimeout(()=>p.remove(), 5500); } }
 
-    function getNextPos(c, s, perm) { if (!perm) { let nx = c + s; if (c<=23 && nx>23) nx -= 24; return nx; } if (c===23) return (c+s)-24; let nx = c+s; if (c<=22 && nx>=23) nx+=1; return nx; }
-    function getMovable(roll) { const p = G.currentPlayer, t = p===1?G.p1Tokens:G.p2Tokens, perm = hasPerm(p), res = []; for (let i=0;i<4;i++) { if (t[i]===-1) continue; const nx = getNextPos(t[i], roll, perm); if (nx<p1Path.length) res.push({idx:i, targetPos:nx}); } return res; }
+    function getNextPos(c, s, perm) { if (!perm) { let nx=c+s; if(c<=23&&nx>23) nx-=24; return nx; } if(c===23) return (c+s)-24; let nx=c+s; if(c<=22&&nx>=23) nx+=1; return nx; }
+    function getMovable(roll) { const p=G.currentPlayer, t=p===1?G.p1Tokens:G.p2Tokens, perm=hasPerm(p), res=[]; for(let i=0;i<4;i++) { if(t[i]===-1) continue; const nx=getNextPos(t[i],roll,perm); if(nx<p1Path.length) res.push({idx:i,targetPos:nx}); } return res; }
     function boostedRoll(b) { return b===1?3 : b===2?6 : 12; }
 
     function rollGavvalu(playerNum) {
-      SFX.init(); if (G.hasRolled || G.isGameOver || G.currentPlayer !== playerNum) return;
-      D.p1RollBtn.disabled = true; D.p2RollBtn.disabled = true; stopTimer(); SFX.play('roll');
-      const p = G.currentPlayer; let missCount = p===1 ? G.p1MissCount : G.p2MissCount;
-      const states = Array.from({length:4}, ()=>Math.random()<0.5); const borla = states.filter(Boolean).length; let base = borla===0?12 : borla===4?6 : borla; let forced = false;
-      if (base!==6 && base!==12) { missCount++; if (missCount>=5) forced=true; } else { missCount=0; }
-      if (forced) { base = Math.random()<0.6?6:12; states.fill(base===6); missCount=0; }
-      if (p===1) G.p1MissCount=missCount; else G.p2MissCount=missCount;
-      
-      const shellsArr = p===1 ? D.shells.p1 : D.shells.p2;
-      for (let i=0;i<4;i++) { const el=shellsArr[i]; if (states[i]) { el.className='shell-el down'; el.textContent='บ'; } else { el.className='shell-el'; el.textContent='🐚'; } }
-      
-      const p1sum = G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0), p2sum = G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0); let final = base;
-      if ((p===1&&G.p1Revenge)||(p===2&&G.p2Revenge)) { final = boostedRoll(base); if (p===1) G.p1Revenge=false; else G.p2Revenge=false; }
-      else if (p===1&&G.p1BonusPending) { if (p1sum<p2sum) final=boostedRoll(base); G.p1BonusPending=false; }
-      else if (p===2&&G.p2BonusPending) { if (p2sum<p1sum) final=boostedRoll(base); G.p2BonusPending=false; }
-      
-      if (final === 12) G.extraTurns++; 
-      G.currentRoll = final; G.hasRolled = true; 
-      
-      const activeBtn = p === 1 ? D.p1RollBtn : D.p2RollBtn;
-      activeBtn.textContent = `🎲 ${final}`;
-      
-      const vaultT = p===1?G.p1Tokens:G.p2Tokens; const vaultIdxs = vaultT.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); const hasBoard = vaultT.some(pos=>pos!==-1&&pos<p1Path.length-1);
-      
-      if (final===12 && vaultIdxs.length>=2 && !hasBoard) { registerAction(()=>doReleaseTwoVault(p, vaultIdxs[0], vaultIdxs[1]), 900); return; }
-      if (final===12 && vaultIdxs.length===1 && !hasBoard) { registerAction(()=>doReleaseAndSix(p, vaultIdxs[0]), 900); return; }
-      if (final===6 && vaultIdxs.length>0 && !hasBoard) { registerAction(()=>doReleaseOne(p, vaultIdxs[0]), 900); return; }
-      
-      const movable = getMovable(final); const canRelease = (final===6||final===12) && vaultIdxs.length>0;
-      
-      if (!movable.length && !canRelease) { registerAction(()=>afterMove(), 1100); }
-      else if (movable.length===1 && !canRelease) { registerAction(()=>moveToken(p, movable[0].idx), 900); }
+      SFX.init(); if(G.hasRolled||G.isGameOver||G.currentPlayer!==playerNum) return;
+      D.p1RollBtn.disabled=true; D.p2RollBtn.disabled=true; stopTimer(); SFX.play('roll');
+      const p=G.currentPlayer; let missCount=p===1?G.p1MissCount:G.p2MissCount;
+      const states=Array.from({length:4},()=>Math.random()<0.5); const borla=states.filter(Boolean).length; let base=borla===0?12:borla===4?6:borla; let forced=false;
+      if(base!==6&&base!==12) { missCount++; if(missCount>=5) forced=true; } else { missCount=0; }
+      if(forced) { base=Math.random()<0.6?6:12; states.fill(base===6); missCount=0; }
+      if(p===1) G.p1MissCount=missCount; else G.p2MissCount=missCount;
+      const shellsArr=p===1?D.shells.p1:D.shells.p2;
+      for(let i=0;i<4;i++) { const el=shellsArr[i]; if(states[i]) { el.className='shell-el down'; el.textContent='บ'; } else { el.className='shell-el'; el.textContent='🐚'; } }
+      let final=base;
+      if((p===1&&G.p1Revenge)||(p===2&&G.p2Revenge)) { final=boostedRoll(base); if(p===1) G.p1Revenge=false; else G.p2Revenge=false; }
+      else if(p===1&&G.p1BonusPending) { if(computeScore(1)<computeScore(2)) final=boostedRoll(base); G.p1BonusPending=false; }
+      else if(p===2&&G.p2BonusPending) { if(computeScore(2)<computeScore(1)) final=boostedRoll(base); G.p2BonusPending=false; }
+      if(final===12) G.extraTurns++;
+      G.currentRoll=final; G.hasRolled=true;
+      const activeBtn=p===1?D.p1RollBtn:D.p2RollBtn;
+      activeBtn.textContent=`🎲 ${final}`;
+      const vaultT=p===1?G.p1Tokens:G.p2Tokens; const vaultIdxs=vaultT.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); const hasBoard=vaultT.some(pos=>pos!==-1&&pos<p1Path.length-1);
+      if(final===12&&vaultIdxs.length>=2&&!hasBoard) { registerAction(()=>doReleaseTwoVault(p,vaultIdxs[0],vaultIdxs[1]),900); return; }
+      if(final===12&&vaultIdxs.length===1&&!hasBoard) { registerAction(()=>doReleaseAndSix(p,vaultIdxs[0]),900); return; }
+      if(final===6&&vaultIdxs.length>0&&!hasBoard) { registerAction(()=>doReleaseOne(p,vaultIdxs[0]),900); return; }
+      const movable=getMovable(final); const canRelease=(final===6||final===12)&&vaultIdxs.length>0;
+      if(!movable.length&&!canRelease) { registerAction(()=>afterMove(),1100); }
+      else if(movable.length===1&&!canRelease) { registerAction(()=>moveToken(p,movable[0].idx),900); }
       else { 
-          updateBoard(); startTimer(); 
-          if (G.gameMode === 'AI' && p === G.aiColor) {
-              registerAction(() => executeAIMove(p, final, movable, canRelease, vaultIdxs), 700);
-          }
+        updateBoard(); startTimer(); 
+        if(G.gameMode==='AI'&&p===G.aiColor) { registerAction(()=>executeAIMove(p,final,movable,canRelease,vaultIdxs),700); }
       }
     }
 
-    function executeAIMove(p, finalRoll, movable, canRelease, vaultIdxs) {
-        if (G.isGameOver || G.currentPlayer !== p || !G.hasRolled) return;
-        let options = [];
-        if (canRelease && vaultIdxs.length > 0) { vaultIdxs.forEach(idx => options.push({ type: 'vault', idx: idx })); }
-        movable.forEach(m => options.push({ type: 'board', idx: m.idx }));
-        if (options.length === 0) { afterMove(); return; }
-        const choice = options[Math.floor(Math.random() * options.length)];
-        if (choice.type === 'vault') releaseFromVault(p, choice.idx, null); 
-        else moveToken(p, choice.idx, null);
+    function executeAIMove(p,finalRoll,movable,canRelease,vaultIdxs) {
+      if(G.isGameOver||G.currentPlayer!==p||!G.hasRolled) return;
+      let options=[];
+      if(canRelease&&vaultIdxs.length>0) { vaultIdxs.forEach(idx=>options.push({type:'vault',idx})); }
+      movable.forEach(m=>options.push({type:'board',idx:m.idx}));
+      if(!options.length) { afterMove(); return; }
+      const choice=options[Math.floor(Math.random()*options.length)];
+      if(choice.type==='vault') releaseFromVault(p,choice.idx,null); else moveToken(p,choice.idx,null);
     }
 
-    function doReleaseTwoVault(p, i1, i2) { 
-        if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[i1]=0; t[i2]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
-    }
-    function doReleaseOne(p, idx) { 
-        if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[idx]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[0]); afterMove(); 
-    }
-    function doReleaseAndSix(p, idx) { 
-        if (!G.hasRolled || G.currentPlayer !== p || G.isGameOver) return; 
-        clearActionTimeouts(); stopTimer(); const t = p===1?G.p1Tokens:G.p2Tokens; 
-        t[idx]=6; sparkle((p===1?p1Path:p2Path)[6]); SFX.play('move'); 
-        checkKill(p, (p===1?p1Path:p2Path)[6]); afterMove(); 
-    }
+    function doReleaseTwoVault(p,i1,i2) { if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; clearActionTimeouts(); stopTimer(); const t=p===1?G.p1Tokens:G.p2Tokens; t[i1]=0; t[i2]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); checkKill(p,(p===1?p1Path:p2Path)[0]); afterMove(); }
+    function doReleaseOne(p,idx) { if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; clearActionTimeouts(); stopTimer(); const t=p===1?G.p1Tokens:G.p2Tokens; t[idx]=0; sparkle((p===1?p1Path:p2Path)[0]); SFX.play('move'); checkKill(p,(p===1?p1Path:p2Path)[0]); afterMove(); }
+    function doReleaseAndSix(p,idx) { if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; clearActionTimeouts(); stopTimer(); const t=p===1?G.p1Tokens:G.p2Tokens; t[idx]=6; sparkle((p===1?p1Path:p2Path)[6]); SFX.play('move'); checkKill(p,(p===1?p1Path:p2Path)[6]); afterMove(); }
     
-    function releaseFromVault(p, idx, e) { 
-        if (e) { e.stopPropagation(); e.preventDefault(); } 
-        if (!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; 
-        clearActionTimeouts(); const r = G.currentRoll, t = p===1?G.p1Tokens:G.p2Tokens, vIdxs = t.reduce((a,v,i)=>v===-1?[...a,i]:a,[]); 
-        if (r===12&&vIdxs.length>=2) { doReleaseTwoVault(p,vIdxs[0],vIdxs[1]); return; } 
-        if (r===12&&vIdxs.length===1) { doReleaseAndSix(p,idx); return; } 
-        if ((r===6||r===12)&&t[idx]===-1) { doReleaseOne(p,idx); } 
+    function releaseFromVault(p,idx,e) { 
+      if(e) { e.stopPropagation(); e.preventDefault(); }
+      if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return;
+      clearActionTimeouts(); const r=G.currentRoll, t=p===1?G.p1Tokens:G.p2Tokens, vIdxs=t.reduce((a,v,i)=>v===-1?[...a,i]:a,[]);
+      if(r===12&&vIdxs.length>=2) { doReleaseTwoVault(p,vIdxs[0],vIdxs[1]); return; }
+      if(r===12&&vIdxs.length===1) { doReleaseAndSix(p,idx); return; }
+      if((r===6||r===12)&&t[idx]===-1) { doReleaseOne(p,idx); }
     }
 
-    function moveToken(p, tIdx, e) {
-      if(e) { e.stopPropagation(); e.preventDefault(); } if (!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return; 
-      const t = p===1?G.p1Tokens:G.p2Tokens, c = getMovable(G.currentRoll).find(m=>m.idx===tIdx); if (!c) return; 
+    function moveToken(p,tIdx,e) {
+      if(e) { e.stopPropagation(); e.preventDefault(); }
+      if(!G.hasRolled||G.currentPlayer!==p||G.isGameOver) return;
+      const t=p===1?G.p1Tokens:G.p2Tokens, c=getMovable(G.currentRoll).find(m=>m.idx===tIdx); if(!c) return;
       clearActionTimeouts(); stopTimer(); SFX.play('move');
-      let nx = c.targetPos; const path = p===1?p1Path:p2Path; const lC = path[nx]; 
-      
-      let tempTrap = null;
-      if (lC===activePortal) { if (p===1) G.p1PortalUsed=true; else G.p2PortalUsed=true; const oPath = p===1?p2Path:p1Path, oT = p===1?G.p2Tokens:G.p1Tokens, t10 = getNextPosWithPerm(nx, 10), c10 = path[t10], hasOpp = oT.some(op=>op!==-1&&oPath[op]===c10); nx = hasOpp ? getNextPosWithPerm(nx,11) : t10; removePortal(); SFX.play('portal'); }
-      else if (lC===activeRedhole) { nx = 0; tempTrap = activeRedhole; shakeBoard(); SFX.play('redhole'); }
-      
-      t[tIdx] = nx; sparkle(path[nx]);
-      if (tempTrap) { removeRedhole(); }
-      
-      checkKill(p, path[nx]); afterMove();
+      let nx=c.targetPos; const path=p===1?p1Path:p2Path; const lC=path[nx];
+      let tempTrap=null;
+      if(lC===activePortal) { if(p===1) G.p1PortalUsed=true; else G.p2PortalUsed=true; const oPath=p===1?p2Path:p1Path, oT=p===1?G.p2Tokens:G.p1Tokens, t10=getNextPosWithPerm(nx,10), c10=path[t10], hasOpp=oT.some(op=>op!==-1&&oPath[op]===c10); nx=hasOpp?getNextPosWithPerm(nx,11):t10; removePortal(); SFX.play('portal'); }
+      else if(lC===activeRedhole) { nx=0; tempTrap=activeRedhole; shakeBoard(); SFX.play('redhole'); }
+      t[tIdx]=nx; sparkle(path[nx]);
+      if(tempTrap) { removeRedhole(); }
+      checkKill(p,path[nx]); afterMove();
     }
     
-    function getNextPosWithPerm(p, s) { for (let i=0; i<s; i++) { if (p===23) p=0; else if (p===22) p=24; else p++; if (p>=p1Path.length-1) { p=p1Path.length-1; break; } } return p; }
-    function afterMove() { G.hasRolled = false; if (G.extraTurns > 0) { G.extraTurns--; resetRoll(); } else switchTurn(false); }
+    function getNextPosWithPerm(p,s) { for(let i=0;i<s;i++) { if(p===23) p=0; else if(p===22) p=24; else p++; if(p>=p1Path.length-1) { p=p1Path.length-1; break; } } return p; }
+    function afterMove() { G.hasRolled=false; if(G.extraTurns>0) { G.extraTurns--; resetRoll(); } else switchTurn(false); }
     
-    function checkKill(movingP, coord) {
-      if (safeZones.includes(coord)) return;
-      const p1at = G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length, p2at = G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
-      if (!p1at||!p2at) return;
-      
-      const p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p1Kills*10), p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0)+(G.p2Kills*10);
-      
-      if (movingP===1) {
-        if (p2at>=2) { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); G.p2Kills++; if (p1pts<p2pts) G.p1Revenge=true; SFX.play('kill'); shakeBoard(); }
-        else { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) { G.p2Tokens[i]=-1; G.p1Kills++; G.p1BonusPending=true; G.extraTurns++; if (p2pts<p1pts) G.p2Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
+    function checkKill(movingP,coord) {
+      if(safeZones.includes(coord)) return;
+      const p1at=G.p1Tokens.filter(p=>p!==-1&&p1Path[p]===coord).length, p2at=G.p2Tokens.filter(p=>p!==-1&&p2Path[p]===coord).length;
+      if(!p1at||!p2at) return;
+      const p1pts=computeScore(1), p2pts=computeScore(2);
+      if(movingP===1) {
+        if(p2at>=2) { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) G.p1Tokens[i]=0; }); G.p2Kills++; if(p1pts<p2pts) G.p1Revenge=true; SFX.play('kill'); shakeBoard(); }
+        else { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) { G.p2Tokens[i]=-1; G.p1Kills++; G.p1BonusPending=true; G.extraTurns++; if(p2pts<p1pts) G.p2Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
       } else {
-        if (p1at>=2) { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); G.p1Kills++; if (p2pts<p1pts) G.p2Revenge=true; SFX.play('kill'); shakeBoard(); }
-        else { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) { G.p1Tokens[i]=-1; G.p2Kills++; G.p2BonusPending=true; G.extraTurns++; if (p1pts<p2pts) G.p1Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
+        if(p1at>=2) { G.p2Tokens.forEach((p,i)=>{ if(p!==-1&&p2Path[p]===coord) G.p2Tokens[i]=0; }); G.p1Kills++; if(p2pts<p1pts) G.p2Revenge=true; SFX.play('kill'); shakeBoard(); }
+        else { G.p1Tokens.forEach((p,i)=>{ if(p!==-1&&p1Path[p]===coord) { G.p1Tokens[i]=-1; G.p2Kills++; G.p2BonusPending=true; G.extraTurns++; if(p1pts<p2pts) G.p1Revenge=true; } }); SFX.play('kill'); shakeBoard(); }
       }
     }
     
-    function switchTurn(noMove) { if (G.isGameOver) return; G.currentPlayer = G.currentPlayer===1?2:1; G.hasRolled = false; G.currentRoll = 0; resetRoll(); }
+    function switchTurn(noMove) { if(G.isGameOver) return; G.currentPlayer=G.currentPlayer===1?2:1; G.hasRolled=false; G.currentRoll=0; resetRoll(); }
     
     function resetRoll() {
-      if (G.isGameOver) return; const p = G.currentPlayer;
-      D.p1RollBtn.disabled = (p !== 1) || (G.gameMode === 'AI' && G.aiColor === 1); 
-      D.p2RollBtn.disabled = (p !== 2) || (G.gameMode === 'AI' && G.aiColor === 2);
-      
-      D.p1RollBtn.textContent = p === 1 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
-      D.p2RollBtn.textContent = p === 2 ? '🎲 రోల్' : '🎲 వెయిట్ ⏳';
-      
-      D.p1Dot.className = `turn-dot ${p===1?'red':'dim'}`; D.p1Label.className = `turn-label ${p===1?'red':'dim'}`;
-      D.p2Dot.className = `turn-dot ${p===2?'blue':'dim'}`; D.p2Label.className = `turn-label ${p===2?'blue':'dim'}`;
-      
-      ['p1','p2'].forEach(player => { const arr = player==='p1'?D.shells.p1:D.shells.p2; for (let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; } });
+      if(G.isGameOver) return; const p=G.currentPlayer;
+      D.p1RollBtn.disabled=(p!==1)||(G.gameMode==='AI'&&G.aiColor===1); 
+      D.p2RollBtn.disabled=(p!==2)||(G.gameMode==='AI'&&G.aiColor===2);
+      D.p1RollBtn.textContent=p===1?'🎲 రోల్':'🎲 వెయిట్ ⏳';
+      D.p2RollBtn.textContent=p===2?'🎲 రోల్':'🎲 వెయిట్ ⏳';
+      D.p1Dot.className=`turn-dot ${p===1?'red':'dim'}`; D.p1Label.className=`turn-label ${p===1?'red':'dim'}`;
+      D.p2Dot.className=`turn-dot ${p===2?'blue':'dim'}`; D.p2Label.className=`turn-label ${p===2?'blue':'dim'}`;
+      ['p1','p2'].forEach(player=>{ const arr=player==='p1'?D.shells.p1:D.shells.p2; for(let i=0;i<4;i++) { arr[i].className='shell-el'; arr[i].textContent='🐚'; } });
       updateBoard(); startTimer();
-      if (G.gameMode === 'AI' && p === G.aiColor && !G.isGameOver) registerAction(() => { rollGavvalu(p); }, 700);
+      if(G.gameMode==='AI'&&p===G.aiColor&&!G.isGameOver) registerAction(()=>{ rollGavvalu(p); },700);
     }
 
-    function updateBoard() {
-      const p = G.currentPlayer, r = G.currentRoll, mov = G.hasRolled ? getMovable(r) : [], movI = mov.map(m=>m.idx);
-      const p1C={}, p2C={}; for (let i=0; i<4; i++) { if (G.p1Tokens[i] !== -1) p1C[p1Path[G.p1Tokens[i]]] = (p1C[p1Path[G.p1Tokens[i]]]||0)+1; if (G.p2Tokens[i] !== -1) p2C[p2Path[G.p2Tokens[i]]] = (p2C[p2Path[G.p2Tokens[i]]]||0)+1; }
-      
-      document.querySelectorAll('.token').forEach(t=>t.remove());
-      
-      for(let i=0; i<4; i++) {
-        let pos1 = G.p1Tokens[i];
-        if (pos1 === -1) { D.p1Vault.appendChild(D.p1TokensDOM[i]); D.p1TokensDOM[i].className = 'token p1-token'; } 
-        else { let c=p1Path[pos1]; if(c && D.cells[c]) { D.cells[c].appendChild(D.p1TokensDOM[i]); D.p1TokensDOM[i].className='token p1-token'; if(p===1&&G.hasRolled&&movI.includes(i)) D.p1TokensDOM[i].classList.add('glow-move'); } }
+    // ============================================================
+    //  PREDICTION METER — proper win-probability calculation
+    // ============================================================
+    function computeScore(player) {
+      // Weighted score: position progress + kills bonus + center permission + vault penalty
+      const tokens = player === 1 ? G.p1Tokens : G.p2Tokens;
+      const path   = player === 1 ? p1Path     : p2Path;
+      const total  = path.length - 1; // 48 = finishing index
 
-        let pos2 = G.p2Tokens[i];
-        if (pos2 === -1) { D.p2Vault.appendChild(D.p2TokensDOM[i]); D.p2TokensDOM[i].className = 'token p2-token'; } 
-        else { let c=p2Path[pos2]; if(c && D.cells[c]) { D.cells[c].appendChild(D.p2TokensDOM[i]); D.p2TokensDOM[i].className='token p2-token'; if(p===2&&G.hasRolled&&movI.includes(i)) D.p2TokensDOM[i].classList.add('glow-move'); } }
+      let score = 0;
+      let onBoard = 0;
+
+      for (let i = 0; i < 4; i++) {
+        const pos = tokens[i];
+        if (pos === -1) {
+          // In vault: counts as 0 progress, slight negative weight
+          score -= 2;
+        } else if (pos === total) {
+          // Finished token: maximum contribution
+          score += 100;
+        } else {
+          // Progress along path (0→48), scaled 0-90
+          score += (pos / total) * 90;
+          onBoard++;
+        }
       }
-      updateMeters(); checkWinner(); saveGameState();
+
+      // Kills mean opponent tokens got sent back — strong advantage
+      const kills = player === 1 ? G.p1Kills : G.p2Kills;
+      score += kills * 8;
+
+      // Having center permission means we can finish tokens
+      if (hasPerm(player)) score += 6;
+
+      // Bonus pending is a slight near-future advantage
+      const bonus = player === 1 ? G.p1BonusPending : G.p2BonusPending;
+      if (bonus) score += 4;
+
+      // Having tokens on board (not stuck in vault) is good
+      score += onBoard * 3;
+
+      return Math.max(0, score);
     }
 
     function updateMeters() {
-      let p1pts=G.p1Tokens.reduce((a,b)=>a+(b===-1?0:b),0), p2pts=G.p2Tokens.reduce((a,b)=>a+(b===-1?0:b),0);
-      if(p1pts>G.maxP1) G.maxP1=p1pts; if(p2pts>G.maxP2) G.maxP2=p2pts;
-      D.p1Kills.textContent=G.p1Kills; D.p2Kills.textContent=G.p2Kills;
-      D.p1Perm.textContent=hasPerm(1)?'✅':'❌'; D.p2Perm.textContent=hasPerm(2)?'✅':'❌';
-      const tot=G.maxP1+G.maxP2; let rp=tot>0?Math.round((G.maxP1/tot)*100):50; D.mRed.style.width=rp+'%'; D.mBlue.style.width=(100-rp)+'%';
+      D.p1Kills.textContent = G.p1Kills;
+      D.p2Kills.textContent = G.p2Kills;
+      D.p1Perm.textContent  = hasPerm(1) ? '✅' : '❌';
+      D.p2Perm.textContent  = hasPerm(2) ? '✅' : '❌';
+
+      const s1 = computeScore(1);
+      const s2 = computeScore(2);
+      const total = s1 + s2;
+
+      let redPct, bluePct;
+      if (total <= 0) {
+        redPct = 50; bluePct = 50;
+      } else {
+        redPct  = Math.round((s1 / total) * 100);
+        bluePct = 100 - redPct;
+      }
+
+      // Clamp so neither side disappears completely
+      redPct  = Math.max(5, Math.min(95, redPct));
+      bluePct = 100 - redPct;
+
+      D.mRed.style.width  = redPct  + '%';
+      D.mBlue.style.width = bluePct + '%';
+
+      // Show percentage labels (only if wide enough)
+      D.mRed.textContent  = redPct  > 15 ? redPct  + '%' : '';
+      D.mBlue.textContent = bluePct > 15 ? bluePct + '%' : '';
+
+      // Update header percentages
+      if (D.predRedPct)  D.predRedPct.textContent  = redPct;
+      if (D.predBluePct) D.predBluePct.textContent = bluePct;
+    }
+
+    // ============================================================
+    //  UPDATE BOARD — with STACK BADGE support
+    // ============================================================
+    function updateBoard() {
+      const p=G.currentPlayer, r=G.currentRoll, mov=G.hasRolled?getMovable(r):[], movI=mov.map(m=>m.idx);
+
+      // Remove all existing tokens from DOM
+      document.querySelectorAll('.token').forEach(t=>t.remove());
+
+      // Count stacks per cell for each player
+      // p1StackCount[coord] = number of p1 tokens at that coord on board
+      // p2StackCount[coord] = number of p2 tokens at that coord on board
+      const p1Stack = {}, p2Stack = {};
+      for (let i=0;i<4;i++) {
+        if (G.p1Tokens[i] !== -1) {
+          const coord = p1Path[G.p1Tokens[i]];
+          p1Stack[coord] = (p1Stack[coord] || 0) + 1;
+        }
+        if (G.p2Tokens[i] !== -1) {
+          const coord = p2Path[G.p2Tokens[i]];
+          p2Stack[coord] = (p2Stack[coord] || 0) + 1;
+        }
+      }
+
+      // Track which cell already has a representative token placed (for badge)
+      const p1Placed = {}, p2Placed = {};
+
+      for (let i=0;i<4;i++) {
+        // ---- PLAYER 1 ----
+        let pos1 = G.p1Tokens[i];
+        if (pos1 === -1) {
+          // In vault
+          D.p1Vault.appendChild(D.p1TokensDOM[i]);
+          D.p1TokensDOM[i].className = 'token p1-token';
+          // Clear any old badge
+          const oldBadge = D.p1TokensDOM[i].querySelector('.stack-count');
+          if (oldBadge) oldBadge.remove();
+        } else {
+          const coord = p1Path[pos1];
+          if (coord && D.cells[coord]) {
+            const stackCount = p1Stack[coord];
+            if (!p1Placed[coord]) {
+              // First token at this coord — place it and add badge if >1
+              p1Placed[coord] = true;
+              D.cells[coord].appendChild(D.p1TokensDOM[i]);
+              D.p1TokensDOM[i].className = 'token p1-token';
+              if (p===1 && G.hasRolled && movI.includes(i)) D.p1TokensDOM[i].classList.add('glow-move');
+              // Remove old badge
+              const oldBadge = D.p1TokensDOM[i].querySelector('.stack-count');
+              if (oldBadge) oldBadge.remove();
+              // Add new badge if stacked
+              if (stackCount >= 2) {
+                const badge = document.createElement('span');
+                badge.className = 'stack-count';
+                badge.textContent = stackCount;
+                D.p1TokensDOM[i].appendChild(badge);
+              }
+            }
+            // Additional tokens at same coord: don't render separately (represented by badge)
+          }
+        }
+
+        // ---- PLAYER 2 ----
+        let pos2 = G.p2Tokens[i];
+        if (pos2 === -1) {
+          D.p2Vault.appendChild(D.p2TokensDOM[i]);
+          D.p2TokensDOM[i].className = 'token p2-token';
+          const oldBadge = D.p2TokensDOM[i].querySelector('.stack-count');
+          if (oldBadge) oldBadge.remove();
+        } else {
+          const coord = p2Path[pos2];
+          if (coord && D.cells[coord]) {
+            const stackCount = p2Stack[coord];
+            if (!p2Placed[coord]) {
+              p2Placed[coord] = true;
+              D.cells[coord].appendChild(D.p2TokensDOM[i]);
+              D.p2TokensDOM[i].className = 'token p2-token';
+              if (p===2 && G.hasRolled && movI.includes(i)) D.p2TokensDOM[i].classList.add('glow-move');
+              const oldBadge = D.p2TokensDOM[i].querySelector('.stack-count');
+              if (oldBadge) oldBadge.remove();
+              if (stackCount >= 2) {
+                const badge = document.createElement('span');
+                badge.className = 'stack-count';
+                badge.textContent = stackCount;
+                D.p2TokensDOM[i].appendChild(badge);
+              }
+            }
+          }
+        }
+      }
+
+      updateMeters(); checkWinner(); saveGameState();
     }
 
     function checkWinner() {
-      if (G.p1Timeouts >= 4 || G.p2Timeouts >= 4) return;
+      if(G.p1Timeouts>=4||G.p2Timeouts>=4) return;
       const p1win=G.p1Tokens.every(p=>p===p1Path.length-1), p2win=G.p2Tokens.every(p=>p===p1Path.length-1);
-      if (!p1win&&!p2win) return;
+      if(!p1win&&!p2win) return;
       G.isGameOver=true; stopTimer(); clearGameLoops(); clearActionTimeouts();
       SFX.play('win'); triggerConfetti();
       showRestartScreen(`${p1win?'RED':'BLUE'} గెలిచారు! 👑`, `అభినందనలు!`);
     }
 
-    // Rules Modal
-    document.getElementById('rules-btn-action').addEventListener('click', () => { document.getElementById('rules-screen').style.display = 'flex'; requestAnimationFrame(() => document.getElementById('rules-screen').style.opacity = '1'); });
-    document.getElementById('rules-back-btn').addEventListener('click', () => { document.getElementById('rules-screen').style.opacity = '0'; setTimeout(() => document.getElementById('rules-screen').style.display = 'none', 300); });
-    
-    // Quit Modal Logic
-    document.getElementById('btn-quit-main').addEventListener('click', () => { document.getElementById('quit-modal').style.display = 'flex'; });
-    document.getElementById('btn-quit-no').addEventListener('click', () => { document.getElementById('quit-modal').style.display = 'none'; });
+    // ===== UI EVENTS =====
+    document.getElementById('rules-btn-action').addEventListener('click', () => { document.getElementById('rules-screen').style.display='flex'; requestAnimationFrame(()=>document.getElementById('rules-screen').style.opacity='1'); });
+    document.getElementById('rules-back-btn').addEventListener('click', () => { document.getElementById('rules-screen').style.opacity='0'; setTimeout(()=>document.getElementById('rules-screen').style.display='none', 300); });
+    document.getElementById('btn-quit-main').addEventListener('click', () => { document.getElementById('quit-modal').style.display='flex'; });
+    document.getElementById('btn-quit-no').addEventListener('click', () => { document.getElementById('quit-modal').style.display='none'; });
     document.getElementById('btn-quit-yes').addEventListener('click', () => {
-        document.getElementById('quit-modal').style.display = 'none'; document.getElementById('main-game').style.display = 'none';
-        document.getElementById('start-screen').style.display = 'flex'; document.getElementById('start-screen').style.opacity = '1';
-        G = getInitialState(); clearGameState(); stopTimer(); clearGameLoops(); clearActionTimeouts();
+      document.getElementById('quit-modal').style.display='none'; document.getElementById('main-game').style.display='none';
+      document.getElementById('start-screen').style.display='flex'; document.getElementById('start-screen').style.opacity='1';
+      G=getInitialState(); clearGameState(); stopTimer(); clearGameLoops(); clearActionTimeouts();
     });
 
-    // Setup Wizard
     function showSetupStep(step) {
-      document.getElementById('step-mode').style.display = (step === 0) ? 'flex' : 'none';
-      document.getElementById('step-color').style.display = (step === 1) ? 'flex' : 'none';
-      document.getElementById('step-ready').style.display = (step === 2) ? 'flex' : 'none';
-      currentSetupStep = step;
-      
-      if (step === 2) {
-          const sumText = tempSetup.mode === '2P' ? "👥 Two Players Mode" : `🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor === 1 ? '🔴 RED' : '🔵 BLUE'} | Bot: ${tempSetup.aColor === 1 ? '🔴 RED' : '🔵 BLUE'}</span>`;
-          document.getElementById('ready-summary').innerHTML = sumText;
+      document.getElementById('step-mode').style.display=(step===0)?'flex':'none';
+      document.getElementById('step-color').style.display=(step===1)?'flex':'none';
+      document.getElementById('step-ready').style.display=(step===2)?'flex':'none';
+      currentSetupStep=step;
+      if(step===2) {
+        const sumText=tempSetup.mode==='2P'?"👥 Two Players Mode":`🤖 Play vs Computer<br><span style="font-size:14px; color:#aaa; display:block; margin-top:10px;">మీరు: ${tempSetup.hColor===1?'🔴 RED':'🔵 BLUE'} | Bot: ${tempSetup.aColor===1?'🔴 RED':'🔵 BLUE'}</span>`;
+        document.getElementById('ready-summary').innerHTML=sumText;
       }
     }
 
-    document.getElementById('start-btn-action').addEventListener('click', () => {
-      document.getElementById('setup-screen').style.display = 'flex';
-      requestAnimationFrame(() => document.getElementById('setup-screen').style.opacity = '1');
-      showSetupStep(0);
-    });
-
-    document.getElementById('setup-back-btn').addEventListener('click', () => {
-      if (currentSetupStep === 0) {
-          document.getElementById('setup-screen').style.opacity = '0';
-          setTimeout(() => document.getElementById('setup-screen').style.display = 'none', 300);
-      } else if (currentSetupStep === 1) { showSetupStep(0);
-      } else if (currentSetupStep === 2) {
-          if (tempSetup.mode === '2P') showSetupStep(0); else showSetupStep(1);
-      }
-    });
-
-    document.getElementById('btn-mode-2p').addEventListener('click', () => { tempSetup.mode = '2P'; showSetupStep(2); });
-    document.getElementById('btn-mode-ai').addEventListener('click', () => { tempSetup.mode = 'AI'; showSetupStep(1); });
-    document.getElementById('btn-color-red').addEventListener('click', () => { tempSetup.hColor = 1; tempSetup.aColor = 2; showSetupStep(2); });
-    document.getElementById('btn-color-blue').addEventListener('click', () => { tempSetup.hColor = 2; tempSetup.aColor = 1; showSetupStep(2); });
-    document.getElementById('final-start-btn').addEventListener('click', () => {
-      SFX.init();
-      G.gameMode = tempSetup.mode;
-      G.humanColor = tempSetup.hColor;
-      G.aiColor = tempSetup.aColor;
-      document.getElementById('setup-screen').style.opacity = '0';
-      document.getElementById('start-screen').style.opacity = '0';
-      setTimeout(() => {
-          document.getElementById('setup-screen').style.display = 'none';
-          document.getElementById('start-screen').style.display = 'none';
-          document.getElementById('main-game').style.display = 'flex';
-          updateStrikeDisplay(); startGameLoops(); resetRoll(); saveGameState();
-      }, 300);
+    document.getElementById('start-btn-action').addEventListener('click', () => { document.getElementById('setup-screen').style.display='flex'; requestAnimationFrame(()=>document.getElementById('setup-screen').style.opacity='1'); showSetupStep(0); });
+    document.getElementById('setup-back-btn').addEventListener('click', () => { if(currentSetupStep===0) { document.getElementById('setup-screen').style.opacity='0'; setTimeout(()=>document.getElementById('setup-screen').style.display='none',300); } else if(currentSetupStep===1) { showSetupStep(0); } else if(currentSetupStep===2) { if(tempSetup.mode==='2P') showSetupStep(0); else showSetupStep(1); } });
+    document.getElementById('btn-mode-2p').addEventListener('click',()=>{ tempSetup.mode='2P'; showSetupStep(2); });
+    document.getElementById('btn-mode-ai').addEventListener('click',()=>{ tempSetup.mode='AI'; showSetupStep(1); });
+    document.getElementById('btn-color-red').addEventListener('click',()=>{ tempSetup.hColor=1; tempSetup.aColor=2; showSetupStep(2); });
+    document.getElementById('btn-color-blue').addEventListener('click',()=>{ tempSetup.hColor=2; tempSetup.aColor=1; showSetupStep(2); });
+    document.getElementById('final-start-btn').addEventListener('click',()=>{
+      SFX.init(); G.gameMode=tempSetup.mode; G.humanColor=tempSetup.hColor; G.aiColor=tempSetup.aColor;
+      document.getElementById('setup-screen').style.opacity='0'; document.getElementById('start-screen').style.opacity='0';
+      setTimeout(()=>{
+        document.getElementById('setup-screen').style.display='none'; document.getElementById('start-screen').style.display='none';
+        document.getElementById('main-game').style.display='flex';
+        updateStrikeDisplay(); startGameLoops(); resetRoll(); saveGameState();
+      },300);
     });
 
     window.onload = function() {
       initDOM();
-      if (loadGameState()) {
-          document.getElementById('start-screen').style.display = 'none'; syncUIWithState();
-      }
+      if(loadGameState()) { document.getElementById('start-screen').style.display='none'; }
       document.getElementById('restart-btn-action').addEventListener('click', restartGame);
     };
   </script>
