@@ -290,14 +290,13 @@
       </div>
       <!-- Login Form -->
       <div id="form-login">
-        <div class="auth-field"><label>EMAIL</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="email"></div>
+        <div class="auth-field"><label>USERNAME</label><input type="text" id="login-username" placeholder="vinay123" autocomplete="username"></div>
         <div class="auth-field"><label>PASSWORD</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
         <button class="auth-submit" id="btn-login">🎮 లాగిన్ చేయి</button>
       </div>
       <!-- Register Form -->
       <div id="form-register" style="display:none;">
         <div class="auth-field"><label>USERNAME</label><input type="text" id="reg-username" placeholder="vinay123" maxlength="20"></div>
-        <div class="auth-field"><label>EMAIL</label><input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email"></div>
         <div class="auth-field"><label>PASSWORD (min 6 chars)</label><input type="password" id="reg-password" placeholder="••••••••" autocomplete="new-password"></div>
         <button class="auth-submit" id="btn-register">✅ రిజిస్టర్ చేయి</button>
       </div>
@@ -308,25 +307,51 @@
 
   <!-- PROFILE SCREEN -->
   <div id="profile-screen">
-    <div style="width:100%; max-width:340px;">
+    <div style="width:100%; max-width:380px;">
       <div class="profile-header">
         <div class="profile-avatar">👤</div>
         <div>
           <div class="profile-name" id="profile-name">-</div>
-          <div class="profile-email" id="profile-email">-</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <span style="font-size:18px;">🪙</span>
+            <span style="font-size:20px;font-weight:900;color:#fbbf24;" id="profile-coins">0</span>
+            <span style="font-size:11px;color:var(--text-muted);">COINS</span>
+          </div>
         </div>
       </div>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value" id="stat-games">0</div><div class="stat-label">🎮 GAMES</div></div>
-        <div class="stat-card"><div class="stat-value" id="stat-wins">0</div><div class="stat-label">🏆 WINS</div></div>
-        <div class="stat-card"><div class="stat-value" id="stat-losses">0</div><div class="stat-label">💀 LOSSES</div></div>
-        <div class="stat-card"><div class="stat-value" id="stat-kills">0</div><div class="stat-label">⚔️ KILLS</div></div>
+      <!-- Tabs -->
+      <div class="auth-tabs" style="margin-bottom:16px;">
+        <button class="auth-tab active" id="tab-stats-btn">📊 Stats</button>
+        <button class="auth-tab" id="tab-lb-btn">🏆 Leaderboard</button>
       </div>
-      <div style="text-align:center; margin-top:16px;">
-        <div style="font-size:13px; color:var(--text-muted);">గెలుపు శాతం</div>
-        <div style="font-size:28px; font-weight:900; color:var(--gold);" id="stat-winrate">0%</div>
+      <!-- Stats Tab -->
+      <div id="tab-stats">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="stat-games">0</div><div class="stat-label">🎮 GAMES</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-wins">0</div><div class="stat-label">🏆 WINS</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-losses">0</div><div class="stat-label">💀 LOSSES</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-kills">0</div><div class="stat-label">⚔️ KILLS</div></div>
+        </div>
+        <div style="text-align:center;margin-top:16px;">
+          <div style="font-size:13px;color:var(--text-muted);">గెలుపు శాతం</div>
+          <div style="font-size:28px;font-weight:900;color:var(--gold);" id="stat-winrate">0%</div>
+        </div>
+        <!-- Coins breakdown -->
+        <div style="background:var(--panel-card);border:1px solid var(--panel-border);border-radius:12px;padding:12px;margin-top:12px;font-size:12px;color:var(--text-muted);">
+          <div style="color:var(--gold);font-weight:bold;margin-bottom:8px;">🪙 Coins System</div>
+          <div>🏆 Win = <span style="color:#4ade80;">+100</span> &nbsp; 💀 Loss = <span style="color:#f87171;">-90</span></div>
+          <div>⚔️ Kill = <span style="color:#4ade80;">+15</span> each &nbsp; 🎮 Play = <span style="color:#4ade80;">+5</span></div>
+          <div>⚡ Speed Bonus = <span style="color:#fbbf24;">+10 to +50</span></div>
+        </div>
       </div>
-      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:20px;">
+      <!-- Leaderboard Tab -->
+      <div id="tab-lb" style="display:none;">
+        <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:10px;">Top 50 Players by Coins</div>
+        <div id="lb-list" style="max-height:45vh;overflow-y:auto;">
+          <div style="text-align:center;color:var(--text-muted);padding:20px;">⏳ Loading...</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:16px;">
         <button class="profile-close" id="btn-close-profile">🎮 గేమ్ కి వెళ్ళు</button>
         <button class="profile-logout" id="btn-logout">🚪 లాగ్ అవుట్</button>
       </div>
@@ -653,7 +678,9 @@
       orangeFirstP2Coord:{},
       gameMode:'2P', theme:'red-blue',
       // Roll counters — every 5th roll guaranteed to be 4 or 8
-      p1RollCount:0, p2RollCount:0
+      p1RollCount:0, p2RollCount:0,
+      // Turn counter for speed bonus
+      totalTurns:0
     };
   }
 
@@ -726,23 +753,25 @@
       const innerStart=CFG.layer2StartIdx; // 16
 
       if(!perm){
-        // No permission: outer ring only, cannot cross gate into inner
-        let nx=c+s;
-        if(nx > gateIdx) nx = gateIdx;
-        return nx;
+        // No permission: cannot ENTER inner ring from outer
+        // But if ALREADY in inner ring (e.g. via portal), can move freely within
+        if(c < innerStart){
+          // On outer ring — block at gate
+          let nx=c+s;
+          if(nx > gateIdx) nx = gateIdx;
+          return nx;
+        }
+        // Already in inner ring — allow movement (crown still needs exact)
       }
 
-      // With permission:
+      // With permission OR already in inner ring:
       const nx=c+s;
-
       if(c >= innerStart){
-        // Token ALREADY in inner ring — must land EXACTLY on crown
         if(nx === crownIdx) return crownIdx; // exact → crown ✅
-        if(nx > crownIdx)   return c;        // overshoot → STAY (can't move)
-        return nx;                           // normal inner move forward
+        if(nx > crownIdx)   return c;        // overshoot → STAY
+        return nx;
       } else {
-        // Token is on outer ring with permission (unusual — outer→inner allowed)
-        if(nx > crownIdx) return gateIdx;   // overshoot from outer = stop at gate
+        if(nx > crownIdx) return gateIdx;
         return nx;
       }
     } else {
@@ -1379,75 +1408,70 @@
   function checkKill(movingP, coord, doneCb){
     if(CFG.safeZones.includes(coord)){if(doneCb)doneCb();return;}
 
-    // Count how many tokens from each player are physically on this coord
-    // Each player's tokens are tracked on their OWN path
     const p1at=G.p1Tokens.filter(pos=>pos!==-1&&CFG.p1Path[pos]===coord).length;
     const p2at=G.p2Tokens.filter(pos=>pos!==-1&&CFG.p2Path[pos]===coord).length;
-
-    // No conflict if only one team present
     if(!p1at||!p2at){if(doneCb)doneCb();return;}
 
     const p1pts=computeScore(1), p2pts=computeScore(2);
     const isOrange=isOrangeCoord(coord);
-
-    // Who owns the shield on this orange cell?
-    // orangeFirstP1Coord[coord]=true means P1 arrived first
-    // orangeFirstP2Coord[coord]=true means P2 arrived first
     const orangeOwnerP1=isOrange&&!!G.orangeFirstP1Coord[coord];
     const orangeOwnerP2=isOrange&&!!G.orangeFirstP2Coord[coord];
 
     SFX.play('kill'); shakeBoard();
 
     if(movingP===1){
-      // P1 just moved onto coord where P2 coin(s) exist
-
-      if(orangeOwnerP2){
-        // P2 owns shield → P1 incoming bounces to HOME (start, pos=0)
+      if(orangeOwnerP2&&!orangeOwnerP1){
+        // P2 already had shield, P1 incoming → P1 bounces to home
         SFX.play('shield');
         const bi=G.p1Tokens.findIndex(pos=>pos!==-1&&CFG.p1Path[pos]===coord);
         if(bi!==-1){
           animateBounce(D.p1TokensDOM[bi],()=>{
-            G.p1Tokens[bi]=0; // home (start)
-            G.p2Kills++;
+            G.p1Tokens[bi]=0;G.p2Kills++;
             if(p1pts<p2pts)G.p1Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
         return;
       }
-
-      if(orangeOwnerP1){
-        // P1 owns shield → P1's OWN second coin landed here = SELF KILL
-        const allP1Here=G.p1Tokens.reduce((a,pos,i)=>
-          pos!==-1&&CFG.p1Path[pos]===coord?[...a,i]:a,[]);
+      if(orangeOwnerP1&&p1at>=2){
+        // P1 owns shield AND another P1 coin landed → SELF KILL (second P1 coin)
+        const allP1Here=G.p1Tokens.reduce((a,pos,i)=>pos!==-1&&CFG.p1Path[pos]===coord?[...a,i]:a,[]);
         const ski=allP1Here.length>=2?allP1Here[0]:-1;
         if(ski!==-1){
           animateBounce(D.p1TokensDOM[ski],()=>{
-            G.p1Tokens[ski]=-1; // vault
+            G.p1Tokens[ski]=-1;updateBoard();if(doneCb)doneCb();
+          });
+        }else{if(doneCb)doneCb();}
+        return;
+      }
+      if(orangeOwnerP1&&p2at>=1){
+        // P1 just claimed shield on this orange cell, P2 is here → P2 bounces
+        SFX.play('shield');
+        const bi=G.p2Tokens.findIndex(pos=>pos!==-1&&CFG.p2Path[pos]===coord);
+        if(bi!==-1){
+          animateBounce(D.p2TokensDOM[bi],()=>{
+            G.p2Tokens[bi]=0;G.p1Kills++;
+            if(p2pts<p1pts)G.p2Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
         return;
       }
-
-      // Non-orange cell — normal rules
+      // Normal cell
       if(p2at>=2){
-        // 2+ P2 coins = P1 bounces
         const bi=G.p1Tokens.findIndex(pos=>pos!==-1&&CFG.p1Path[pos]===coord);
         if(bi!==-1){
           animateBounce(D.p1TokensDOM[bi],()=>{
-            G.p1Tokens[bi]=-1;
-            G.p2Kills++;if(p1pts<p2pts)G.p1Revenge=true;
+            G.p1Tokens[bi]=-1;G.p2Kills++;
+            if(p1pts<p2pts)G.p1Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
       }else{
-        // P1 kills P2
         const vi=G.p2Tokens.findIndex(pos=>pos!==-1&&CFG.p2Path[pos]===coord);
         if(vi!==-1){
           animateKill(D.p2TokensDOM[vi],()=>{
-            G.p2Tokens[vi]=-1;G.p1Kills++;
-            G.p1BonusPending=true;G.extraTurns++;
+            G.p2Tokens[vi]=-1;G.p1Kills++;G.p1BonusPending=true;G.extraTurns++;
             if(p2pts<p1pts)G.p2Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
@@ -1455,55 +1479,58 @@
       }
 
     }else{
-      // P2 just moved onto coord where P1 coin(s) exist
-
-      if(orangeOwnerP1){
-        // P1 owns shield → P2 incoming bounces to HOME (start, pos=0)
+      if(orangeOwnerP1&&!orangeOwnerP2){
+        // P1 already had shield, P2 incoming → P2 bounces to home
         SFX.play('shield');
         const bi=G.p2Tokens.findIndex(pos=>pos!==-1&&CFG.p2Path[pos]===coord);
         if(bi!==-1){
           animateBounce(D.p2TokensDOM[bi],()=>{
-            G.p2Tokens[bi]=0; // home (start)
-            G.p1Kills++;
+            G.p2Tokens[bi]=0;G.p1Kills++;
             if(p2pts<p1pts)G.p2Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
         return;
       }
-
-      if(orangeOwnerP2){
-        // P2 owns shield → P2's OWN second coin landed = SELF KILL
-        const allP2Here=G.p2Tokens.reduce((a,pos,i)=>
-          pos!==-1&&CFG.p2Path[pos]===coord?[...a,i]:a,[]);
+      if(orangeOwnerP2&&p2at>=2){
+        // P2 owns shield AND another P2 coin landed → SELF KILL
+        const allP2Here=G.p2Tokens.reduce((a,pos,i)=>pos!==-1&&CFG.p2Path[pos]===coord?[...a,i]:a,[]);
         const ski=allP2Here.length>=2?allP2Here[0]:-1;
         if(ski!==-1){
           animateBounce(D.p2TokensDOM[ski],()=>{
-            G.p2Tokens[ski]=-1; // vault
+            G.p2Tokens[ski]=-1;updateBoard();if(doneCb)doneCb();
+          });
+        }else{if(doneCb)doneCb();}
+        return;
+      }
+      if(orangeOwnerP2&&p1at>=1){
+        // P2 just claimed shield, P1 is here → P1 bounces
+        SFX.play('shield');
+        const bi=G.p1Tokens.findIndex(pos=>pos!==-1&&CFG.p1Path[pos]===coord);
+        if(bi!==-1){
+          animateBounce(D.p1TokensDOM[bi],()=>{
+            G.p1Tokens[bi]=0;G.p2Kills++;
+            if(p1pts<p2pts)G.p1Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
         return;
       }
-
-      // Non-orange cell — normal rules
+      // Normal cell
       if(p1at>=2){
-        // 2+ P1 coins = P2 bounces
         const bi=G.p2Tokens.findIndex(pos=>pos!==-1&&CFG.p2Path[pos]===coord);
         if(bi!==-1){
           animateBounce(D.p2TokensDOM[bi],()=>{
-            G.p2Tokens[bi]=-1;
-            G.p1Kills++;if(p2pts<p1pts)G.p2Revenge=true;
+            G.p2Tokens[bi]=-1;G.p1Kills++;
+            if(p2pts<p1pts)G.p2Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
         }else{if(doneCb)doneCb();}
       }else{
-        // P2 kills P1
         const vi=G.p1Tokens.findIndex(pos=>pos!==-1&&CFG.p1Path[pos]===coord);
         if(vi!==-1){
           animateKill(D.p1TokensDOM[vi],()=>{
-            G.p1Tokens[vi]=-1;G.p2Kills++;
-            G.p2BonusPending=true;G.extraTurns++;
+            G.p1Tokens[vi]=-1;G.p2Kills++;G.p2BonusPending=true;G.extraTurns++;
             if(p1pts<p2pts)G.p1Revenge=true;
             updateBoard();if(doneCb)doneCb();
           });
@@ -1517,6 +1544,7 @@
   // =====================================================
   function switchTurn(noMove){
     if(G.isGameOver)return;
+    G.totalTurns++;
     G.currentPlayer=G.currentPlayer===1?2:1;
     G.hasRolled=false;G.currentRoll=0;
     resetRoll();
@@ -1805,12 +1833,26 @@
   }
 
   function showRestartScreen(title, sub){
-    clearGameState();clearGameLoops();clearActionTimeouts();
-    // Save result to Firebase
-    const p1Won = title.includes(G.theme==='blue-red'?'BLUE':'RED');
-    const myKills = G.p1Kills;
-    if(typeof window.saveGameResult === 'function'){
-      window.saveGameResult(p1Won, myKills);
+    clearGameState();clearGameLoops();clearActionTimeouts();stopTimer();
+    const p1Name=G.theme==='blue-red'?'BLUE':'RED';
+    const p1won=title.includes(p1Name);
+    const myKills=G.p1Kills;
+    const turns=G.totalTurns||0;
+    // Speed bonus: faster game = more bonus (5x5 max 30 turns, 7x7 max 80 turns)
+    const fastThreshold=CFG.gridSize===5?20:50;
+    const slowThreshold=CFG.gridSize===5?40:100;
+    let speedBonus=0;
+    if(p1won){
+      if(turns<=fastThreshold) speedBonus=50;
+      else if(turns<=slowThreshold) speedBonus=Math.round(50*(1-(turns-fastThreshold)/(slowThreshold-fastThreshold)));
+      speedBonus=Math.max(10,speedBonus);
+    }
+    // Coins: win=+100, loss=-90(min 0), kill=+15each, speed bonus, participation=+5
+    const coinsChange=p1won
+      ? 100 + (myKills*15) + speedBonus + 5
+      : Math.max(-90, -(90)) + (myKills*15) + 5;
+    if(typeof window.saveGameResult==='function'){
+      window.saveGameResult(p1won, myKills, coinsChange, turns);
     }
     setTimeout(()=>{
       document.getElementById('rs-title').textContent=title;
@@ -1991,7 +2033,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDijakIOTks_Xx2p5-LJqWgfBjs8ExwNso",
@@ -2056,54 +2098,48 @@
 
     // ── Login ──
     async function doLogin() {
-      const email = document.getElementById('login-email').value.trim();
+      const username = document.getElementById('login-username').value.trim().toLowerCase();
       const password = document.getElementById('login-password').value;
-      if (!email || !password) { setAuthError('Email మరియు Password enter చేయండి'); return; }
+      if (!username || !password) { setAuthError('Username మరియు Password enter చేయండి'); return; }
       setAuthLoading(true);
+      const email = username + '@shellkoin.game';
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
         const msgs = {
-          'auth/user-not-found': 'ఈ email తో account లేదు',
+          'auth/user-not-found': 'ఈ username లేదు — Register చేయండి',
           'auth/wrong-password': 'Password తప్పు',
-          'auth/invalid-email': 'Email format తప్పు',
-          'auth/invalid-credential': 'Email లేదా Password తప్పు',
-          'auth/too-many-requests': 'చాలాసార్లు try చేశారు, కొంత సేపు wait చేయండి'
+          'auth/invalid-credential': 'Username లేదా Password తప్పు',
+          'auth/too-many-requests': 'చాలాసార్లు try చేశారు, కొంత సేపు wait చేయండి',
+          'auth/network-request-failed': 'Internet connection లేదు'
         };
-        setAuthError(msgs[e.code] || 'Login fail: ' + e.message);
+        setAuthError(msgs[e.code] || 'Login fail: ' + e.code);
       }
     }
 
     // ── Register ──
     async function doRegister() {
-      const username = document.getElementById('reg-username').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
+      const username = document.getElementById('reg-username').value.trim().toLowerCase();
       const password = document.getElementById('reg-password').value;
-      if (!username || !email || !password) { setAuthError('అన్ని fields fill చేయండి'); return; }
+      if (!username || !password) { setAuthError('అన్ని fields fill చేయండి'); return; }
       if (username.length < 3) { setAuthError('Username కనీసం 3 characters ఉండాలి'); return; }
+      if (!/^[a-z0-9_]+$/.test(username)) { setAuthError('Username లో only letters, numbers, _ వాడండి'); return; }
       if (password.length < 6) { setAuthError('Password కనీసం 6 characters ఉండాలి'); return; }
       setAuthLoading(true);
+      const email = username + '@shellkoin.game';
       try {
-        // Step 1: Create auth user
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         currentUsername = username;
-        // Step 2: Save to Firestore (non-blocking — if this fails, login still works)
         try {
           await setDoc(doc(db, 'users', cred.user.uid), {
             username, email,
             createdAt: new Date().toISOString(),
-            stats: { gamesPlayed: 0, wins: 0, losses: 0, kills: 0 }
+            stats: { gamesPlayed: 0, wins: 0, losses: 0, kills: 0, coins: 0 }
           });
-        } catch(fsErr) {
-          // Firestore failed but auth succeeded — still let user in
-          console.warn('Firestore write failed (rules may need update):', fsErr.message);
-        }
-        // Auth succeeded — onAuthStateChanged will call showGame()
+        } catch(fsErr) { console.warn('Firestore write failed:', fsErr.message); }
       } catch (e) {
-        console.error('Register error:', e.code, e.message);
         const msgs = {
-          'auth/email-already-in-use': 'ఈ email already registered — Login try చేయండి',
-          'auth/invalid-email': 'Email format తప్పు (example@gmail.com)',
+          'auth/email-already-in-use': 'ఈ username already తీసుకోబడింది — వేరే username try చేయండి',
           'auth/weak-password': 'Password చాలా weak — కనీసం 6 characters',
           'auth/network-request-failed': 'Internet connection లేదు'
         };
@@ -2114,13 +2150,18 @@
     // ── Profile ──
     async function openProfile() {
       if (!currentUser) return;
+      // Reset tabs
+      document.getElementById('tab-stats').style.display='block';
+      document.getElementById('tab-lb').style.display='none';
+      document.getElementById('tab-stats-btn').className='auth-tab active';
+      document.getElementById('tab-lb-btn').className='auth-tab';
       try {
         const snap = await getDoc(doc(db, 'users', currentUser.uid));
         if (snap.exists()) {
           const d = snap.data();
           const s = d.stats || {};
           document.getElementById('profile-name').textContent = d.username || '-';
-          document.getElementById('profile-email').textContent = d.email || '-';
+          document.getElementById('profile-coins').textContent = (s.coins||0).toLocaleString();
           document.getElementById('stat-games').textContent = s.gamesPlayed || 0;
           document.getElementById('stat-wins').textContent = s.wins || 0;
           document.getElementById('stat-losses').textContent = s.losses || 0;
@@ -2132,16 +2173,69 @@
       document.getElementById('profile-screen').style.display = 'flex';
     }
 
+    // ── Tab switching ──
+    document.getElementById('tab-stats-btn').addEventListener('click', ()=>{
+      document.getElementById('tab-stats').style.display='block';
+      document.getElementById('tab-lb').style.display='none';
+      document.getElementById('tab-stats-btn').className='auth-tab active';
+      document.getElementById('tab-lb-btn').className='auth-tab';
+    });
+    document.getElementById('tab-lb-btn').addEventListener('click', async ()=>{
+      document.getElementById('tab-stats').style.display='none';
+      document.getElementById('tab-lb').style.display='block';
+      document.getElementById('tab-stats-btn').className='auth-tab';
+      document.getElementById('tab-lb-btn').className='auth-tab active';
+      await loadLeaderboard();
+    });
+
+    // ── Leaderboard ──
+    async function loadLeaderboard() {
+      const lbList = document.getElementById('lb-list');
+      lbList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">⏳ Loading...</div>';
+      try {
+        const q = query(collection(db,'users'), orderBy('stats.coins','desc'), limit(50));
+        const snap = await getDocs(q);
+        if(snap.empty){ lbList.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:20px;">ఇంకా players లేరు</div>'; return; }
+        let html='';
+        let rank=1;
+        snap.forEach(d=>{
+          const data=d.data();
+          const s=data.stats||{};
+          const isMe=d.id===currentUser?.uid;
+          const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+          html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.05);${isMe?'background:rgba(251,191,36,0.1);border-radius:8px;':''}">
+            <span style="font-size:${rank<=3?'20px':'14px'};min-width:32px;text-align:center;font-weight:bold;color:${isMe?'#fbbf24':'var(--text-muted)'};">${medal}</span>
+            <div style="flex:1;">
+              <div style="font-weight:bold;color:${isMe?'#fbbf24':'var(--text-light)'};font-size:14px;">${data.username||'?'}${isMe?' (మీరు)':''}</div>
+              <div style="font-size:11px;color:var(--text-muted);">🏆${s.wins||0} ⚔️${s.kills||0} 🎮${s.gamesPlayed||0}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:16px;font-weight:900;color:#fbbf24;">${(s.coins||0).toLocaleString()}</div>
+              <div style="font-size:10px;color:var(--text-muted);">🪙 coins</div>
+            </div>
+          </div>`;
+          rank++;
+        });
+        lbList.innerHTML=html;
+      } catch(e) {
+        lbList.innerHTML='<div style="text-align:center;color:#f87171;padding:20px;">Load failed. Try again.</div>';
+        console.log('Leaderboard error:',e);
+      }
+    }
+
     // ── Save game result ──
-    window.saveGameResult = async function(won, kills) {
+    window.saveGameResult = async function(won, kills, coinsChange, turns) {
       if (!currentUser) return;
       try {
+        const finalCoinsChange = coinsChange || (won ? 100 : -90);
         await updateDoc(doc(db, 'users', currentUser.uid), {
           'stats.gamesPlayed': increment(1),
           'stats.wins': increment(won ? 1 : 0),
           'stats.losses': increment(won ? 0 : 1),
-          'stats.kills': increment(kills || 0)
+          'stats.kills': increment(kills || 0),
+          'stats.coins': increment(finalCoinsChange)
         });
+        // Ensure coins don't go below 0 (handled by max in game logic, but safety check)
       } catch(e) { console.log('Stats save error:', e); }
     };
 
@@ -2161,6 +2255,7 @@
 
     // Enter key support
     document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+    document.getElementById('login-username').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
     document.getElementById('reg-password').addEventListener('keydown', e => { if(e.key==='Enter') doRegister(); });
   </script>
 </body>
