@@ -185,6 +185,101 @@
 
 
 
+
+    /* ===== LUCKY 7 SCREEN ===== */
+    #lucky7-screen {
+      position: fixed; inset: 0; z-index: 7500;
+      background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .l7-title { font-size: 28px; font-weight: 900; color: var(--gold); margin-bottom: 2px; text-align: center; letter-spacing: 2px; }
+    .l7-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; text-align: center; }
+    .l7-balance { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; text-align: center; }
+    .l7-balance strong { color: var(--gold); font-size: 16px; }
+
+    /* Bet zone selector */
+    .l7-zones { display: flex; gap: 10px; width: 100%; max-width: 360px; margin-bottom: 16px; }
+    .l7-zone {
+      flex: 1; border-radius: 14px; padding: 14px 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all 0.2s; position: relative; gap: 4px;
+    }
+    .l7-zone:active { transform: scale(0.97); }
+    .l7-zone-left  { background: linear-gradient(135deg,#1e3a5f,#1d4ed8); border-color: #3b82f6; }
+    .l7-zone-mid   { background: linear-gradient(135deg,#3a1a00,#d97706); border-color: #fbbf24; }
+    .l7-zone-right { background: linear-gradient(135deg,#1a3a1a,#166534); border-color: #4ade80; }
+    .l7-zone.selected { transform: scale(1.05); box-shadow: 0 0 20px 4px currentColor; }
+    .l7-zone-left.selected  { box-shadow: 0 0 20px 3px #3b82f6; border-width: 3px; }
+    .l7-zone-mid.selected   { box-shadow: 0 0 20px 3px #fbbf24; border-width: 3px; }
+    .l7-zone-right.selected { box-shadow: 0 0 20px 3px #4ade80; border-width: 3px; }
+    .l7-zone-label { font-size: 13px; font-weight: 900; color: white; }
+    .l7-zone-range { font-size: 11px; color: rgba(255,255,255,0.7); }
+    .l7-zone-mult  { font-size: 18px; font-weight: 900; color: white; margin-top: 2px; }
+    .l7-zone-check { position: absolute; top: 6px; right: 8px; font-size: 14px; opacity: 0; transition: opacity 0.2s; }
+    .l7-zone.selected .l7-zone-check { opacity: 1; }
+
+    /* Bet amount row */
+    .l7-bet-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .l7-bet-btn { width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 22px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+    .l7-bet-btn:active { transform: scale(0.9); }
+    .l7-bet-minus { background: #7f1d1d; color: white; border: 2px solid #ef4444; }
+    .l7-bet-plus  { background: linear-gradient(135deg,#fbbf24,#d97706); color: #1c0a00; }
+    .l7-bet-btn:disabled { opacity: 0.3; }
+    .l7-bet-amount { font-size: 26px; font-weight: 900; color: var(--gold); min-width: 100px; text-align: center; }
+
+    /* Roll button */
+    .l7-roll-btn {
+      width: 100%; max-width: 320px; padding: 16px;
+      font-size: 20px; font-weight: 900; color: #1c0a00;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+      border: 3px solid #fcd34d; border-radius: 40px; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(245,158,11,0.5), inset 0 3px 0 rgba(255,255,255,0.4);
+      transition: transform 0.1s; margin-bottom: 10px; outline: none;
+    }
+    .l7-roll-btn:active:not(:disabled) { transform: scale(0.97); }
+    .l7-roll-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+    /* Number display */
+    .l7-number-display {
+      font-size: 72px; font-weight: 900; min-height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 6px 0; transition: all 0.3s;
+      text-shadow: 0 0 30px currentColor;
+    }
+    .l7-number-display.left-color  { color: #60a5fa; }
+    .l7-number-display.mid-color   { color: #fbbf24; text-shadow: 0 0 40px #fbbf24, 0 0 80px #f59e0b; }
+    .l7-number-display.right-color { color: #4ade80; }
+    .l7-number-display.rolling { animation: l7-roll-anim 0.08s infinite alternate; }
+    @keyframes l7-roll-anim { 0%{transform:scale(1);}100%{transform:scale(1.08);} }
+
+    /* Result message */
+    .l7-result {
+      font-size: 20px; font-weight: 900; text-align: center;
+      min-height: 28px; margin-bottom: 8px;
+      animation: l7-result-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes l7-result-pop { 0%{transform:scale(0.5);opacity:0;}100%{transform:scale(1);opacity:1;} }
+    .l7-result.win   { color: #4ade80; }
+    .l7-result.lose  { color: #f87171; }
+    .l7-result.jackpot { color: #fbbf24; font-size: 24px; text-shadow: 0 0 20px #fbbf24; }
+
+    /* Close btn */
+    .l7-close-btn {
+      padding: 10px 28px; background: var(--panel-card); color: var(--text-muted);
+      border: 1px solid var(--panel-border); border-radius: 10px;
+      font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 4px;
+    }
+
+    /* Watch Ad button in Lucky7 */
+    .l7-ad-btn {
+      font-size: 12px; color: #93c5fd; background: rgba(59,130,246,0.1);
+      border: 1px solid #3b82f6; border-radius: 8px;
+      padding: 6px 14px; cursor: pointer; margin-top: 4px; display: none;
+    }
+    .l7-ad-btn.visible { display: block; }
+
     /* ===== REWARDED AD SCREEN ===== */
     #ad-screen {
       position: fixed; inset: 0; z-index: 8500;
@@ -470,7 +565,16 @@
     <p class="game-subtitle">Mobile Edition</p>
     <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
       <button class="start-btn" id="start-btn-action">🎮 PLAY GAME</button>
-      <button class="watch-ad-btn" id="watch-ad-btn-start">▶ Ad చూడు • 🪙 +1000</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <button class="watch-ad-btn" id="watch-ad-btn-start">▶ Ad చూడు • 🪙 +1000</button>
+        <div style="font-size:10px;color:var(--text-muted);" id="ad-btn-subtext"></div>
+      </div>
+      <button class="watch-ad-btn" id="bonus-open-btn" style="background:linear-gradient(135deg,#1a3a1a,#166534);border-color:#4ade80;color:white;">
+        🎴 Daily Bonus <span id="bonus-btn-badge" style="background:#4ade80;color:#064e3b;border-radius:10px;padding:2px 8px;font-size:11px;margin-left:4px;">OPEN</span>
+      </button>
+      <button class="watch-ad-btn" id="lucky7-open-btn" style="background:linear-gradient(135deg,#1a0a3a,#4c1d95);border-color:#a78bfa;color:white;font-size:16px;">
+        🎰 Lucky 7 <span style="background:#a78bfa;color:#1a0a3a;border-radius:10px;padding:2px 8px;font-size:11px;margin-left:4px;">DOUBLE!</span>
+      </button>
       <button class="start-btn secondary-btn" id="rules-btn-action" style="font-size:16px;padding:12px 30px;">📜 GAME RULES</button>
     </div>
   </div>
@@ -506,10 +610,16 @@
       </div>
     </div>
     <div class="setup-content" id="step-mode" style="display:none;">
-      <h3 style="color:var(--gold);text-align:center;margin-bottom:24px;">మోడ్ ఎంచుకోండి</h3>
+      <h3 style="color:var(--gold);text-align:center;margin-bottom:8px;">మోడ్ ఎంచుకోండి</h3>
+      <!-- Coin balance display -->
+      <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:10px 20px;margin-bottom:20px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">మీ balance</div>
+        <div style="font-size:28px;font-weight:900;color:var(--gold);">🪙 <span id="mode-coin-balance">0</span></div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">AI mode లో coins bet చేయవచ్చు</div>
+      </div>
       <div class="setup-options">
-        <button class="setup-btn" id="btn-mode-2p">👥 Two Players</button>
-        <button class="setup-btn" id="btn-mode-ai">🤖 Human vs AI</button>
+        <button class="setup-btn" id="btn-mode-2p">👥 Two Players<br><span style="font-size:11px;font-weight:400;color:var(--text-muted);">Coins పణంగా పెట్టరు</span></button>
+        <button class="setup-btn" id="btn-mode-ai" style="border-color:var(--gold);">🤖 Human vs AI<br><span style="font-size:11px;font-weight:400;color:#fbbf24;">Coins bet చేయవచ్చు 🪙</span></button>
       </div>
     </div>
     <div class="setup-content" id="step-color" style="display:none;">
@@ -550,14 +660,7 @@
     </div>
     <div class="setup-content" id="step-ready" style="display:none;">
       <h3 style="color:var(--gold);text-align:center;margin-bottom:24px;" id="ready-summary"></h3>
-      <!-- Vault coin display -->
-      <div class="setup-vault-info" id="setup-vault-display">
-        <span>🏠 Vault:</span>
-        <div class="setup-vault-tokens" id="setup-vault-p1"></div>
-        <span style="margin:0 4px;color:var(--panel-border)">|</span>
-        <div class="setup-vault-tokens" id="setup-vault-p2"></div>
-      </div>
-      <button class="start-btn" id="final-start-btn" style="margin-top:16px;">▶ Start Game</button>
+      <button class="start-btn" id="final-start-btn" style="margin-top:16px;font-size:20px;padding:18px 48px;">▶ START GAME</button>
     </div>
   </div>
 
@@ -647,6 +750,60 @@
 
 
 
+
+  <!-- LUCKY 7 SCREEN -->
+  <div id="lucky7-screen">
+    <div class="l7-title">🎰 Lucky 7</div>
+    <div class="l7-subtitle">Zone ఎంచుకో • Bet పెట్టు • Roll చేయి!</div>
+    <div class="l7-balance">మీ balance: 🪙 <strong id="l7-balance">0</strong></div>
+
+    <!-- Zone selector -->
+    <div class="l7-zones">
+      <div class="l7-zone l7-zone-left" id="l7-zone-left" onclick="l7SelectZone('left')">
+        <div class="l7-zone-check">✓</div>
+        <div class="l7-zone-label">LOW</div>
+        <div class="l7-zone-range">0 – 6</div>
+        <div class="l7-zone-mult">2✕</div>
+      </div>
+      <div class="l7-zone l7-zone-mid" id="l7-zone-mid" onclick="l7SelectZone('mid')">
+        <div class="l7-zone-check">✓</div>
+        <div class="l7-zone-label">LUCKY</div>
+        <div class="l7-zone-range">= 7</div>
+        <div class="l7-zone-mult">3✕</div>
+      </div>
+      <div class="l7-zone l7-zone-right" id="l7-zone-right" onclick="l7SelectZone('right')">
+        <div class="l7-zone-check">✓</div>
+        <div class="l7-zone-label">HIGH</div>
+        <div class="l7-zone-range">8 – 14</div>
+        <div class="l7-zone-mult">2✕</div>
+      </div>
+    </div>
+
+    <!-- Bet amount -->
+    <div class="l7-bet-row">
+      <button class="l7-bet-btn l7-bet-minus" id="l7-bet-minus">−</button>
+      <div>
+        <div class="l7-bet-amount">🪙 <span id="l7-bet-display">100</span></div>
+        <div style="font-size:10px;color:var(--text-muted);text-align:center;">BET</div>
+      </div>
+      <button class="l7-bet-btn l7-bet-plus" id="l7-bet-plus">+</button>
+    </div>
+
+    <!-- Number display -->
+    <div class="l7-number-display" id="l7-number">🎲</div>
+
+    <!-- Result -->
+    <div class="l7-result" id="l7-result"></div>
+
+    <!-- Roll button -->
+    <button class="l7-roll-btn" id="l7-roll-btn" disabled>Zone ఎంచుకో ↑</button>
+
+    <!-- Low balance ad -->
+    <button class="l7-ad-btn" id="l7-ad-btn" onclick="showRewardedAd(()=>l7UpdateUI())">▶ Ad చూడు → +1000 coins</button>
+
+    <button class="l7-close-btn" id="l7-close-btn">← Back</button>
+  </div>
+
   <!-- REWARDED AD SCREEN -->
   <div id="ad-screen">
     <div class="ad-container">
@@ -674,6 +831,7 @@
     <div class="bonus-subtitle">ఒక card తెరవండి • ప్రతి 2 గంటలకు once</div>
     <div class="bonus-cards" id="bonus-cards-wrap"></div>
     <div class="bonus-timer" id="bonus-timer-text"></div>
+    <div id="bonus-result-msg" style="display:none;text-align:center;margin:8px 0;"></div>
     <button class="bonus-close-btn" id="bonus-close-btn">🎮 Skip చేయి</button>
   </div>
 
@@ -1291,6 +1449,10 @@
   function showSetupStep(step){
     document.getElementById('step-board').style.display=(step===0)?'flex':'none';
     document.getElementById('step-mode').style.display=(step===1)?'flex':'none';
+    if(step===1){
+      const balEl=document.getElementById('mode-coin-balance');
+      if(balEl) balEl.textContent=(window._userCoins||0).toLocaleString();
+    }
     document.getElementById('step-color').style.display=(step===2)?'flex':'none';
     document.getElementById('step-bet').style.display=(step===3)?'flex':'none';
     document.getElementById('step-ready').style.display=(step===4)?'flex':'none';
@@ -1309,29 +1471,7 @@
       const betLine=!is2P?`<span style="font-size:14px;color:#fbbf24;display:block;margin-top:6px;">🪙 Bet: ${tempSetup.betAmount.toLocaleString()} coins</span>`:'';
       document.getElementById('ready-summary').innerHTML=`${bl}<br>${ml}${cl}${betLine}`;
 
-      // Show vault coins for each player (all 4 start in vault = -1)
-      const p1Class = tempSetup.theme==='blue-red'?'p2c':'p1c';
-      const p2Class = tempSetup.theme==='blue-red'?'p1c':'p2c';
-      const p1Color = tempSetup.hColor===1 ? 'p1c' : 'p2c';
-      const p2Color = tempSetup.hColor===1 ? 'p2c' : 'p1c';
-      function renderVaultDots(elId, colorClass){
-        const el=document.getElementById(elId);
-        if(!el)return;
-        el.innerHTML='';
-        for(let i=0;i<4;i++){
-          const d=document.createElement('div');
-          d.className='setup-vault-coin '+colorClass;
-          el.appendChild(d);
-        }
-      }
-      renderVaultDots('setup-vault-p1', p1Color);
-      renderVaultDots('setup-vault-p2', p2Color);
-      const vaultLabel = document.getElementById('setup-vault-display');
-      if(vaultLabel){
-        const p1Name=tempSetup.hColor===1?'🔴':'🔵';
-        const p2Name=tempSetup.hColor===1?'🔵':'🔴';
-        vaultLabel.querySelector('span').textContent = '🏠 Start coins:';
-      }
+
     }
   }
 
@@ -1442,42 +1582,248 @@
 
 
 
+
+  // ===== LUCKY 7 MINI GAME =====
+  const L7_BET_LEVELS = [100,200,500,1000,2000,5000,10000,25000];
+  let l7State = { zone: null, bet: 100, rolling: false };
+
+  window.l7SelectZone = function(zone){
+    if(l7State.rolling) return;
+    l7State.zone = zone;
+    ['left','mid','right'].forEach(z=>{
+      document.getElementById('l7-zone-'+z).classList.toggle('selected', z===zone);
+    });
+    l7UpdateUI();
+  };
+
+  function l7UpdateUI(){
+    const bal = window._userCoins || 0;
+    document.getElementById('l7-balance').textContent = bal.toLocaleString();
+    document.getElementById('l7-bet-display').textContent = l7State.bet.toLocaleString();
+    // +/- buttons
+    const idx = L7_BET_LEVELS.indexOf(l7State.bet);
+    document.getElementById('l7-bet-minus').disabled = idx <= 0 || l7State.rolling;
+    document.getElementById('l7-bet-plus').disabled  = idx >= L7_BET_LEVELS.length-1 || l7State.rolling;
+    // Roll button
+    const rollBtn = document.getElementById('l7-roll-btn');
+    const canRoll = l7State.zone !== null && l7State.bet <= bal && !l7State.rolling;
+    rollBtn.disabled = !canRoll;
+    if(!l7State.zone)       rollBtn.textContent = 'Zone ఎంచుకో ↑';
+    else if(l7State.bet > bal) rollBtn.textContent = '🪙 Balance సరిపోదు';
+    else                    rollBtn.textContent = '🎲 Roll చేయి!';
+    // Low balance ad button
+    const adBtn = document.getElementById('l7-ad-btn');
+    if(adBtn) adBtn.classList.toggle('visible', bal < l7State.bet && canWatchAd());
+  }
+
+  function l7Roll(){
+    if(l7State.rolling || !l7State.zone) return;
+    const bal = window._userCoins || 0;
+    if(l7State.bet > bal) return;
+
+    l7State.rolling = true;
+    l7UpdateUI();
+
+    const numEl   = document.getElementById('l7-number');
+    const resultEl = document.getElementById('l7-result');
+    const rollBtn  = document.getElementById('l7-roll-btn');
+    resultEl.textContent = '';
+    resultEl.className = 'l7-result';
+    rollBtn.textContent = '🎲 Rolling...';
+
+    // Animate rolling numbers
+    numEl.className = 'l7-number-display rolling';
+    numEl.style.color = '#ffffff';
+    let rollCount = 0;
+    const totalRolls = 18; // ~1.5s of animation
+    const rollInterval = setInterval(()=>{
+      numEl.textContent = Math.floor(Math.random() * 15);
+      rollCount++;
+      if(rollCount >= totalRolls){
+        clearInterval(rollInterval);
+        // Final number
+        const final = Math.floor(Math.random() * 15); // 0-14
+        numEl.classList.remove('rolling');
+        numEl.textContent = final;
+
+        // Determine zone of result
+        let resultZone;
+        if(final <= 6)       resultZone = 'left';
+        else if(final === 7) resultZone = 'mid';
+        else                 resultZone = 'right';
+
+        // Color the number
+        const colorMap = { left:'left-color', mid:'mid-color', right:'right-color' };
+        numEl.className = 'l7-number-display ' + colorMap[resultZone];
+
+        // Determine win/lose
+        const won = resultZone === l7State.zone;
+        const isJackpot = final === 7 && l7State.zone === 'mid';
+        const multiplier = isJackpot ? 3 : 2;
+
+        let coinDelta = 0;
+        if(won){
+          coinDelta = l7State.bet * (multiplier - 1); // net gain (bet already spent)
+        } else {
+          coinDelta = -l7State.bet;
+        }
+
+        // Update balance
+        const newBal = Math.max(0, bal + coinDelta);
+        window._userCoins = newBal;
+        if(typeof window.addBonusCoins === 'function'){
+          window.addBonusCoins(coinDelta);
+        }
+
+        // Show result
+        setTimeout(()=>{
+          if(isJackpot){
+            resultEl.textContent = `🎰 JACKPOT! +${(l7State.bet*2).toLocaleString()} 🪙`;
+            resultEl.className = 'l7-result jackpot';
+            SFX.play('win');
+            showCoinPopup(l7State.bet * 2);
+          } else if(won){
+            resultEl.textContent = `✅ గెలిచావు! +${l7State.bet.toLocaleString()} 🪙`;
+            resultEl.className = 'l7-result win';
+            SFX.play('coin');
+            showCoinPopup(l7State.bet);
+          } else {
+            resultEl.textContent = `❌ ఓడిపోయావు! -${l7State.bet.toLocaleString()} 🪙`;
+            resultEl.className = 'l7-result lose';
+            SFX.play('kill');
+            showCoinPopup(-l7State.bet);
+          }
+          l7State.rolling = false;
+          rollBtn.textContent = '🎲 మళ్ళీ Roll చేయి!';
+          l7UpdateUI();
+        }, 300);
+      }
+    }, 80);
+  }
+
+  function showLucky7(){
+    // Reset state
+    l7State = { zone: null, bet: Math.min(100, window._userCoins||100), rolling: false };
+    ['left','mid','right'].forEach(z=> document.getElementById('l7-zone-'+z).classList.remove('selected'));
+    document.getElementById('l7-number').textContent = '🎲';
+    document.getElementById('l7-number').className = 'l7-number-display';
+    document.getElementById('l7-result').textContent = '';
+    document.getElementById('l7-result').className = 'l7-result';
+    l7UpdateUI();
+    document.getElementById('lucky7-screen').style.display = 'flex';
+  }
+
+  function hideLucky7(){
+    document.getElementById('lucky7-screen').style.display = 'none';
+  }
+
+
   // ===== REWARDED AD SYSTEM =====
   // Simulated ad — replace simulateAd() with real AdMob when ready
   const AD_COOLDOWN_MS = 30 * 60 * 1000; // 30 min between ads
+  const AD_MAX_PER_DAY = 3;              // max 3 ads per day
   const AD_KEY = 'shellkoin_ad_last';
+  const AD_COUNT_KEY = 'shellkoin_ad_count'; // {date, count}
   const AD_REWARD = 1000;
 
-  // Fake ad content pool
+  function getAdStatus(){
+    // Check cooldown
+    const last = parseInt(localStorage.getItem(AD_KEY)||'0');
+    const cooldownLeft = Math.max(0, AD_COOLDOWN_MS - (Date.now()-last));
+    // Check daily limit
+    let dayCount = 0;
+    try{
+      const dc = JSON.parse(localStorage.getItem(AD_COUNT_KEY)||'{}');
+      const today = new Date().toDateString();
+      dayCount = dc.date===today ? (dc.count||0) : 0;
+    }catch(e){}
+    return { cooldownLeft, dayCount, canWatch: cooldownLeft===0 && dayCount<AD_MAX_PER_DAY };
+  }
+
+  function incrementAdCount(){
+    const today = new Date().toDateString();
+    let dc = {};
+    try{ dc = JSON.parse(localStorage.getItem(AD_COUNT_KEY)||'{}'); }catch(e){}
+    const count = dc.date===today ? (dc.count||0)+1 : 1;
+    localStorage.setItem(AD_COUNT_KEY, JSON.stringify({date:today, count}));
+  }
+
+  function formatAdTimer(ms){
+    const m = Math.floor(ms/60000);
+    const s = Math.floor((ms%60000)/1000);
+    return `${m}m ${s}s`;
+  }
+
+  let _adStatusInterval = null;
+
+  function updateAdBtnText(){
+    const status = getAdStatus();
+    const btn = document.getElementById('watch-ad-btn-start');
+    const subtext = document.getElementById('ad-btn-subtext');
+    if(!btn) return;
+    if(status.dayCount >= AD_MAX_PER_DAY){
+      btn.disabled = true;
+      btn.style.opacity='0.4';
+      if(subtext) subtext.textContent = `రోజు limit అయింది (${AD_MAX_PER_DAY}/${AD_MAX_PER_DAY}) • రేపు మళ్ళీ try చేయండి`;
+    } else if(status.cooldownLeft > 0){
+      btn.disabled = true;
+      btn.style.opacity='0.5';
+      if(subtext) subtext.textContent = `తదుపరి ad: ${formatAdTimer(status.cooldownLeft)} • నేడు చూసినవి: ${status.dayCount}/${AD_MAX_PER_DAY}`;
+    } else {
+      btn.disabled = false;
+      btn.style.opacity='1';
+      if(subtext) subtext.textContent = `నేడు చూసినవి: ${status.dayCount}/${AD_MAX_PER_DAY}`;
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  // YOUR CUSTOM AD — మీ business ad ఇక్కడ పెట్టండి!
+  // emoji, name, tagline మార్చండి
+  // లేదా imgUrl తో real image పెట్టవచ్చు
+  // ══════════════════════════════════════════════════
   const AD_POOL = [
-    { emoji:'🎮', name:'GameZone Pro',    tagline:'అత్యుత్తమ mobile games చదవండి!' },
-    { emoji:'📚', name:'LearnFast',       tagline:'ఇంట్లో నుండే skills నేర్చుకోండి!' },
-    { emoji:'🏋️', name:'FitLife App',     tagline:'రోజూ 10 నిమిషాలు — fit గా ఉండండి!' },
-    { emoji:'💰', name:'MoneyMind',       tagline:'Smart గా invest చేయడం నేర్చుకోండి!' },
-    { emoji:'🍕', name:'FoodieExpress',   tagline:'30 నిమిషాల్లో మీ door కి!' },
+    {
+      emoji: '🤖',
+      name: 'AI & Web Solutions',
+      tagline: 'AI తో Websites, Apps తయారు చేస్తాను\nContact: your@email.com',
+      // imgUrl: 'https://your-image-url.com/poster.jpg'  // optional
+    }
   ];
 
   let _adTimerRef = null;
   let _adOnComplete = null;
 
   function canWatchAd(){
-    const last = parseInt(localStorage.getItem(AD_KEY) || '0');
-    return Date.now() - last >= AD_COOLDOWN_MS;
+    return getAdStatus().canWatch;
   }
 
   function showRewardedAd(onComplete){
-    if(!canWatchAd()){
-      const remaining = AD_COOLDOWN_MS - (Date.now() - parseInt(localStorage.getItem(AD_KEY)||'0'));
-      const m = Math.ceil(remaining/60000);
-      alert(`⏳ ${m} నిమిషాల తర్వాత మళ్ళీ ad చూడవచ్చు`);
+    const adStatus = getAdStatus();
+    if(!adStatus.canWatch){
+      // Just update button text — no popup/alert
+      updateAdBtnText();
       return;
     }
     _adOnComplete = onComplete;
-    // Pick random ad
-    const ad = AD_POOL[Math.floor(Math.random() * AD_POOL.length)];
-    document.getElementById('ad-brand-emoji').textContent = ad.emoji;
-    document.getElementById('ad-brand-name').textContent = ad.name;
-    document.getElementById('ad-tagline').textContent = ad.tagline;
+    // Pick ad (single custom ad)
+    const ad = AD_POOL[0];
+    const brandEl = document.getElementById('ad-brand-emoji');
+    const nameEl = document.getElementById('ad-brand-name');
+    const tagEl = document.getElementById('ad-tagline');
+    // Support custom image poster
+    const mockEl = document.querySelector('.ad-video-mock');
+    if(ad.imgUrl){
+      mockEl.style.backgroundImage = `url(${ad.imgUrl})`;
+      mockEl.style.backgroundSize = 'cover';
+      mockEl.style.backgroundPosition = 'center';
+      brandEl.style.display='none'; nameEl.style.display='none';
+    } else {
+      mockEl.style.backgroundImage = '';
+      brandEl.style.display=''; nameEl.style.display='';
+    }
+    brandEl.textContent = ad.emoji;
+    nameEl.textContent = ad.name;
+    tagEl.innerHTML = ad.tagline.replace('\n','<br>');
 
     const timerBtn = document.getElementById('ad-timer-btn');
     const progressBar = document.getElementById('ad-progress-bar');
@@ -1488,7 +1834,7 @@
     progressBar.style.width = '0%';
 
     document.getElementById('ad-screen').style.display = 'flex';
-    localStorage.setItem(AD_KEY, Date.now().toString());
+    localStorage.setItem(AD_KEY, Date.now().toString()); incrementAdCount();
 
     let timeLeft = 15;
     // After 1 frame, start progress animation
@@ -1522,22 +1868,12 @@
   function finishAd(watched){
     document.getElementById('ad-screen').style.display = 'none';
     clearInterval(_adTimerRef);
-    if(watched){
-      // Full watch = 1000 coins
-      showCoinPopup(AD_REWARD);
-      SFX.play('coin');
-      if(typeof window.addBonusCoins === 'function') window.addBonusCoins(AD_REWARD);
-      // Show thank you briefly
-      setTimeout(()=>{
-        if(_adOnComplete) _adOnComplete();
-      }, 500);
-    } else {
-      // Skipped = still get 1000 (rewarded ad = always reward on skip too, like real AdMob)
-      showCoinPopup(AD_REWARD);
-      SFX.play('coin');
-      if(typeof window.addBonusCoins === 'function') window.addBonusCoins(AD_REWARD);
-      if(_adOnComplete) _adOnComplete();
-    }
+    // Always reward (watched or skipped — like real AdMob rewarded ads)
+    showCoinPopup(AD_REWARD);
+    SFX.play('coin');
+    if(typeof window.addBonusCoins === 'function') window.addBonusCoins(AD_REWARD);
+    updateAdBtnText(); // refresh cooldown text
+    setTimeout(()=>{ if(_adOnComplete) _adOnComplete(); }, 400);
   }
 
   // Hook up ad buttons after DOM ready
@@ -1572,6 +1908,11 @@
     const timeLeft = getBonusTimeLeft();
     const wrap = document.getElementById('bonus-cards-wrap');
     const timerEl = document.getElementById('bonus-timer-text');
+    // Always reset close button and result msg on open
+    const cb = document.getElementById('bonus-close-btn');
+    if(cb){ cb.style.display=''; cb.textContent='🎮 Skip చేయి'; }
+    const rm = document.getElementById('bonus-result-msg');
+    if(rm) rm.style.display='none';
     wrap.innerHTML = '';
 
     if(timeLeft > 0){
@@ -1619,6 +1960,26 @@
           } else {
             SFX.play('timeout');
           }
+          // Hide skip button, show result popup text, auto-close
+          const closeBtn = document.getElementById('bonus-close-btn');
+          const bonusResultEl = document.getElementById('bonus-result-msg');
+          if(closeBtn) closeBtn.style.display = 'none';
+          if(bonusResultEl){
+            bonusResultEl.style.display = 'block';
+            if(prize.coins > 0){
+              bonusResultEl.innerHTML = `<span style="color:#4ade80;font-size:18px;font-weight:900;">✅ +${prize.coins} Coins మొచ్చాయి! 🎉</span>`;
+            } else {
+              bonusResultEl.innerHTML = `<span style="color:#9ca3af;font-size:16px;">😅 Try Again! తదుపరి సారి try చేయండి</span>`;
+            }
+          }
+          // Auto-close after 2 seconds
+          setTimeout(()=>{
+            hideBonusScreen();
+            updateBonusBtn();
+            // Reset for next open
+            if(closeBtn){ closeBtn.style.display=''; closeBtn.textContent='🎮 Skip చేయి'; }
+            if(bonusResultEl) bonusResultEl.style.display='none';
+          }, 2000);
           // Start countdown timer
           timerEl.textContent = formatBonusTimer(BONUS_COOLDOWN_MS);
           clearInterval(_bonusTimerRef);
@@ -1642,6 +2003,22 @@
 
   document.getElementById('bonus-close-btn').addEventListener('click', hideBonusScreen);
 
+  function updateBonusBtn(){
+    const badge = document.getElementById('bonus-btn-badge');
+    if(!badge) return;
+    const tl = getBonusTimeLeft();
+    if(tl > 0){
+      const m=Math.floor(tl/60000), s=Math.floor((tl%60000)/1000);
+      badge.style.background='#4b5563'; badge.style.color='#9ca3af';
+      badge.textContent=`${m}m ${s}s`;
+    } else {
+      badge.style.background='#4ade80'; badge.style.color='#064e3b';
+      badge.textContent='OPEN';
+    }
+  }
+  // Live bonus countdown on start screen
+  setInterval(()=>{ updateBonusBtn(); updateAdBtnText(); }, 1000);
+
   window.onload=function(){
     initDOM();
     let restored=false;
@@ -1658,14 +2035,26 @@
     document.getElementById('restart-btn-action').addEventListener('click',restartGame);
     // Watch Ad buttons
     document.getElementById('watch-ad-btn-start').addEventListener('click',()=>{
-      showRewardedAd(()=>{
-        // After ad, update bet UI if open
-        if(typeof updateBetUI==='function') updateBetUI();
-      });
+      showRewardedAd(()=>{ if(typeof updateBetUI==='function') updateBetUI(); });
+    });
+    document.getElementById('bonus-open-btn').addEventListener('click',()=>{ showBonusScreen(); });
+    document.getElementById('lucky7-open-btn') && document.getElementById('lucky7-open-btn').addEventListener('click', showLucky7);
+    document.getElementById('l7-close-btn').addEventListener('click', hideLucky7);
+    document.getElementById('l7-roll-btn').addEventListener('click', l7Roll);
+    document.getElementById('l7-bet-minus').addEventListener('click',()=>{
+      const idx=L7_BET_LEVELS.indexOf(l7State.bet);
+      if(idx>0){l7State.bet=L7_BET_LEVELS[idx-1];l7UpdateUI();}
+    });
+    document.getElementById('l7-bet-plus').addEventListener('click',()=>{
+      const idx=L7_BET_LEVELS.indexOf(l7State.bet);
+      if(idx<L7_BET_LEVELS.length-1){l7State.bet=L7_BET_LEVELS[idx+1];l7UpdateUI();}
     });
     document.getElementById('low-balance-ad-btn').addEventListener('click',()=>{
       showRewardedAd(()=>{ updateBetUI(); });
     });
+    // Init button states
+    updateAdBtnText();
+    updateBonusBtn();
   };
   </script>
   <!-- FIREBASE + AUTH + LEADERBOARD -->
@@ -1716,8 +2105,11 @@
       document.getElementById('profile-btn').style.display = 'block';
       document.getElementById('profile-username-btn').textContent = currentUsername || 'Profile';
       document.getElementById('start-screen').style.display = 'flex';
-      // Show daily bonus after short delay
-      setTimeout(()=>{ if(typeof showBonusScreen==='function') showBonusScreen(); }, 800);
+      // Update button states only — do NOT auto-open any screens
+      setTimeout(()=>{
+        if(typeof updateBonusBtn==='function') updateBonusBtn();
+        if(typeof updateAdBtnText==='function') updateAdBtnText();
+      }, 300);
     }
 
     // ── Auth state ──
