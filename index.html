@@ -563,20 +563,60 @@
   <div id="start-screen">
     <h1 class="game-title">ShellKoin</h1>
     <p class="game-subtitle">Mobile Edition</p>
-    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
-      <button class="start-btn" id="start-btn-action">🎮 PLAY GAME</button>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <button class="watch-ad-btn" id="watch-ad-btn-start">▶ Ad చూడు • 🪙 +1000</button>
-        <div style="font-size:10px;color:var(--text-muted);" id="ad-btn-subtext"></div>
+
+    <!-- Main play button -->
+    <button class="start-btn" id="start-btn-action" style="font-size:26px;padding:20px 60px;margin-bottom:28px;">🎮 PLAY GAME</button>
+
+    <!-- 3 mini feature buttons in a row -->
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px;width:100%;max-width:360px;">
+
+      <!-- Daily Bonus -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+        <button id="bonus-open-btn" style="
+          width:100%;padding:12px 0;border-radius:14px;border:2px solid #4ade80;
+          background:linear-gradient(135deg,#052e16,#166534);color:white;
+          font-size:22px;cursor:pointer;position:relative;outline:none;
+          box-shadow:0 4px 15px rgba(74,222,128,0.2);transition:transform 0.1s;
+        ">🎴
+          <span id="bonus-btn-badge" style="
+            position:absolute;top:-6px;right:-6px;
+            background:#4ade80;color:#052e16;border-radius:8px;
+            font-size:9px;font-weight:900;padding:2px 5px;
+          ">OPEN</span>
+        </button>
+        <div style="font-size:10px;color:var(--text-muted);font-weight:bold;">BONUS</div>
       </div>
-      <button class="watch-ad-btn" id="bonus-open-btn" style="background:linear-gradient(135deg,#1a3a1a,#166534);border-color:#4ade80;color:white;">
-        🎴 Daily Bonus <span id="bonus-btn-badge" style="background:#4ade80;color:#064e3b;border-radius:10px;padding:2px 8px;font-size:11px;margin-left:4px;">OPEN</span>
-      </button>
-      <button class="watch-ad-btn" id="lucky7-open-btn" style="background:linear-gradient(135deg,#1a0a3a,#4c1d95);border-color:#a78bfa;color:white;font-size:16px;">
-        🎰 Lucky 7 <span style="background:#a78bfa;color:#1a0a3a;border-radius:10px;padding:2px 8px;font-size:11px;margin-left:4px;">DOUBLE!</span>
-      </button>
-      <button class="start-btn secondary-btn" id="rules-btn-action" style="font-size:16px;padding:12px 30px;">📜 GAME RULES</button>
+
+      <!-- Lucky 7 -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+        <button id="lucky7-open-btn" style="
+          width:100%;padding:12px 0;border-radius:14px;border:2px solid #a78bfa;
+          background:linear-gradient(135deg,#1e1b4b,#4c1d95);color:white;
+          font-size:22px;cursor:pointer;outline:none;
+          box-shadow:0 4px 15px rgba(167,139,250,0.2);transition:transform 0.1s;
+        ">🎰</button>
+        <div style="font-size:10px;color:var(--text-muted);font-weight:bold;">LUCKY 7</div>
+      </div>
+
+      <!-- Watch Ad -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+        <button id="watch-ad-btn-start" style="
+          width:100%;padding:12px 0;border-radius:14px;border:2px solid #3b82f6;
+          background:linear-gradient(135deg,#0c1a2e,#1d4ed8);color:white;
+          font-size:22px;cursor:pointer;outline:none;
+          box-shadow:0 4px 15px rgba(59,130,246,0.2);transition:transform 0.1s;
+        ">▶</button>
+        <div style="font-size:10px;color:var(--text-muted);font-weight:bold;">+1000 🪙</div>
+        <div style="font-size:9px;color:var(--text-muted);text-align:center;max-width:70px;" id="ad-btn-subtext"></div>
+      </div>
+
     </div>
+
+    <!-- Game Rules (subtle) -->
+    <button class="start-btn secondary-btn" id="rules-btn-action"
+      style="font-size:13px;padding:10px 24px;border-width:2px;opacity:0.7;letter-spacing:1px;">
+      📜 GAME RULES
+    </button>
   </div>
 
   <!-- SETUP WIZARD -->
