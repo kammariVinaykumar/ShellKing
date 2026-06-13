@@ -1638,7 +1638,14 @@
 
   function l7UpdateUI(){
     const bal = window._userCoins || 0;
-    document.getElementById('l7-balance').textContent = bal.toLocaleString();
+    const balEl = document.getElementById('l7-balance');
+    // Show balance with live deduction preview when zone + bet selected
+    if(l7State.zone && !l7State.rolling && bal >= l7State.bet){
+      const afterBet = bal - l7State.bet;
+      balEl.innerHTML = `${bal.toLocaleString()} <span style="color:#f87171;font-size:11px;">− ${l7State.bet.toLocaleString()} = <strong>${afterBet.toLocaleString()}</strong></span>`;
+    } else {
+      balEl.textContent = bal.toLocaleString();
+    }
     document.getElementById('l7-bet-display').textContent = l7State.bet.toLocaleString();
     // +/- buttons
     const idx = L7_BET_LEVELS.indexOf(l7State.bet);
@@ -1661,13 +1668,20 @@
     const bal = window._userCoins || 0;
     if(l7State.bet > bal) return;
 
+    // ── Deduct bet immediately ──
+    window._userCoins = bal - l7State.bet;
+    if(typeof window.addBonusCoins === 'function'){
+      window.addBonusCoins(-l7State.bet);
+    }
+
     l7State.rolling = true;
-    l7UpdateUI();
+    l7UpdateUI(); // shows updated (reduced) balance
 
     const numEl   = document.getElementById('l7-number');
     const resultEl = document.getElementById('l7-result');
     const rollBtn  = document.getElementById('l7-roll-btn');
-    resultEl.textContent = '';
+    // Show deduction clearly before roll
+    resultEl.innerHTML = `<span style="color:rgba(255,255,255,0.5);font-size:13px;">🪙 ${bal.toLocaleString()} − ${l7State.bet.toLocaleString()} = ${window._userCoins.toLocaleString()}</span>`;
     resultEl.className = 'l7-result';
     rollBtn.textContent = '🎲 Rolling...';
 
@@ -1701,34 +1715,37 @@
         const isJackpot = final === 7 && l7State.zone === 'mid';
         const multiplier = isJackpot ? 3 : 2;
 
+        // ── Correct calculation ──
+        // Bet is already deducted when Roll pressed (see l7Roll deduct step)
+        // Win 2X: get back bet*2 (net = +bet)
+        // Win 3X: get back bet*3 (net = +bet*2)
+        // Loss:   already deducted, no change needed
         let coinDelta = 0;
+        let resultCoins = 0;
         if(won){
-          coinDelta = l7State.bet * (multiplier - 1); // net gain (bet already spent)
-        } else {
-          coinDelta = -l7State.bet;
+          coinDelta = l7State.bet * multiplier; // full return (bet*2 or bet*3)
+          resultCoins = l7State.bet * (multiplier - 1); // profit shown to user
         }
-
-        // Update balance
-        const newBal = Math.max(0, bal + coinDelta);
-        window._userCoins = newBal;
-        if(typeof window.addBonusCoins === 'function'){
+        // coinDelta is what we ADD back (0 on loss since already deducted)
+        window._userCoins = Math.max(0, (window._userCoins||0) + coinDelta);
+        if(coinDelta > 0 && typeof window.addBonusCoins === 'function'){
           window.addBonusCoins(coinDelta);
         }
 
         // Show result
         setTimeout(()=>{
           if(isJackpot){
-            resultEl.textContent = `🎰 JACKPOT! +${(l7State.bet*2).toLocaleString()} 🪙`;
+            resultEl.innerHTML = `🎰 JACKPOT! <span style="color:#fbbf24;">+${(l7State.bet*2).toLocaleString()} 🪙</span><br><span style="font-size:13px;opacity:0.8;">Balance: 🪙 ${window._userCoins.toLocaleString()}</span>`;
             resultEl.className = 'l7-result jackpot';
             SFX.play('win');
             showCoinPopup(l7State.bet * 2);
           } else if(won){
-            resultEl.textContent = `✅ గెలిచావు! +${l7State.bet.toLocaleString()} 🪙`;
+            resultEl.innerHTML = `✅ గెలిచావు! <span style="color:#4ade80;">+${resultCoins.toLocaleString()} 🪙</span><br><span style="font-size:13px;color:rgba(255,255,255,0.6);">Balance: 🪙 ${window._userCoins.toLocaleString()}</span>`;
             resultEl.className = 'l7-result win';
             SFX.play('coin');
-            showCoinPopup(l7State.bet);
+            showCoinPopup(resultCoins);
           } else {
-            resultEl.textContent = `❌ ఓడిపోయావు! -${l7State.bet.toLocaleString()} 🪙`;
+            resultEl.innerHTML = `❌ ఓడిపోయావు! <span style="color:#f87171;">-${l7State.bet.toLocaleString()} 🪙</span><br><span style="font-size:13px;color:rgba(255,255,255,0.6);">Balance: 🪙 ${window._userCoins.toLocaleString()}</span>`;
             resultEl.className = 'l7-result lose';
             SFX.play('kill');
             showCoinPopup(-l7State.bet);
